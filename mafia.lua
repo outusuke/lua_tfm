@@ -7,7 +7,7 @@ random_event_chance_start = 40   -------------in %
 next_day_delay = 30 --- in seconds
 new_years = false --- true for Christmas decoration
 bool_animeska_maps = true ---maps of Animeska6#0000
-bool_post_get = false --add left mouse
+bool_post_get = true --add left mouse
 ------------------ ADVANCED PROPERTIES -----------------
 -- WARNING
 -- If automatic sort is on, mafia, police, villager list and the doctor field MUST BE EMPTY.
