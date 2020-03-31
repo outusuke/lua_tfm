@@ -7,6 +7,7 @@ random_event_chance_start = 40   -------------in %
 next_day_delay = 30 --- in seconds
 new_years = false --- true for Christmas decoration
 bool_animeska_maps = true ---maps of Animeska6#0000
+bool_post_get = false --add left mouse
 ------------------ ADVANCED PROPERTIES -----------------
 -- WARNING
 -- If automatic sort is on, mafia, police, villager list and the doctor field MUST BE EMPTY.
@@ -256,7 +257,9 @@ function eventNewPlayer(playerName)
 	ui.addTextArea(-66, "<a href='event:help'>help", nil, 725, 27, 50, 20, 1, 0x0000ff, 0.7,true)
     if start then
         -- Nothing for watch is here.
-		massinfo[#massinfo+1] = "<font color='#777777'>["..playerName.."]:".."Присоединился к игре!</font>"
+		if bool_post_get then
+			massinfo[#massinfo+1] = "<font color='#777777'>["..playerName.."]:".."Присоединился к игре!</font>"
+		end
 		ui.addPopup(-90000, 0, "<p align='center'>Вы можете участвовать тока в событии дневного голосования.", playerName, 200, 200, 400, true)
     else
     local ji = 1 
@@ -590,7 +593,9 @@ function eventTextAreaCallback(id, p, cmd)
 end
 
 function eventPlayerLeft(pName)
-	massinfo[#massinfo+1] = "<font color='#777777'>["..pName.."]:".."Покинул комнату!</font>"
+	if bool_post_get then
+		massinfo[#massinfo+1] = "<font color='#777777'>["..pName.."]:".."Покинул комнату!</font>"
+	end
     delplayer(pName)
     if pName == adm then
 
