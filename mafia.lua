@@ -6,7 +6,7 @@ per_kill_doctor = 30        -------------in %
 random_event_chance_start = 40   -------------in %
 next_day_delay = 30 --- in seconds
 new_years = false --- true for Christmas decoration
-bool_animeska_maps = true ---maps of Animeska6#0000
+bool_animeska_maps = false ---maps of Animeska6#0000
 bool_post_get = true --add left mouse
 ------------------ ADVANCED PROPERTIES -----------------
 -- WARNING
