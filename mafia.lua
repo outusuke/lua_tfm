@@ -22,6 +22,7 @@ random_event_chance = random_event_chance_start
 
 die_virus = 0
 die_doctor = 0
+changeboolg = true
 
 --------------------- DO NOT TOUCH ---------------------
 --------------------- GAME  STATES ---------------------
@@ -449,6 +450,7 @@ function eventTextAreaCallback(id, p, cmd)
     if cmd == "start" then
 		massinfo = {}
 		random_event_chance = random_event_chance_start
+		changeboolg = true
 		die_virus = 0
 		die_doctor = 0
         if countElements(users) < 4 and automatic_sort then
@@ -613,6 +615,12 @@ end
 function randomEvent()
     if math.random(0, 100) <= random_event_chance then
         event = math.random(0, 2)
+		if changeboolg == false then
+			event = math.random(0, 6)
+			if event > 2 then
+				event = 2
+			end
+		end
         if event == 0 then
             all_users = {}
             for p, _ in pairs(mafia_list) do
@@ -1172,6 +1180,14 @@ function delplayer(p) ---not security WRANG
         doctor = ""
 		massinfo[#massinfo+1] = "[<font color='#ffffff'>"..p.."</font>]".."Был доктор!"
     end
+	
+	if countmapa(getAllPlayers()) < 7 and changeboolg then
+		massinfo[#massinfo+1] = "<font color='#ffaa00'>Число игроков стало меньше 7, повышены процент от смертности</font>"
+		per_kill_virus = 50
+		per_kill_doctor = 50
+		changeboolg = false
+	end
+	
     tfm.exec.killPlayer(p)
     ui.removeTextArea(5100, p)
     tfm.exec.respawnPlayer (p)
