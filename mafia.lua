@@ -1181,7 +1181,7 @@ function delplayer(p) ---not security WRANG
 		massinfo[#massinfo+1] = "[<font color='#ffffff'>"..p.."</font>]".."Был доктор!"
     end
 	
-	if countmapa(getAllPlayers()) < 7 and changeboolg then
+	if countElements(getAllPlayers()) < 7 and changeboolg then
 		massinfo[#massinfo+1] = "<font color='#ffaa00'>Число игроков стало меньше 7, повышены процент от смертности</font>"
 		per_kill_virus = 50
 		per_kill_doctor = 50
