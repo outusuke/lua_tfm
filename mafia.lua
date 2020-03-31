@@ -49,16 +49,22 @@ tfm.exec.disableAfkDeath(true)
 tfm.exec.newGame("@7544429")
 tfm.exec.setGameTime(0);
 
-maps = {"@7542886",--DAY
+maps_deff = {"@7542886",--DAY
         "@7544426",--EVENING
         "@7544429",--NIGHT
         "@7544428"}--MORNING
+
+maps = maps_deff
+
+maps_animeska = {"@7696886", "@7696889", "@7696890", "@7696874"}
+maps_new_year = {"@7548278", "@7548281", "@7548283", "@7548280"}
+
 if new_years then
-	maps = {"@7548278", "@7548281", "@7548283", "@7548280"}
+	maps = maps_new_year
 end
 
 if bool_animeska_maps then
-	maps = {"@7696886", "@7696889", "@7696890", "@7696874"}
+	maps = maps_animeska
 end
 
 time = 0
@@ -325,7 +331,7 @@ function eventTextAreaCallback(id, p, cmd)
 	end
 
 	if cmd == "adminpanel" then
-		ui.addTextArea(-58100, "<br><a href='event:adminmessage'>Написать сообщение в чат</a><br><a href='event:adminchange_per_kill_virus'>Поменять процент смерти от вируса</a><br><a href='event:adminchange_per_kill_doctor'>Поменять процент смерти от укола</a><br><a href='event:adminchange_per_event'>Поменять процент вероятности дневного события</a><br><br><a href='event:adminchange_close'>Close</a>", adm, 100, 150, 600, nil, 1, 1, 1, true)
+		ui.addTextArea(-58100, "<br><a href='event:adminmessage'>Написать сообщение в чат</a><br><a href='event:adminchange_per_kill_virus'>Поменять процент смерти от вируса</a><br><a href='event:adminchange_per_kill_doctor'>Поменять процент смерти от укола</a><br><a href='event:adminchange_per_event'>Поменять процент вероятности дневного события</a><br><a href='event:adminchange_style_maps'>Поменять стиль карт</a><br><br><a href='event:adminchange_close'>Close</a>", adm, 100, 150, 600, nil, 1, 1, 1, true)
 	end
 	
 	if cmd == "adminmessage" then
@@ -344,12 +350,28 @@ function eventTextAreaCallback(id, p, cmd)
 		ui.removeTextArea(-58100, nil)
 		ui.addPopup(-58400, 2, "<p align='center'>Введите значение процента вероятности дневного события:", adm, 200, 200, 400, true)
 	end
+	if cmd == "adminchange_style_maps" then
+		ui.removeTextArea(-58100, nil)
+		ui.addTextArea(-58100, "<br><a href='event:style1'>Основной стиль Deff83</a><br><a href='event:style2'>Новогодний стиль</a><br><a href='event:style3'>Стиль розовый Animeska6#0000</a><>br<br><a href='event:adminchange_close'>Close</a>", adm, 100, 150, 600, nil, 1, 1, 1, true)
+	end
 	if cmd == "adminchange_close" then
 		ui.removeTextArea(-58100, nil)
 	end
-	
-	
-	
+	if cmd == "style1" then
+		ui.removeTextArea(-58100, nil)
+		maps = maps_deff
+		massinfo[#massinfo+1] = "<font color='#ff33ff'>[ADMIN]: включен основной стиль оформления</font>"
+	end
+	if cmd == "style2" then
+		ui.removeTextArea(-58100, nil)
+		maps = maps_new_year
+		massinfo[#massinfo+1] = "<font color='#ff33ff'>[ADMIN]: включен новогодний стиль оформления</font>"
+	end
+	if cmd == "style3" then
+		ui.removeTextArea(-58100, nil)
+		maps = maps_animeska
+		massinfo[#massinfo+1] = "<font color='#ff33ff'>[ADMIN]: включен розовый стиль оформления</font>"
+	end
 	
 	if cmd == "golos_polish" then
 		ui.removeTextArea(-59000, p)
