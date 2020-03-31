@@ -1313,18 +1313,18 @@ end
 
 function infoper()
 	local stringinfo = "Проценты: (умер)<br>"
-	if per_kill_virus > 90 then
+	if per_kill_virus > 49 then
 		stringinfo = stringinfo.."<font color='#ffaa00'>смерть от вируса: "..per_kill_virus.."% ("..die_virus..")</font><br>"
 	else
 		stringinfo = stringinfo.."смерть от вируса: "..per_kill_virus.."% ("..die_virus..")<br>"
 	end
-	if per_kill_doctor > 90 then
+	if per_kill_doctor > 49 then
 		stringinfo = stringinfo.."<font color='#ffaa00'>смерть от укола: "..per_kill_doctor.."% ("..die_doctor..")</font><br>"
 	else
 		stringinfo = stringinfo.."смерть от укола: "..per_kill_doctor.."% ("..die_doctor..")<br>"
 	end
 	
-	if random_event_chance > 90 then
+	if random_event_chance > 89 then
 		stringinfo = stringinfo.."<font color='#ffaa00'>дневное событие: "..random_event_chance.."%</font>"
 	else
 		stringinfo = stringinfo.."дневное событие: "..random_event_chance.."%"
