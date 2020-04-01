@@ -75,6 +75,8 @@ for nick in pairs(tfm.get.room.playerList) do
     tfm.exec.setPlayerScore(nick,0,false)
 end
 
+mapName = "<VP>Мафия<BL> | <N>Время: <V>%ds</V><BL> | <N>Мышь: <V>%d<N>/<V>%d<N> <BL> | <N>Создатели: <BV>Deff83#0000, Ilyamikheev#4068\n"
+
 
 ui.addTextArea(-1, "<p align='center'> <a href='event:start'>Запустить!", adm, 120, 350, 100, 20, 1, 0x00ff00, 0.7,true)
 ui.addTextArea(-2, "<p align='center'> <a href='event:game'>Участвовать", nil, 10, 350, 100, 20, 1, 0xffffff, 0.7,true)
@@ -113,7 +115,9 @@ function getAllPlayers()
     for n, v in pairs(mafia_list) do
         result[n] = v
     end
-    result[doctor] = {}
+	for i=1, doctor_count do
+		result[doctor] = {}
+	end
     return result
 end
 
@@ -682,11 +686,16 @@ function randomEvent()
 end
 
 obnovmessageinfo = 2*1
+allPlayer = -1
 
 function eventLoop()
     if not start then
         return
     end
+	if allPlayer == -1 then
+		allPlayer = countElements(getAllPlayers())
+	end
+	ui.setMapName(string.format(mapName, (next_day_delay - (time % next_day_delay)), countElements(getAllPlayers()), allPlayer))
     time = time + 0.5
     for p, val in pairs(criminals) do
        if isContains(val, "lock_position") then
@@ -709,7 +718,6 @@ function eventLoop()
 	if time % obnovmessageinfo == 0 then
 		messageinfo(nil)
 	end
-		
 		
     if time % next_day_delay == 0 then
         day_cycle = day_cycle + 1
@@ -1360,6 +1368,7 @@ function vosstan()
     users = {}
     viselebool = false
     kill = 0
+	allPlayer = -1
     mafia_list = {}
     police_list = {}
     villager_list = {}
