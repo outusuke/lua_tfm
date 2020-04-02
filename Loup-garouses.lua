@@ -327,7 +327,7 @@ function nbrSouris()
 end
 
 ui.msg = function(txt)
-	ui.addTextArea(idHaut, "<p align='center'>"..txt.."</p>", name, 15, 28, 770, 50, 0x8C3232, 0x131A2A, transparence, true)
+	ui.addTextArea(idHaut, "<p align='center'>"..txt.."</p>", name, 15, 28, 770, nil, 0x8C3232, 0x131A2A, transparence, true)
 end
 
 ui.role = function(name, role, obj)
