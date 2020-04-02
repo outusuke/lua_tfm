@@ -55,7 +55,7 @@ function main()
 			vote = " Выберите, кого сжечь на костре!",
 			hunter = " %s %s выбирай цель!",
 		},
-		win = "%s выИграли!"
+		win = "%s выиграли!"
 	}
 --sytème:
 	for pl in pairs(tfm.get.room.playerList) do
