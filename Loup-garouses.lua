@@ -45,17 +45,17 @@ function main()
 	T = {
 		events = {
 			night = " Наступает ночь, вся деревня засыпает.",
-			thief = " %s %s просыпается, крадет кого-то и засыпает.\проверьте свою карту после поворота !!!",
+			thief = " %s %s просыпается, крадет кого-то и засыпает.\проверьте свою карту после поворота!!!",
 			cupid = " %s %s просыпается, выбирает двух любовников и засыпает.",
 			lovers = " Влюбленные просыпаются, узнают друг друга, целуются и засыпают.",
 			seer = " %s %s просыпается, видит чье-то лицо и засыпает.",
 			saving = " %s %s просыпается, защищает кого-то и засыпает.",
 			werewolf = " %s просыпаются, выбирают свою жертву и засыпают.",
 			witch = " %s %s просыпается, выбирается из мертвых или убивает кого-то и засыпает.",
-			vote = " Выберите кого сжечь на костре !",
-			hunter = " %s %s выбирай цель !",
+			vote = " Выберите кого сжечь на костре!",
+			hunter = " %s %s выбирай цель!",
 		},
-		win = "%s выйграли!"
+		win = "%s выbграли!"
 	}
 --sytème:
 	for pl in pairs(tfm.get.room.playerList) do
@@ -81,7 +81,7 @@ function eventPlayerLeft(name)
 			end
 		end
 		players[name].isPlaying = false
-		local txt = tfm.lg.dead(name, "<ROSE>"..name.."</ROSE> вышел из гостиной. Это был один "..roles[players[name].jeu.role].." !")
+		local txt = tfm.lg.dead(name, "<ROSE>"..name.."</ROSE> вышел из комнаты. Это был один "..roles[players[name].jeu.role].." !")
 		ui.msg(txt)
 		if tfm.lg.win() then
 			for k, v in ipairs(task) do
@@ -98,6 +98,7 @@ function eventNewGame() tfm.lg.map() end
 function eventChatCommand(name, cmd)
 	if cmd=="start" and play then
 		if (not pcall(setRolesNames)) then
+                        -- Звучит абсолютно понятно (нет) (ilyamikheevcoder)
 			error("<R>Таблица \'Изменения\' одержимые!</R>")
 		end
 		if #want2Play>5 then
@@ -138,7 +139,7 @@ function eventChatCommand(name, cmd)
 			end
 			tfm.lg.tour("ini")
 		else
-			ui.msg("Не хватает игроков!\необходимо минимум<J>6 </J> игроков!")
+			ui.msg("Не хватает игроков!\nнеобходимо минимум <J>6</J> игроков!")
 		end
 	end
 	if string.lower(cmd:sub(0,1))=="t" and speak and players[name].jeu.role~=nil and players[name].jeu.role==2 and players[name].mort then
@@ -156,8 +157,8 @@ function eventTextAreaCallback(id, name, call)
 		players[name].choose = true
 		players[name].jeu.role = players[call:sub(6)].jeu.role
 		players[call:sub(6)].jeu.role = 1
-		ui.role(name, roles[players[name].jeu.role], players[name].jeu.role==2 and "Убивай всех Жителей !" or "убей всех Оборотней !")
-		ui.role(call:sub(6), "Селянин", "Убей всех Оборотней !")
+		ui.role(name, roles[players[name].jeu.role], players[name].jeu.role==2 and "Убей всех Жителей!!" or "Убей всех Оборотней!")
+		ui.role(call:sub(6), "Селянин", "Убей всех Оборотней!")
 	end
 	if call:sub(1,6)=="lovers" then
 		name2 = call:sub(7)
@@ -174,7 +175,7 @@ function eventTextAreaCallback(id, name, call)
 	if call:sub(1,6)=="saving" then
 		players[name].lastProtect = call:sub(7)
 		players[call:sub(7)].isProtect = true
-		ui.choser("Ты защищаешь "..call:sub(7).." на ночь !", name)
+		ui.choser("Ты защищаешь "..call:sub(7).." на ночь!", name)
 	end
 	if call:sub(1,8)=="werewolf" then
 		local name2 = call:sub(9)
@@ -226,7 +227,7 @@ function eventTextAreaCallback(id, name, call)
 	if call:sub(1,4)=="kill" then
 		players[name].kill = call:sub(5)
 		table.insert(jeu.mort, call:sub(5))
-		ui.choser(call:sub(5).." пей свое зелье и умри в мучительных муках !", name)
+		ui.choser(call:sub(5).." пей свое зелье и умри в болезненных муках!", name)
 	end
 	if call:sub(1,4)=="hunt" then
 		jeu.mort[1] = call:sub(5)
@@ -249,7 +250,7 @@ function eventPopupAnswer(id, name, ans)
 			ressu = true
 			players[name].rez = ""
 		else
-			ui.addPopup(idTimer, 1, "Хочешь убить кого-то ?", name, 350, 175, nil, true)
+			ui.addPopup(idTimer, 1, "Хочешь убить кого-нибудь?", name, 350, 175, nil, true)
 		end
 	end
 	if id==idTimer then
@@ -338,7 +339,7 @@ ui.choser = function(txt, name, bool, display)
 end
 
 ui.chat = function(name)
-	ui.addTextArea(idChat, "<J>!t сообщение< / J><BL > для разговора с оборотнями < / BL>\n"..jeu.chat, name, 15, 86, 200, 228, 0x8c3232, 0x131a2a, tonumber(transparence)/1.5, true)
+	ui.addTextArea(idChat, "<J>!t сообщение</J><BL> для разговора с оборотнями </BL>\n"..jeu.chat, name, 15, 86, 200, 228, 0x8c3232, 0x131a2a, tonumber(transparence)/1.5, true)
 end
 
 tfm.lg = {
@@ -389,7 +390,7 @@ tfm.lg = {
 					jeu.amour[2] = players[name].amour[2]
 					jeu.roles[5] = 0
 					jeu.roles[3] = jeu.roles[3] + 1
-					ui.role(name, "Селянин", "Убей всех оборотней !")
+					ui.role(name, "Селянин", "Убей всех оборотней!")
 				end
 			end
 			if lastTour=="witch" then
@@ -466,7 +467,7 @@ tfm.lg = {
 			end
 			if tour=="thief" then
 				if jeu.roles[8]==1 then
-					local txt = "Возьми карте:"
+					local txt = "Выберите, кого украсть:"
 					local pl = ""
 					for k, v in pairs(plNbr) do
 						if players[v].jeu.role==8 and players[v].mort then
@@ -484,7 +485,7 @@ tfm.lg = {
 			end
 			if tour=="cupid" then
 				if jeu.roles[5]==1 then
-					local txt = "Выбраны две любви:"
+					local txt = "Выберите двух влюблённых:"
 					local pl = ""
 					for k, v in pairs(plNbr) do
 						if players[v].mort then
@@ -512,8 +513,8 @@ tfm.lg = {
 			end
 			if tour=="daily" then
 				if jeu.roles[1]==1 or jeu.roles[7]==1 then
-					local txt2 = "Лица, нуждающиеся в защите:"
-					local txt = "Никто раскрывать:"
+					local txt2 = "Выберите, кого защитить:"
+					local txt = "Выберите, кого раскрыть:"
 					local pl, pl2, msg
 					for k, v in pairs(plNbr) do
 						if players[v].mort then
@@ -551,7 +552,7 @@ tfm.lg = {
 				for k, v in pairs(plNbr) do
 					players[v].vote = nil
 				end
-				local werewolf, txt = {}, "Человек, который ест:"
+				local werewolf, txt = {}, "Выберите, кого съесть:"
 				for k, v in pairs(plNbr) do
 					if players[v].jeu.role==2 and players[v].mort then
 						table.insert(werewolf, v)
@@ -574,9 +575,9 @@ tfm.lg = {
 					for k, v in pairs(plNbr) do
 						if players[v].jeu.role==4 then
 							if jeu.mort[1]~=nil and players[v].rez==nil then
-								ui.addPopup(idChoser, 1, "Хочешь ли ты вернуть к жизни <VI>"..jeu.mort[1].."</VI> ?", v, 350, 175, nil, true)
+								ui.addPopup(idChoser, 1, "Хочешь ли ты вернуть к жизни <VI>"..jeu.mort[1].."</VI>?", v, 350, 175, nil, true)
 							elseif players[v].kill==nil then
-								ui.addPopup(idTimer, 1, "Хочешь убить кого-то ?", v, 350, 175, nil, true)
+								ui.addPopup(idTimer, 1, "Хочешь убить кого-то?", v, 350, 175, nil, true)
 							else
 								tour = "dead"
 								break;
@@ -614,14 +615,14 @@ tfm.lg = {
 			if tour=="dead" then
 				local txt, hunter = "Деревня просыпается, "
 				if jeu.mort==nil or ressu or jeu.mort[1]==nil or jeu.mort=={} then
-					txt = txt.."без жертв !"
+					txt = txt.."без жертв!"
 					ressu = false
 					ui.msg(txt)
 					tfm.lg.task(15, tfm.lg.win() and "win" or "vote", tour)
 				else
 					for k, v in pairs(jeu.mort) do
 						if (not players[v].isProtect) then
-							txt, hunter = tfm.lg.dead(v, txt.."без <ROSE>"..v.."</ROSE> ,он(а) был "..roles[players[v].jeu.role].." !!\n")
+							txt, hunter = tfm.lg.dead(v, txt.."без <ROSE>"..v.."</ROSE> ,он(а) был "..roles[players[v].jeu.role].."!!\n")
 						end
 					end
 					jeu.mort = {}
@@ -639,7 +640,7 @@ tfm.lg = {
 					txt = "Никто не идет на костер !"
 				else
 					for k, v in pairs(jeu.mort) do
-						txt, hunter = tfm.lg.dead(v, tostring(txt).."<ROSE>"..v.."</ROSE> ,он(а) был "..tostring(roles[players[v].jeu.role]).." !!\n")
+						txt, hunter = tfm.lg.dead(v, tostring(txt).."<ROSE>"..v.."</ROSE> ,он(а) был "..tostring(roles[players[v].jeu.role]).."!!\n")
 					end
 					jeu.mort = {}
 					ui.msg(txt)
@@ -684,7 +685,7 @@ tfm.lg = {
 					end
 				end
 				ui.choser(txt, pl)
-				ui.msg("Охотник, в своих последних вздохах, стреляет в человека по своему выбору !")
+				ui.msg("Охотник, в своих последних вздохах, стреляет в человека по своему выбору!")
 				tfm.lg.task(15, "deadHunt", lastTour, true, true, idChoser, pl)
 			end
 			if tour=="deadHunt" then
