@@ -80,6 +80,16 @@ function main()
 	ui.addTextArea(idStartButton, '<a href="event:start">Запустить</a>', admin, 720, 370, 65, 20, 0x005500, 0x00FF00, transparence, true)
 end
 
+function isContains(table, element)
+    for p, val in pairs(table) do
+         if val == element then
+        
+            return true
+        end
+    end
+    return false
+end
+
 function eventNewPlayer(name)
 	ui.addPopup(idPlay, 1, "<p align='center'>Ты хочешь играть в Оборотни?", name, 350, 175, nil, true)
 	players[name] = {isPlaying = false, play = false}
@@ -178,8 +188,22 @@ function gameInit()
 		tfm.lg.tour("ini")
 	else
 		ui.msg("Не хватает игроков!\nНеобходимо минимум <J>3</J> игрока!")
+		want2Play_not_enouth()
 	end
 end
+
+
+function want2Play_not_enouth()
+	for k,v in pairs(tfm.get.room.playerList) do
+		print(k)
+		if isContains(want2Play, k)==false and players[k]~=nil and players[k].isPlaying==false then
+			ui.addPopup(idPlay, 1, "<p align='center'>Ты хочешь играть в Оборотни?", k, 350, 175, nil, true)
+			players[k] = {isPlaying = false, play = false}
+			tfm.lg.map()
+		end
+	end
+end
+
 function eventChatCommand(name, cmd)
 	if cmd=="start" and play then
 		
@@ -215,7 +239,7 @@ function eventTextAreaCallback(id, name, call)
 		end
 	end
 	if call:sub(1,4)=="seer" then
-		ui.choser(call:sub(5).." являе(ю)тся "..roles[players[call:sub(5)].jeu.role], name)
+		ui.choser(call:sub(5).." является "..roles[players[call:sub(5)].jeu.role], name)
 	end
 	if call:sub(1,6)=="saving" then
 		players[name].lastProtect = call:sub(7)
