@@ -2,7 +2,9 @@
 --[  Модуль создан Athesdrake#0000  ]--
 --[  переведен Deff83  ]--
 
-transparence = 0.75 --[[transparence des zones de textes]] --À Changer par un chiffre entre 0 et 1 (0 = transparent, 1 = opaque)
+adm = "Ilyamikheev#4068" --[[админ]] -- если в поле указан недействительный игрок, запускать игру могут все
+transparence = 0.75 --[[прозрачность текста]] -- от 0 (полностью невидимый) до 1 (полностью видимый)
+testing = false --[[режим тестового запуска]] -- нет минимума игроков, всех убъет в начале игры
 
 changeLesNoms = {
 	voyante =    {"Ясновидящая", "La"},
@@ -30,6 +32,7 @@ function main()
 	idPlay = 5
 	idLovers = 6
 	idChat = 7
+	idStartButton = 8
 --tables:
 	task = {}
 	players = {}
@@ -38,17 +41,20 @@ function main()
 	jeu = {}
 	roles = {"Ясновидящая", "Оборотень", "Селянин", "Ведьма", "Амур", "Охотник", "Cпаситель", "Вор", "Качек"}
 	game = {}
-		game[6] = {1,2,2,1}
-		game[7] = {1,2,2,1,1}
-		game[8] = {1,2,2,1,1,1}
-		game[9] = {1,2,2,1,1,1,1}
+		game[3] = {1, 1, 0, 0, 0, 0, 1}
+		game[4] = {1, 2, 0, 0, 0, 0, 0}
+		game[5] = {1, 2, 0, 0, 0, 0, 0}
+		game[6] = {1, 2, 2, 1, 0, 0, 0}
+		game[7] = {1, 2, 2, 1, 1, 0, 0}
+		game[8] = {1, 2, 2, 1, 1, 1, 0}
+		game[9] = {1, 2, 2, 1, 1, 1, 1}
 	T = {
 		events = {
 			night = " Наступает ночь, вся деревня засыпает.",
 			thief = " %s %s просыпается, крадет кого-то и засыпает. Проверьте свою карту после поворота!!!",
 			cupid = " %s %s просыпается, выбирает двух любовников и засыпает.",
 			lovers = " Влюбленные просыпаются, узнают друг друга, целуются и засыпают.",
-			seer = " %s %s просыпается, видит чье-то лицо и засыпает.",
+			seer = " %s %s просыпается, видит чью-то роль и засыпает.",
 			saving = " %s %s просыпается, защищает кого-то и засыпает.",
 			werewolf = " %s просыпаются, выбирают свою жертву и засыпают.",
 			witch = " %s %s просыпается, выбирается из мертвых или убивает кого-то и засыпает.",
@@ -58,12 +64,20 @@ function main()
 		win = "%s выиграли!"
 	}
 --sytème:
+	admin = nil
 	for pl in pairs(tfm.get.room.playerList) do
+		if pl == adm then
+			admin = adm
+		end
 		eventNewPlayer(pl)
 	end
 	for k, v in pairs({"start", "t"}) do
 		system.disableChatCommandDisplay(v, true)
 	end
+	for i=2, 7 do
+		ui.removeTextArea(i)
+	end
+	ui.addTextArea(idStartButton, '<a href="event:start">Запустить</a>', admin, 720, 370, 65, 20, 0x005500, 0x00FF00, transparence, true)
 end
 
 function eventNewPlayer(name)
@@ -90,32 +104,50 @@ function eventPlayerLeft(name)
 			tfm.lg.task(3, "win")
 		end
 	end
+	if play then
+		if players[name] ~= nil then
+			players[name] = nil
+		end
+		local i = 0
+		for k, v in pairs(want2Play) do
+			if v == name then
+				i = k
+			end
+		end
+		if i ~= 0 then
+			table.remove(want2Play, i)
+		end
+	end
 	tfm.lg.map()
 end
 
 function eventNewGame() tfm.lg.map() end
 
-function eventChatCommand(name, cmd)
-	if cmd=="start" and play then
-		if (not pcall(setRolesNames)) then
-                        -- Звучит абсолютно понятно (нет) (ilyamikheevcoder)
+function gameInit()
+	if (not pcall(setRolesNames)) then
+            -- Звучит абсолютно понятно (нет) (ilyamikheevcoder)
 			error("<R>Таблица \'Изменения\' одержимые!</R>")
-		end
-		if #want2Play>5 then
-			task = {}
-			play = false
-			jeu = {roles={0,0,0,0,0,0,0,0,0}}
-			local r = {}
-			if game[#want2Play]~=nil then
-				for k, v in pairs(game[#want2Play]) do
-					r[k] = v
-				end
-			else
-				r = {1,3,2,1,1,1,1,1,1}
-				r[2] = #want2Play/4
-				r[3] = #want2Play-(r[2]+7)
+	end
+	if #want2Play>2 or testing then
+		ui.removeTextArea(idStartButton, nil)
+		task = {}
+		play = false
+		jeu = {roles={0,0,0,0,0,0,0,0,0}}
+		local r = {}
+		if game[#want2Play]~=nil then
+			print("start init map"..#want2Play)
+			for k, v in pairs(game[#want2Play]) do
+				r[k] = v
 			end
-			math.randomseed(os.time())
+		else
+			print("no start init map")
+			r = {1,3,2,1,1,1,1,1,1}				
+			r[2] = #want2Play/4
+			r[3] = #want2Play-(r[2]+7)
+		end
+		
+		math.randomseed(os.time())
+        if not testing then
 			for i=1, #want2Play do
 				local pl = nil
 				repeat
@@ -137,10 +169,20 @@ function eventChatCommand(name, cmd)
 				players[pl].isPlaying = true
 				ui.role(pl, roles[ran], objectif)
 			end
-			tfm.lg.tour("ini")
 		else
-			ui.msg("Не хватает игроков!\nНеобходимо минимум <J>6</J> игроков!")
+			for k, v in pairs(want2Play) do
+				players[v].play = true
+				players[v].mort = true
+			end
 		end
+		tfm.lg.tour("ini")
+	else
+		ui.msg("Не хватает игроков!\nНеобходимо минимум <J>3</J> игрока!")
+	end
+end
+function eventChatCommand(name, cmd)
+	if cmd=="start" and play then
+		
 	end
 	if string.lower(cmd:sub(0,1))=="t" and speak and players[name].jeu.role~=nil and players[name].jeu.role==2 and players[name].mort then
 		jeu.chat = "["..name.."] "..((cmd:sub(3)):gsub("&lt;"..".-".."&gt;", "")):gsub("%c", "").."\n"..jeu.chat
@@ -153,6 +195,9 @@ function eventChatCommand(name, cmd)
 end
 
 function eventTextAreaCallback(id, name, call)
+    if call == "start" then
+		gameInit()
+	end
 	if call:sub(1,5)=="steal" then
 		players[name].choose = true
 		players[name].jeu.role = players[call:sub(6)].jeu.role
@@ -271,7 +316,7 @@ function eventLoop(t1, t2)
 		TIME = math.ceil(os.difftime(tbl.time,os.time())/1000)
 		tfm.lg.map()
 		if tbl.timer then
-			ui.addTextArea(idTimer, TIME, all, 740, 45, nil, nil, 0, 0, 0, true)
+			ui.addTextArea(idTimer, TIME, all, 765, 28, nil, nil, 0, 0, 0, true)
 		end
 		if tbl.time<=os.time() or tbl.finish then
 			ui.removeTextArea(idTimer)
@@ -282,6 +327,8 @@ function eventLoop(t1, t2)
 				tfm.lg.tour(tbl.tour, tbl.last, tbl.name)
 			end
 			table.remove(task, k)
+			ui.addPopup(idTimer, 0, "", name, 9999, 9999, 0)
+			ui.addPopup(idChoser, 0, "", name, 9999, 9999, 0)
 		end
 	end
 end
@@ -418,7 +465,7 @@ tfm.lg = {
 				local last = 0
 				local mort = ""
 				local tbl = {}
-				local nbr = 0
+				local nbr = 0--количество не мертвых
 				for k, v in pairs(plNbr) do
 					if players[v].mort then
 						nbr = nbr + 1
@@ -434,9 +481,9 @@ tfm.lg = {
 					end
 				end
 				if mort=="" then
-					jeu.mort = {}
-				elseif #tbl>1 and (#plNbr%2)~=0 then
-					if nbr==2 then
+					tour = "vote"
+				elseif #tbl>1 and (#plNbr%2)~=0 then--если мнения разделились и количество игроков нечетное
+					if nbr==2 then--если остались двое
 						jeu.mort = {mort}
 					else
 						tour = "vote"
@@ -674,6 +721,7 @@ tfm.lg = {
 					end
 				end
 				ui.msg(txt)
+				main()
 			end
 			if tour=="hunter" then
 				local txt, pl = "Выбери человека, которого хочешь убить:"
