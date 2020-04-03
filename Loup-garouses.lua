@@ -18,6 +18,18 @@ changeLesNoms = {
 	costaud =    {"Качек", "Le"}
 }
 
+
+-----rule
+function show_rule(pl)
+	ui.addPopup(-10000, 0, "<p align='center'><font size='30px' color='#ffff00'>Конкурс \"Оборотни\"</font><br><font size='14px'><font color='#00ff00'>автор Athesdrake#0000 редакция и улучшение Deff83#0000 и Ilyamikheev#4068</font><br><font size='12px'>Вы должны убить всех жителей деревни, если вы оборотень или убить всех оборотней, если вы сельский житель. Для этого оборотни могут назначить жертву ночью и сожрать ее. Днем деревня голосует за то, чтобы посадить кого-нибудь на костер. Его истинная личность будет раскрыта. Учитывая, что нелегко догадаться, является ли кто-то сельским жителем или нет, сельчане могут сыграть свою роль.<br>Житель деревни. Он не имеет никакой власти, но играет важную роль в голосовании.<br>Оборотень. Ночью превращается в оборотня, чтобы пожрать жертву.<br>Ясновидящая. Каждую ночь она видит сквозь свой волшебный шар истинную личность человека по своему выбору.<br>Ведьма. Она владеет двумя зельями. Первая позволяет ему, оказавшись в части, воскресить человека, которого съели волки. Вторая позволяет ему, также оказавшись в части, убить человека по своему выбору.<br>Охотник. Это вполне нормальный персонаж, за исключением того, что, когда он умирает, он может убить человека по своему выбору.<br>Вор. В начале игры он меняет свою карту на чужую. (он станет простым жителем).<br>маленькая девочка. Эта роль не ставится. <font size='8px'>(я не вижу, как это сделать, чтобы закодировать эту роль :/ )</font>.<br>Спаситель. Он может каждую ночь защищать кого-то по своему выбору. Он не может выбрать одного и того же человека две ночи подряд (но может защитить себя).</font></font></p>", pl, 100, 30, 600, true)
+end
+
+ui.addTextArea(-66000, "<a href='event:help'>help", nil, 725, 27, 50, 20, 1, 0x0000ff, 0.7,true)
+
+show_rule(nil)
+
+
+
 function main()
 --vars:
 	play = true
@@ -64,12 +76,22 @@ function main()
 		win = "%s выиграли!"
 	}
 --sytème:
+	for pl in pairs(tfm.get.room.playerList) do
+		if pl == adm then
+			initPlayer(pl)
+		end
+		
+	end
+	startPanel()
+end
+
+function startPanel()
 	admin = nil
 	for pl in pairs(tfm.get.room.playerList) do
 		if pl == adm then
 			admin = adm
 		end
-		eventNewPlayer(pl)
+		
 	end
 	for k, v in pairs({"start", "t"}) do
 		system.disableChatCommandDisplay(v, true)
@@ -90,10 +112,21 @@ function isContains(table, element)
     return false
 end
 
-function eventNewPlayer(name)
+function initPlayer(name)
 	ui.addPopup(idPlay, 1, "<p align='center'>Ты хочешь играть в Оборотни?", name, 350, 175, nil, true)
 	players[name] = {isPlaying = false, play = false}
 	tfm.lg.map()
+	ui.addTextArea(-66000, "<a href='event:help'>help", nil, 725, 27, 50, 20, 1, 0x0000ff, 0.7,true)
+end
+
+function eventNewPlayer(name)
+	if play and name == adm then--admin new player, game not start
+		ui.removeTextArea(idStartButton, nil)
+		admin = adm
+		ui.addTextArea(idStartButton, '<a href="event:start">Запустить</a>', admin, 720, 370, 65, 20, 0x005500, 0x00FF00, transparence, true)
+	end
+	initPlayer(name)
+	show_rule(name)
 end
 
 function eventPlayerLeft(name)
@@ -126,6 +159,9 @@ function eventPlayerLeft(name)
 		end
 		if i ~= 0 then
 			table.remove(want2Play, i)
+		end
+		if name == adm then--left adm
+			startPanel()
 		end
 	end
 	tfm.lg.map()
@@ -219,6 +255,11 @@ function eventChatCommand(name, cmd)
 end
 
 function eventTextAreaCallback(id, name, call)
+	
+	if call == "help" then
+		show_rule(name)
+	end
+	
     if call == "start" then
 		gameInit()
 	end
@@ -340,7 +381,7 @@ function eventLoop(t1, t2)
 		TIME = math.ceil(os.difftime(tbl.time,os.time())/1000)
 		tfm.lg.map()
 		if tbl.timer then
-			ui.addTextArea(idTimer, TIME, all, 765, 28, nil, nil, 0, 0, 0, true)
+			ui.addTextArea(idTimer, TIME, all, 665, 28, nil, nil, 0, 0, 0, true)--timer
 		end
 		if tbl.time<=os.time() or tbl.finish then
 			ui.removeTextArea(idTimer)
@@ -398,7 +439,7 @@ function nbrSouris()
 end
 
 ui.msg = function(txt)
-	ui.addTextArea(idHaut, "<p align='center'>"..txt.."</p>", name, 15, 28, 770, nil, 0x8C3232, 0x131A2A, transparence, true)
+	ui.addTextArea(idHaut, "<p align='center'>"..txt.."</p>", name, 15, 28, 670, nil, 0x8C3232, 0x131A2A, transparence, true)
 end
 
 ui.role = function(name, role, obj)
@@ -829,5 +870,7 @@ print=function( ... )
 	end
 	badPrint(table.concat(tbl, "<R>, </R>"))
 end
+
+
 
 main()
