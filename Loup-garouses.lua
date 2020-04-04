@@ -187,7 +187,7 @@ function gameInit()
 			end
 		else
 			print("no start init map")
-			r = {1,3,2,1,1,1,1,1,1}				
+			r = {1,3,2,1,1,1,1,1,1}				--{"Ясновидящая", "Оборотень", "Селянин", "Ведьма", "Амур", "Охотник", "Cпаситель", "Вор", "Качек"}
 			r[2] = #want2Play/4
 			r[3] = #want2Play-(r[2]+7)
 		end
@@ -263,7 +263,7 @@ function eventTextAreaCallback(id, name, call)
     if call == "start" then
 		gameInit()
 	end
-	if call:sub(1,5)=="steal" then
+	if call:sub(1,5)=="steal" then--вор голосует
 		players[name].choose = true
 		players[name].jeu.role = players[call:sub(6)].jeu.role
 		players[call:sub(6)].jeu.role = 1
@@ -486,14 +486,15 @@ tfm.lg = {
 	end,
 
 	tour = function(tour, lastTour, name)
+		-----------------------------------------------------lastTour-----------------------------------------------
 		if lastTour~=nil then
-			if lastTour=="thief" then
+			if lastTour=="thief" then--вор
 				if players[name] and players[name].choose==nil then
 					jeu.roles[8] = 0
 					jeu.roles[3] = jeu.roles[3] + 1
 				end
 			end
-			if lastTour=="cupid" then
+			if lastTour=="cupid" then--купидон
 				if players[name].amour[2]==nil then
 					tour = "daily"
 				else
@@ -505,11 +506,11 @@ tfm.lg = {
 					ui.role(name, "Селянин", "Убей всех оборотней!")
 				end
 			end
-			if lastTour=="witch" then
+			if lastTour=="witch" then--ведьма
 				ui.addPopup(idTimer,2,"",name,1e7,1e7)
 				ui.addPopup(idChoser,2,"",name,1e7,1e7)
 			end
-			if lastTour=="werewolf" then
+			if lastTour=="werewolf" then--оборотень
 				speak = true
 				local last = 0
 				local mort = ""
@@ -526,7 +527,7 @@ tfm.lg = {
 				end
 				jeu.vote = {}
 			end
-			if lastTour=="vote" then
+			if lastTour=="vote" then--голосование
 				local last = 0
 				local mort = ""
 				local tbl = {}
@@ -559,6 +560,7 @@ tfm.lg = {
 				jeu.vote = {}
 			end
 		end
+		--------------------------------------------------tour--------------------------------------------
 		if tour~=nil then
 			if tour=="ini" then
 				jeu.mort = {""}
@@ -570,14 +572,14 @@ tfm.lg = {
 				end
 				tfm.lg.task(2, "night")
 			end
-			if tour=="night" then
+			if tour=="night" then--ночь
 				for _, pl in pairs(plNbr) do
 					players[pl].isProtect = false
 				end
 				ui.msg(T.events[tour])
 				tfm.lg.task(2, "thief", tour)
 			end
-			if tour=="thief" then
+			if tour=="thief" then--вор
 				if jeu.roles[8]==1 then
 					local txt = "Выберите, кого украсть:"
 					local pl = ""
@@ -595,7 +597,7 @@ tfm.lg = {
 					tour = "cupid"
 				end
 			end
-			if tour=="cupid" then
+			if tour=="cupid" then--купидон
 				if jeu.roles[5]==1 then
 					local txt = "Выберите двух влюблённых:"
 					local pl = ""
@@ -616,14 +618,14 @@ tfm.lg = {
 					tour = "daily"
 				end
 			end
-			if tour=="lovers" then
+			if tour=="lovers" then--показать влюбленных
 				for i=1, 2 do
 					ui.addTextArea(idLovers, "<font size='12' color='#131a2a'>Твоя любовь: "..jeu.amour[i], jeu.amour[i==1 and 2 or 1], 6, 322, nil, 20, 0x8C3232, 0x131A2A, transparence, true)
 				end
 				ui.msg(T.events[tour])
 				tfm.lg.task(10, "daily", tour, true)
 			end
-			if tour=="daily" then
+			if tour=="daily" then--день
 				if jeu.roles[1]==1 or jeu.roles[7]==1 then
 					local txt2 = "Выберите, кого защитить:"
 					local txt = "Выберите, кого раскрыть:"
@@ -658,7 +660,7 @@ tfm.lg = {
 					tour = "werewolf"
 				end
 			end
-			if tour=="werewolf" then
+			if tour=="werewolf" then--голосование оборотни
 				jeu.mort = {}
 				speak = true
 				for k, v in pairs(plNbr) do
@@ -682,7 +684,7 @@ tfm.lg = {
 				ui.msg(T.events[tour])
 				tfm.lg.task(45, "witch", tour, true, true, idChoser)
 			end
-			if tour=="witch" then
+			if tour=="witch" then--ведьма голосует
 				if jeu.roles[4]==1 then
 					for k, v in pairs(plNbr) do
 						if players[v].jeu.role==4 then
@@ -724,8 +726,8 @@ tfm.lg = {
 				ui.msg(T.events[tour])
 				tfm.lg.task(10*(#plNbr-tfm.lg.plDead()), "bucher", tour, true, true, idChoser)
 			end
-			if tour=="dead" then
-				local txt, hunter = "Деревня просыпается, "
+			if tour=="dead" then--попробывать смерть
+				local txt, hunter = "Деревня просыпается, "--hunter==nil
 				if jeu.mort==nil or ressu or jeu.mort[1]==nil or jeu.mort=={} then
 					txt = txt.."без жертв!"
 					ressu = false
@@ -734,14 +736,14 @@ tfm.lg = {
 				else
 					for k, v in pairs(jeu.mort) do
 						if (not players[v].isProtect) then
-							txt, hunter = tfm.lg.dead(v, txt.."без <ROSE>"..v.."</ROSE> ,он(а) был "..roles[players[v].jeu.role].."!!\n")
+							txt, hunter = tfm.lg.dead(v, txt.."без <ROSE>"..v.."</ROSE> ,он(а) был "..roles[players[v].jeu.role].."!!\n")--if v==hunter then hunter=true
 						end
 					end
 					jeu.mort = {}
 					ui.msg(txt)
 					if hunter then
 						tfm.lg.task(15, tfm.lg.win() and "win" or "hunter", "mort")
-					else
+					else--==nil
 						tfm.lg.task(15, tfm.lg.win() and "win" or "vote", tour)
 					end
 				end
@@ -788,7 +790,7 @@ tfm.lg = {
 				ui.msg(txt)
 				main()
 			end
-			if tour=="hunter" then
+			if tour=="hunter" then--охотник
 				local txt, pl = "Выбери человека, которого хочешь убить:"
 				for k, v in pairs(plNbr) do
 					if players[v].jeu.role==6 then
