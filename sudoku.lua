@@ -16,6 +16,7 @@ pusto = "      <br>      <br><br><br><br><br><br><br><br><br><br><br><br><br><br
 
 time_new = 10--start timer
 max_info = 10--max info lines
+maxTablo = 7--max line table win
 
 color_winner = {"#F1B90D", "#ffffff", "#FF4900", "#F1B90D"}
 color_winner_x = {0x000001, 0xF1B90D}
@@ -746,7 +747,7 @@ end
 
 function addTextAreaScore()
 	local mess = ""
-	for i = 1, 3 do
+	for i = 1, maxTablo do
 		if not winners[i] then
 			break
 		end
