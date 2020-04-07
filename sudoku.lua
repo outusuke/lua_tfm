@@ -1,28 +1,38 @@
+--[         Судоку         ]--
+--[  Модуль создан Deff83#0000  ]--
 ---------------------- PROPERTIES ----------------------
 --adm = "<admin nickname with hash>"
 adm = "Deff83#0000"
 
-color_winner = {"#F1B90D", "#ffffff", "#FF4900"}
-color_XY = {0x000001, 0xFFFFFF}
-color_sudo = {0xFFFFFFFF, 0xFFFFFFFF}
-color_line = {0xff0000, 0x0000FF}
-border = 2
-
-color_info = {0x000001, 0xffffff}
-color_ban = {"#cc0000", "#00aa00"}
-color_num = {"#FFFFFF", "#F1B90D", "#ff33ff"}
-
-color_adm = {"#ff77ff"}
-color_info_game = {"#dddd00"}
-
+time_ban = 30--timer ban
+fail_score = 10--minus score
+score_win = 50--progress score
+win_col = 10--progress 0/win_col
+boolProgress = true
+map = "@5058219"--"@6168087", "@4942685", "@5058219"
 
 ------------------ ADDITIONAL PROPERTIES -----------------
 pusto = "      <br>      <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>"
 
-
-time_new = 7--start timer
+time_new = 10--start timer
 max_info = 10--max info lines
-time_ban = 2--timer ban
+
+color_winner = {"#F1B90D", "#ffffff", "#FF4900", "#F1B90D"}
+color_winner_x = {0x000001, 0xF1B90D}
+color_XY = {0xFFA540, 0xFFA540}--//
+color_sudo = {0xFFBD73, 0xFFA540}--/
+color_line = {0xFFA540, 0xFF8700}--///
+border = 2
+
+color_info = {0x331500, 0xFF8700}
+color_ban = {"#cc0000", "#00aa00"}
+color_num = {"#9D2763", "#D2006B", "#880045"}
+
+color_adm = {"#ff77ff"}
+color_info_game = {"#dddd00"}
+
+color_progress = {0x331500, 0xFF8700}
+
 
 
 --------------------- DO NOT TOUCH ---------------------
@@ -30,12 +40,14 @@ winners = {}
 players = {}
 id_mouse = 1000
 ban_mass = {}
+chooser = {}
 
 game_state = 1--1 - sudoku, 2 - XY
 lastOtg = {0, 0}
 
 startbool = false
 boolscorenull = true
+
 
 mass_sudo = {}
 mass_sudo_start = {}
@@ -113,7 +125,7 @@ tfm.exec.disableAutoScore(true)
 tfm.exec.disableAutoShaman(true)
 tfm.exec.disableAutoNewGame(true)
 tfm.exec.disableAfkDeath(true)
-tfm.exec.newGame("@6168087")
+tfm.exec.newGame(map)
 
 mapName = "<VP>Судоку<BL> | <N>Время: <V>%s</V><BL> | <N>Мышей: <V>%s<N> <BL> | <N>Создатель: <BV>Deff83#0000\n"
 
@@ -128,16 +140,24 @@ function isContains(table, element)
 end
 
 function shallowcopy(orig)
-    local orig_type = type(orig)
-    local copy
-    if orig_type == 'table' then
-        copy = {}
-        for orig_key, orig_value in pairs(orig) do
-            copy[orig_key] = orig_value
-        end
-    else -- number, string, boolean, etc
-        copy = orig
-    end
+    local copy = {
+		{pusto, pusto, pusto,  pusto, pusto, pusto,  pusto, pusto, pusto},
+		{pusto, pusto, pusto,  pusto, pusto, pusto,  pusto, pusto, pusto},
+		{pusto, pusto, pusto,  pusto, pusto, pusto,  pusto, pusto, pusto},
+		
+		{pusto, pusto, pusto,  pusto, pusto, pusto,  pusto, pusto, pusto},
+		{pusto, pusto, pusto,  pusto, pusto, pusto,  pusto, pusto, pusto},
+		{pusto, pusto, pusto,  pusto, pusto, pusto,  pusto, pusto, pusto},
+		
+		{pusto, pusto, pusto,  pusto, pusto, pusto,  pusto, pusto, pusto},
+		{pusto, pusto, pusto,  pusto, pusto, pusto,  pusto, pusto, pusto},
+		{pusto, pusto, pusto,  pusto, pusto, pusto,  pusto, pusto, pusto}
+	}
+	for i = 1, 9 do
+		for j = 1, 9 do
+			copy[i][j] = orig[i][j]
+		end
+	end
     return copy
 end
 
@@ -182,12 +202,13 @@ end
 
 function addDoska(pl)
 	addlineDoska(pl)
-	addDoskaXY(pl)
 	addDoskaSudoku(pl)
 end
 
 function showChoose(pl, x, y)
-	ui.addTextArea(-60000+players[pl], "<p align='center'><font size='30px' color='#ffffff'><a href='event:choose1"..y..x.."'>1</a>   <a href='event:choose2"..y..x.."'>2</a>   <a href='event:choose3"..y..x.."'>3</a><br><a href='event:choose4"..y..x.."'>4</a>   <a href='event:choose5"..y..x.."'>5</a>   <a href='event:choose6"..y..x.."'>6</a><br><a href='event:choose7"..y..x.."'>7</a>   <a href='event:choose8"..y..x.."'>8</a>   <a href='event:choose9"..y..x.."'>9</a></font><br><a href='event:cancelnum'>cancel</a></p>", pl, 300, 100, 200, nil, 1, 0xffffff, 1,false)
+	chooser[pl] = {x, y}
+	--print(isContains(chooser, pl))
+	
 end
 
 
@@ -200,6 +221,7 @@ function eventTextAreaCallback(id, p, cmd)
 	
 	if cmd == "cancelnum" then
 		ui.removeTextArea(-60000+players[p], p)
+		chooser[p] = nil
 	end
 	
 	if cmd == "restart" then
@@ -227,7 +249,7 @@ function eventTextAreaCallback(id, p, cmd)
 		if isContains(ban_mass, p)==false then
 			local x = cmd:sub(5,5)
 			local y = cmd:sub(6,6)
-			print(x..":"..y)
+			--print(x..":"..y)
 			if startbool then
 			showChoose(p, x, y)
 			end
@@ -235,35 +257,64 @@ function eventTextAreaCallback(id, p, cmd)
 		end
 	end
 	if (cmd:sub(0,6))=="choose" then
-			ui.removeTextArea(-60000+players[p], p)
-			local num = cmd:sub(7,7)
-			local y = cmd:sub(8,8)
-			local x = cmd:sub(9,9)
-			print(x..":"..y..":"..num)
-			mass_sudo[y+0][x+0] = num
-			ui.updateTextArea (-20000+x*10+y, "<p align='center'>".."<font color='"..color_num[2].."'>"..num , nil)
-			tfm.exec.setPlayerScore(p,1, true)
-			massinfo[#massinfo+1] = p..":"..num
-			
-			if lastOtg[1]~=0 then
-				ui.updateTextArea (-20000+lastOtg[1]*10+lastOtg[2], "<p align='center'>".."<font color='"..color_num[1].."'>"..mass_sudo[lastOtg[2]+0][lastOtg[1]+0] , nil)
+		ui.removeTextArea(-60000+players[p], p)
+		chooser[p] = nil
+		local num = cmd:sub(7,7)
+		local y = cmd:sub(8,8)
+		local x = cmd:sub(9,9)
+		--print(x..":"..y..":"..num)
+		if mass_sudo[y+0][x+0] == pusto then
+			if mass_solve[y+0][x+0]==(num+0) then
+				mass_sudo[y+0][x+0] = num
+				ui.updateTextArea (-20000+x*10+y, "<p align='center'>".."<font color='"..color_num[2].."'>"..num , nil)
+				tfm.exec.setPlayerScore(p,1, true)
+				massinfo[#massinfo+1] = p.." отгадал:"..num
+				
+				if lastOtg[1]~=0 then
+					ui.updateTextArea (-20000+lastOtg[1]*10+lastOtg[2], "<p align='center'>".."<font color='"..color_num[1].."'>"..mass_sudo[lastOtg[2]+0][lastOtg[1]+0] , nil)
+				end
+				lastOtg = {x, y}
+				setProgress(p, (num+0))
+				if isWin() then
+					win(p)
+				end
+			else
+				--print(mass_solve[y+0][x+0].."->"..num)
+				
+				if (tfm.get.room.playerList[p].score)-fail_score < 0 then
+					tfm.exec.setPlayerScore(p,0, false)
+					ui.addPopup(-60000+players[p], 0, "<p align='center'>НЕВЕРНО! У вас 0 очков - вас забанили на "..time_ban.."s", p, 200, 200, 400, true)
+					ban(p)
+					return
+				end
+				ui.addPopup(-60000+players[p], 0, "<p align='center'>НЕВЕРНО! <br>-"..fail_score.." очков", p, 200, 200, 400, true)
+				tfm.exec.setPlayerScore(p,-fail_score, true)
 			end
-			lastOtg = {x, y}
-			if isWin() then
-				win(p)
-			end
+		else
+			ui.addPopup(-60000+players[p], 0, "<p align='center'>Вас опередили, ячейка уже заполнена!", p, 200, 200, 400, true)
+		end
 	end
-	
-	
-	
-	
 end
+
+
 
 function restart()
 	for nick in pairs(players) do
 		ui.removeTextArea(-60000+players[nick], nil)
+		ui.removeTextArea(players[nick]*1000+101, nil)
+		ui.removeTextArea(players[nick]*1000+100, nil)
+		ui.removeTextArea(1000+101, nil)
+		ui.removeTextArea(1000+100, nil)
+		for i=1, 9 do
+			ui.removeTextArea(players[nick]*1100+i, nil)
+			ui.removeTextArea(players[nick]*1000+i, nil)
+			ui.removeTextArea(1100+i, nil)
+			ui.removeTextArea(1000+i, nil)
+			
+		end
+		
 	end
-	
+	chooser = {}
 	players = {}
 	for nick in pairs(tfm.get.room.playerList) do
 		id_mouse = id_mouse + 1
@@ -274,6 +325,7 @@ function restart()
 	setnull()
 end
 
+progress = {}
 
 function ban(p)
 	if isContains(ban_mass, p)==false then
@@ -285,9 +337,15 @@ end
 function new_game()
 	if game_state == 1 then
 		refresh()
+		local mass_solve_full = shallowcopy(mass_solve)
 		deleteyach()
 		mass_sudo_start = mass_solve
 		mass_sudo = mass_sudo_start
+		mass_solve = mass_solve_full
+		
+		--test
+		--mass_sudo = mass_solve
+		
 		addDoska(nil)
 	end
 end
@@ -542,7 +600,7 @@ function win(pl)
 	massinfo[#massinfo+1] = "<font color='"..color_info_game[1].."'>".."Sudoku solved!!!".."</font>"
 	time = 0
 	startbool = false
-	print("WIN")
+	--print("WIN")
 	messageinfo(nil)
 end
 
@@ -552,8 +610,11 @@ function start()
 	
 	new_game()
 	if boolscorenull then
+		progress = {}
+		ui.removeTextArea(80000+101, nil)
 		for nick, prop in pairs(tfm.get.room.playerList) do
 			tfm.exec.setPlayerScore(nick,0, false)
+			progress[nick] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0}--1.2.3.4.5.6.7.8.9.score
 		end
 		massinfo = {}
 	end
@@ -562,23 +623,98 @@ function start()
 end
 -------------------------------------------------LOOPER--------------------------------------------
 function eventLoop()
-	time = time + 0.5
-	getListWin()--sort
-	addTextAreaScore()
-	
-	
-	
-	if startbool == false then
-		ui.setMapName(string.format(mapName, math.floor((time_new - time)).."s", #winners))
-		if (time_new - time) == 0 then
-			time = 0
-			start()
+		time = time + 0.5
+	--if time%2 == 0 then
+		getListWin()--sort
+		addTextAreaScore()
+		
+		
+		
+		if startbool == false then
+			ui.setMapName(string.format(mapName, math.floor((time_new - time)).."s", #winners))
+			if (time_new - time) == 0 then
+				time = 0
+				start()
+			end
+		else
+		if boolProgress then
+			getProgress(nil)
+		end
+			messageinfo(nil)
+			ui.setMapName(string.format(mapName, math.floor(time/60)..":"..(math.floor(time)%60), #winners))
+			unbunsloop()
+		end
+	--end
+end
+
+function getProgress(p)
+	if p==nil then
+		for nick, prog in pairs(progress) do
+			showProgress(nick)
 		end
 	else
-		messageinfo(nil)
-		ui.setMapName(string.format(mapName, math.floor(time/60)..":"..(math.floor(time)%60), #winners))
-		unbunsloop()
+		showProgress(p)
 	end
+end
+
+function setProgress(p, chis)
+	if isContains(progress, p) then
+		if chis>= 1 and chis <= 9 then
+			progress[p][chis] = progress[p][chis] + 1
+			
+		end
+	end
+end
+
+function showProgress(p)
+	if tfm.get.room.playerList[p].score>=score_win then
+		progress[p][10] = 1
+	else
+		progress[p][10] = 0
+	end
+	local progressPlayer = progress[p]
+	ui.addTextArea(1000+100, "Достижения:", p, 0, 380, 100, 20, color_progress[1], 0xffffff, 1,true)
+	for i=1, 9 do
+		if progressPlayer[i] >= win_col then
+			ui.addTextArea(players[p]*1000+i, i.."", p, 100+i*40, 382, 13, 15, color_progress[2], 0xffffff, 1,true)
+		else
+			ui.addTextArea(1000+i, i.."", p, 100+i*40, 382, 13, 15, color_progress[1], 0xffffff, 1,true)
+		end
+		ui.addTextArea(players[p]*1100+i, progressPlayer[i].."", p, 118+i*40, 382, 13, 15, 0xffffffff, 1,true)
+	end
+	if progressPlayer[10] == 1 then
+		ui.addTextArea(players[p]*1000+101, "Win Score:"..score_win, p, 520, 380, 100, 20, color_progress[2], 0xffffff, 1,true)
+	else
+		ui.addTextArea(1000+101, "Win Score:"..score_win, p, 520, 380, 100, 20, color_progress[1], 0xffffff, 1,true)
+	end
+	if isProgressWin(p) then
+		progWin(p)
+	end
+end
+
+function isProgressWin(p)
+	local progressPlayer = progress[p]
+	for i=1, 9 do
+		if progressPlayer[i] < win_col then
+			return false
+		end
+	end
+	if progressPlayer[10] == 0 then
+		return false
+	end
+	return true
+end
+
+function progWin(p)
+	time = 0
+	startbool = false
+	boolscorenull = true
+	ui.addTextArea(80000+101, "<font size='28' color = '"..color_winner[4].."'>".."Winner:"..p, nil, 100, 150, 600, nil, color_winner_x[1], color_winner_x[2], 1,true)
+	massinfo[#massinfo+1] = "<font color='"..color_winner[4].."'>".."Winner:"..p.."</font>"
+	for nick in pairs(players) do
+		ui.removeTextArea(-60000+players[nick], nil)
+	end
+	messageinfo(nil)
 end
 
 function unbunsloop()
@@ -625,7 +761,7 @@ function addTextAreaScore()
 		end
 		mess = mess..""..winners[i][1]..":"..winners[i][2].score.."<br>"
 	end
-	ui.addTextArea(-10000, "<font color='#cccccc'>"..mess.."</font>", nil, 600, 50, 200, nil, 0x000001, 0xFFFFFF, 0.9, false)
+	ui.addTextArea(-10000, "<font color='#cccccc'>"..mess.."</font>", nil, 600, 50, 200, nil, color_info[1], color_info[2], 0.9, false)
 end
 
 
@@ -644,8 +780,28 @@ function messageinfo(pl)
 			end
 		end
 	end
+	
+	
+	
 	ui.addTextArea(-50000, stringinfo, pl, 0, 70, 200, nil, color_info[1], color_info[2], 1, false)
 	
+	if startbool then
+		for nick, prop in pairs(players) do
+			showNumsg(nick)
+		end
+	end
+	
+end
+
+function showNumsg(pl)
+	if isContains(chooser, pl) then
+		--print("messageinfo:"..pl)
+		local x = chooser[pl][1]
+		local y = chooser[pl][2]
+		ui.addTextArea(-60000+players[pl], "<p align='center'><font size='30px' color='#ffffff'><a href='event:choose1"..y..x.."'>1</a>   <a href='event:choose2"..y..x.."'>2</a>   <a href='event:choose3"..y..x.."'>3</a><br><a href='event:choose4"..y..x.."'>4</a>   <a href='event:choose5"..y..x.."'>5</a>   <a href='event:choose6"..y..x.."'>6</a><br><a href='event:choose7"..y..x.."'>7</a>   <a href='event:choose8"..y..x.."'>8</a>   <a href='event:choose9"..y..x.."'>9</a></font><br><a href='event:cancelnum'>cancel</a></p>", pl, 0, 70, 200, nil, color_info[1], color_info[2], 1,false)
+		ui.removeTextArea(-50000, pl)
+		return
+	end
 end
 
 
@@ -660,21 +816,23 @@ function eventNewPlayer(playerName)
 	addDoska(playerName)
 	id_mouse = id_mouse + 1
 	players[playerName] = id_mouse
+	progress[playerName] = {0, 0, 0, 0, 0, 0, 0, 0, 0}
 	show_rule()
 end
 
 
 function eventPlayerLeft(pName)
 	players[pName] = nil
+	progress[pName] = nil
 end
 
 
 function show_rule(pl)
-	ui.addPopup(-10000, 0, "<p align='center'><font size='40px' color='#ffff00'>Конкурс \"Судоку\"</font><br><font size='14px'><font color='#00ff00'>автор Deff83#0000</font><br><font color='red'>Судоку</font> </font></p>", pl, 100, 50, 600, true)
-	ui.addTextArea(-66, "<a href='event:help'>help", pl, 0, 27, 50, 20, 1, 0xffffff, 1,true)
+	ui.addPopup(-10000, 0, "<p align='center'><font size='40px' color='#ffff00'>Конкурс \"Судоку\"</font><br><font size='14px'><font color='#00ff00'>автор Deff83#0000</font><br> </font><font color='F1B90D'>Судоку</font> – это одна из самых популярных игр-головоломок всех времен. Цель судоку – заполнить сетку 9 на 9 цифрами так, чтобы в каждой строке, столбце и сетке 3 на 3 были все цифры от 1 до 9. Судоку – не только логическая головоломка, но и отличная игра для развития мозга. Если ты будешь играть в судоку каждый день, то вскоре увидишь, как твоя способность сосредотачиваться и мыслительная способность увеличиваются. <br> В игре нужно выполнить достижения - вписать в судоку числа от 1 до 9 в количестве "..win_col.." раз, а также набрать очки в количестве "..score_win..".<br>Побеждает мышка быстрее всех выполнившая все достижения.<br>За каждый ход прибавляется 1 очко, за не правильный вычитается "..fail_score.." очков. При отрицательных очках мышке дается бан на "..time_ban.." секунд.<br><font size='14px' color='#cccc00'>Приятной игры</font></p>", pl, 100, 50, 600, true)
+	ui.addTextArea(-66, "<a href='event:help'>help", pl, 0, 27, 50, 20, color_info[1], color_info[2], 1,true)
 	
-	ui.addTextArea(-67, "<a href='event:restart'>restart", adm, 740, 360, 50, 20, 1, 0xffffff, 1,true)
-	ui.addTextArea(-68, "<a href='event:scorenull'>restart full", adm, 720, 330, 70, 20, 1, 0xffffff, 1,true)
+	ui.addTextArea(-67, "<a href='event:restart'>restart", adm, 740, 360, 50, 20, color_info[1], color_info[2], 1,true)
+	ui.addTextArea(-68, "<a href='event:scorenull'>restart full", adm, 720, 330, 70, 20, color_info[1], color_info[2], 1,true)
 end
 
 
