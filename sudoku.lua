@@ -625,7 +625,7 @@ end
 function eventLoop()
 		time = time + 0.5
 	--if time%2 == 0 then
-		getListWin()--sort
+		winners = getListWin()--sort
 		addTextAreaScore()
 		
 		
@@ -733,14 +733,14 @@ function unbunsloop()
 end
 
 function getListWin()
-	winners = {}
+	local winnersb = {}
 	for p, _ in pairs(tfm.get.room.playerList) do
-		table.insert(winners, {p, _})
+		table.insert(winnersb, {p, _})
 	end
-	table.sort(winners, function(lhs, rhs)
+	table.sort(winnersb, function(lhs, rhs)
 	  return lhs[2].score >= rhs[2].score
 	end)
-	return winners
+	return winnersb
 	
 end
 
@@ -819,6 +819,7 @@ function eventNewPlayer(playerName)
 	progress[playerName] = {0, 0, 0, 0, 0, 0, 0, 0, 0}
 	show_rule(playerName)
 end
+
 
 
 function eventPlayerLeft(pName)
