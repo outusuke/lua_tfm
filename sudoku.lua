@@ -817,7 +817,7 @@ function eventNewPlayer(playerName)
 	id_mouse = id_mouse + 1
 	players[playerName] = id_mouse
 	progress[playerName] = {0, 0, 0, 0, 0, 0, 0, 0, 0}
-	show_rule()
+	show_rule(playerName)
 end
 
 
