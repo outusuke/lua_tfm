@@ -7,7 +7,7 @@ adm = "Deff83#0000"
 time_ban = 30--timer ban
 fail_score = 10--minus score
 score_win = 50--progress score
-win_col = 10--progress 0/win_col
+win_col = 5--progress 0/win_col
 boolProgress = true
 map = "@5058219"--"@6168087", "@4942685", "@5058219"
 
