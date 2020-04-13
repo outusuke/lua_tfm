@@ -2,9 +2,18 @@
 --[  Модуль создан Athesdrake#0000  ]--
 --[  переведен Deff83  ]--
 
-adm = "Ilyamikheev#4068" --[[админ]] -- если в поле указан недействительный игрок, запускать игру могут все
+adm = "Deff83#0000" --[[админ]] -- если в поле указан недействительный игрок, запускать игру могут все
 transparence = 0.75 --[[прозрачность текста]] -- от 0 (полностью невидимый) до 1 (полностью видимый)
 testing = false --[[режим тестового запуска]] -- нет минимума игроков, всех убъет в начале игры
+
+map = "@7704872"
+colorInfor = {"#aaaa00", "#00cc00", "#cc0000", "#777777", "#ffff00"} --info, add pl, no add pl, left new pl, WIN
+
+
+roles = {"Ясновидящая", "Оборотень", "Селянин", "Ведьма", "Амур", "Охотник", "Cпаситель", "Вор", "Качек"}
+color_roles = {"#ff00ff", "#ffff00", "#ffcc00", "#ff0ff0", "#f5000f", "#ffffcc", "#ccff57", "#972721", "#456789"}
+
+color_side = {"#00ff00", "#ff0000"}
 
 changeLesNoms = {
 	voyante =    {"Ясновидящая", "La"},
@@ -18,19 +27,41 @@ changeLesNoms = {
 	costaud =    {"Качек", "Le"}
 }
 
+fontxSize = 10
+maxCountfontxSize=12
+fontxSizeMin=8
+
+
+massinfo = {}
+massinfoplus = {}-----mouseinfo plus
+--".."<font color='"..color_roles[1].."'>".."
+
+--</font>
+
+tfm.exec.disableAutoScore(true)
+tfm.exec.disableAutoShaman(true)
+tfm.exec.disableAutoNewGame(true)
+tfm.exec.disableAfkDeath(true)
+tfm.exec.newGame(map)
+
+
+tp_player = {{250, 600}, {1200, 500}} --prison, boiler
+zap = false
 
 -----rule
 function show_rule(pl)
-	ui.addPopup(-10000, 0, "<p align='center'><font size='30px' color='#ffff00'>Конкурс \"Оборотни\"</font><br><font size='14px'><font color='#00ff00'>автор Athesdrake#0000 редакция и улучшение Deff83#0000 и Ilyamikheev#4068</font><br><font size='12px'>Вы должны убить всех жителей деревни, если вы оборотень или убить всех оборотней, если вы сельский житель. Для этого оборотни могут назначить жертву ночью и сожрать ее. Днем деревня голосует за то, чтобы посадить кого-нибудь на костер. Его истинная личность будет раскрыта. Учитывая, что нелегко догадаться, является ли кто-то сельским жителем или нет, сельчане могут сыграть свою роль.<br>Житель деревни. Он не имеет никакой власти, но играет важную роль в голосовании.<br>Оборотень. Ночью превращается в оборотня, чтобы пожрать жертву.<br>Ясновидящая. Каждую ночь она видит сквозь свой волшебный шар истинную личность человека по своему выбору.<br>Ведьма. Она владеет двумя зельями. Первая позволяет ему, оказавшись в части, воскресить человека, которого съели волки. Вторая позволяет ему, также оказавшись в части, убить человека по своему выбору.<br>Охотник. Это вполне нормальный персонаж, за исключением того, что, когда он умирает, он может убить человека по своему выбору.<br>Вор. В начале игры он меняет свою карту на чужую. (он станет простым жителем).<br>маленькая девочка. Эта роль не ставится. <font size='8px'>(я не вижу, как это сделать, чтобы закодировать эту роль :/ )</font>.<br>Спаситель. Он может каждую ночь защищать кого-то по своему выбору. Он не может выбрать одного и того же человека две ночи подряд (но может защитить себя).</font></font></p>", pl, 100, 30, 600, true)
+	ui.addPopup(-10000, 0, "<p align='center'><font size='30px' color='#ffff00'>Конкурс \"Оборотни\"</font><br><font size='14px'><font color='#00FFFF'>автор Athesdrake#0000 редакция и улучшение Deff83#0000 и Ilyamikheev#4068</font><br><font size='12px'>Вы должны убить всех ".."<font color='"..color_side[1].."'>".."жителей</font> деревни, если вы ".."<font color='"..color_roles[2].."'>".."оборотень</font> или убить всех ".."<font color='"..color_side[2].."'>".."оборотней</font>, если вы сельский ".."<font color='"..color_side[1].."'>".."житель</font>. Для этого ".."<font color='"..color_roles[2].."'>".."оборотни</font> могут назначить жертву ночью и сожрать ее. Днем деревня голосует за то, чтобы посадить кого-нибудь на костер. Его личность будет раскрыта. В игре необходимо догадаться, кто является оборотнем среди ".."<font color='"..color_roles[3].."'>".."жителей</font>.<br>".."<font color='"..color_roles[3].."'>".."Житель деревни.</font> Он не имеет никакой власти, но играет важную роль в голосовании.<br>".."<font color='"..color_roles[2].."'>".."Оборотень.</font> Ночью превращается в оборотня, чтобы пожрать жертву.<br>".."<font color='"..color_roles[1].."'>".."Ясновидящая.</font> Каждую ночь она видит сквозь свой волшебный шар истинную личность человека по своему выбору.<br>".."<font color='"..color_roles[4].."'>".."Ведьма.</font> Она владеет двумя зельями. Первая позволяет ему, оказавшись в части, воскресить человека, которого съели волки. Вторая позволяет ему, также оказавшись в части, убить человека по своему выбору.<br>".."<font color='"..color_roles[6].."'>".."Охотник.</font> Это вполне нормальный персонаж, за исключением того, что, когда он умирает, он может убить человека по своему выбору.<br>".."<font color='"..color_roles[8].."'>".."Вор.</font> В начале игры он меняет свою карту на чужую. (он станет простым жителем).<br><font color='#888888'>Маленькая девочка.</font> Эта роль не ставится. <font size='8px'>(я не вижу, как это сделать, чтобы закодировать эту роль :/ )</font>.<br>".."<font color='"..color_roles[7].."'>".."Спаситель.</font> Он может каждую ночь защищать кого-то по своему выбору. Он не может выбрать одного и того же человека две ночи подряд (но может защитить себя).</font></font></p>", pl, 100, 30, 600, true)
 end
 
 ui.addTextArea(-66000, "<a href='event:help'>help", nil, 725, 27, 50, 20, 1, 0x0000ff, 0.7,true)
 
 show_rule(nil)
 
-
+	--massinfo[#massinfo+1] = "<font color='"..colorInfor[1].."'>".."Init game".."</font>"
 
 function main()
+--info
+	massinfo[#massinfo+1] = "<font color='"..colorInfor[1].."'>".."Init game".."</font>"
 --vars:
 	play = true
 	speak = false
@@ -51,11 +82,10 @@ function main()
 	plNbr = {}
 	want2Play = {}
 	jeu = {}
-	roles = {"Ясновидящая", "Оборотень", "Селянин", "Ведьма", "Амур", "Охотник", "Cпаситель", "Вор", "Качек"}
 	game = {}
 		game[3] = {1, 1, 0, 0, 0, 0, 1}
-		game[4] = {1, 2, 0, 0, 0, 0, 0}
-		game[5] = {1, 2, 0, 0, 0, 0, 0}
+		game[4] = {1, 2, 1, 0, 0, 0, 0}
+		game[5] = {1, 2, 2, 0, 0, 0, 0}
 		game[6] = {1, 2, 2, 1, 0, 0, 0}
 		game[7] = {1, 2, 2, 1, 1, 0, 0}
 		game[8] = {1, 2, 2, 1, 1, 1, 0}
@@ -77,9 +107,9 @@ function main()
 	}
 --sytème:
 	for pl in pairs(tfm.get.room.playerList) do
-		if pl == adm then
+		--if pl == adm then
 			initPlayer(pl)
-		end
+		--end
 		
 	end
 	startPanel()
@@ -112,6 +142,25 @@ function isContains(table, element)
     return false
 end
 
+function isContainsMap(table, element)
+    for p, val in pairs(table) do
+         if p == element then
+        
+            return true
+        end
+    end
+    return false
+end
+
+function countmapa(massiv)
+    i=0
+    for p, x in pairs(massiv) do
+        i=i+1
+    end
+    return i
+end
+
+
 function initPlayer(name)
 	ui.addPopup(idPlay, 1, "<p align='center'>Ты хочешь играть в Оборотни?", name, 350, 175, nil, true)
 	players[name] = {isPlaying = false, play = false}
@@ -119,7 +168,16 @@ function initPlayer(name)
 	ui.addTextArea(-66000, "<a href='event:help'>help", nil, 725, 27, 50, 20, 1, 0x0000ff, 0.7,true)
 end
 
+function eventPlayerDied(nick)
+    tfm.exec.respawnPlayer(nick)
+end
+
 function eventNewPlayer(name)
+	if zap then
+		tfm.exec.addPhysicObject(0, 1228, 435, {type=8, width=380, height=28})--the cover of the boiler
+		tfm.exec.addPhysicObject(1, 385, 587, {type=10, width=20, height=150})--door of prison
+	end
+    tfm.exec.setNameColor(name, colornick[1])
 	if play and name == adm then--admin new player, game not start
 		ui.removeTextArea(idStartButton, nil)
 		admin = adm
@@ -127,6 +185,8 @@ function eventNewPlayer(name)
 	end
 	initPlayer(name)
 	show_rule(name)
+    tfm.exec.respawnPlayer (name)	
+	massinfo[#massinfo+1] = "<font color='"..colorInfor[4].."'>["..name.."]:".."Присоединился к игре!</font>"
 end
 
 function eventPlayerLeft(name)
@@ -138,8 +198,9 @@ function eventPlayerLeft(name)
 			end
 		end
 		players[name].isPlaying = false
-		local txt = tfm.lg.dead(name, "<ROSE>"..name.."</ROSE> вышел из комнаты. Это был один "..roles[players[name].jeu.role].." !")
-		ui.msg(txt)
+		local txt = tfm.lg.dead(name, "<ROSE>"..name.."</ROSE> вышел из комнаты. Это был один ".."<font color='"..color_roles[players[name].jeu.role].."'>"..roles[players[name].jeu.role].."</font> !")
+		--ui.msg(txt)
+		massinfo[#massinfo+1] = txt
 		if tfm.lg.win() then
 			for k, v in ipairs(task) do
 				task[k].finish = true
@@ -165,6 +226,7 @@ function eventPlayerLeft(name)
 		end
 	end
 	tfm.lg.map()
+	massinfo[#massinfo+1] = "<font color='"..colorInfor[4].."'>["..name.."]:".."Покинул игру!</font>"
 end
 
 function eventNewGame() tfm.lg.map() end
@@ -175,6 +237,10 @@ function gameInit()
 			error("<R>Таблица \'Изменения\' одержимые!</R>")
 	end
 	if #want2Play>2 or testing then
+		zap = true
+		tfm.exec.addPhysicObject(0, 1228, 435, {type=8, width=380, height=28})--the cover of the boiler
+		tfm.exec.addPhysicObject(1, 385, 587, {type=10, width=20, height=150})--door of prison
+		massinfo[#massinfo+1] = "<font color='"..colorInfor[1].."'>".."Start game".."</font>"
 		ui.removeTextArea(idStartButton, nil)
 		task = {}
 		play = false
@@ -223,6 +289,7 @@ function gameInit()
 		end
 		tfm.lg.tour("ini")
 	else
+		massinfo[#massinfo+1] = "<font color='"..colorInfor[1].."'>".."Fail start game (".."still need "..(3-#want2Play).." mice"..")</font>"
 		ui.msg("Не хватает игроков!\nНеобходимо минимум <J>3</J> игрока!")
 		want2Play_not_enouth()
 	end
@@ -231,7 +298,6 @@ end
 
 function want2Play_not_enouth()
 	for k,v in pairs(tfm.get.room.playerList) do
-		print(k)
 		if isContains(want2Play, k)==false and players[k]~=nil and players[k].isPlaying==false then
 			ui.addPopup(idPlay, 1, "<p align='center'>Ты хочешь играть в Оборотни?", k, 350, 175, nil, true)
 			players[k] = {isPlaying = false, play = false}
@@ -260,6 +326,27 @@ function eventTextAreaCallback(id, name, call)
 		show_rule(name)
 	end
 	
+	if call == "plusinfo" then
+		ui.removeTextArea(-57000, name)
+		ui.removeTextArea(-57100, name)
+		if isContainsMap(massinfoplus, name) then
+			
+		else
+			massinfoplus[name] = 1
+		end
+		messageinfo(name)
+	end
+	if call == "plusinfom" then
+		ui.removeTextArea(-57000, name)
+		ui.removeTextArea(-57100, name)
+		if isContainsMap(massinfoplus, name) then
+			massinfoplus[name] = nil
+		else
+			
+		end
+		messageinfo(name)
+	end
+	
     if call == "start" then
 		gameInit()
 	end
@@ -281,11 +368,13 @@ function eventTextAreaCallback(id, name, call)
 	end
 	if call:sub(1,4)=="seer" then
 		ui.choser(call:sub(5).." является "..roles[players[call:sub(5)].jeu.role], name)
+		massinfo[#massinfo+1] = "Ясновидящая посмотрела чью-то роль"
 	end
 	if call:sub(1,6)=="saving" then
 		players[name].lastProtect = call:sub(7)
 		players[call:sub(7)].isProtect = true
 		ui.choser("Ты защищаешь "..call:sub(7).." на ночь!", name)
+		massinfo[#massinfo+1] = "Спаситель защитил кого-то на ночь"
 	end
 	if call:sub(1,8)=="werewolf" then
 		local name2 = call:sub(9)
@@ -319,9 +408,16 @@ function eventTextAreaCallback(id, name, call)
 			jeu.vote[players[name].vote] = jeu.vote[players[name].vote] - 1
 		end
 		players[name].vote = name2
+		
+		local fontsize = fontxSize
+		if countmapa(plNbr)>maxCountfontxSize then
+			fontsize = fontxSizeMin
+			print("fontsize")
+		end
+		
 		for k,v in pairs(plNbr) do
 			if players[v].mort then
-				jeu.txtVote[v] = string.format("<a href='event:vote%s'>%s</a>(%d)→%s\n", v, v, jeu.vote[v] and jeu.vote[v] or 0, players[v].vote and players[v].vote or "никто")
+				jeu.txtVote[v] = (string.format("<font size='"..fontsize.."px'>".."<a href='event:vote%s'>%s</a>(%d)→%s\n".."</font>", v, v, jeu.vote[v] and jeu.vote[v] or 0, players[v].vote and players[v].vote or "никто"))
 			end
 		end
 		local txt = ""
@@ -343,18 +439,28 @@ function eventTextAreaCallback(id, name, call)
 		jeu.mort[1] = call:sub(5)
 		ui.choser("ты стреляешь "..call:sub(5).." в голове", name)
 	end
+	if call=="chat_o" then
+		ui.addPopup(-58200, 2, "<p align='center'>введите сообщение:", name, 200, 200, 400, true)
+	end
 end
 
 function eventPopupAnswer(id, name, ans)
-	if id==idPlay and ans=="yes" then
-		if (not play) then
-			ui.addPopup(idPlay, 0, "Ты должен ждать следующей части, чтобы играть", name, 350, 175, nil, true)
+	if id==idPlay then
+		if ans=="yes" then
+			massinfo[#massinfo+1] = "["..name.."] <font color='"..colorInfor[2].."'>".."хочет играть".."</font>"
+			if (not play) then
+				ui.addPopup(idPlay, 0, "Ты должен ждать следующей части, чтобы играть", name, 350, 175, nil, true)
+			end
+			players[name].play = true
+			players[name].mort = true
+			table.insert(want2Play, name)
+			tfm.lg.map()
+		else
+			massinfo[#massinfo+1] = "["..name.."] <font color='"..colorInfor[3].."'>".."не хочет играть".."</font>"
 		end
-		players[name].play = true
-		players[name].mort = true
-		table.insert(want2Play, name)
-		tfm.lg.map()
 	end
+		
+		
 	if id==idChoser then
 		if ans=="yes" then
 			ressu = true
@@ -373,9 +479,23 @@ function eventPopupAnswer(id, name, ans)
 		players[name].txt = txt
 		ui.addTextArea(idChoser, txt, name, 620, 110, 180, nil, 0x8C3232, 0x131A2A, transparence, true)
 	end
+	if id==-58200 then--chat_o
+		if ans~="" then
+			jeu.chat = "["..name.."] "..ans.."\n"..jeu.chat
+			for k, v in pairs(plNbr) do
+				if players[v].jeu.role==2 then
+					ui.chat(v)
+				end
+			end
+		end
+	end
 end
 
+obnovmessageinfo = 2*1
+time = 0
+
 function eventLoop(t1, t2)
+	time = time + 0.5
 	for k, v in ipairs(task) do
 		local tbl = task[k]
 		TIME = math.ceil(os.difftime(tbl.time,os.time())/1000)
@@ -394,6 +514,22 @@ function eventLoop(t1, t2)
 			table.remove(task, k)
 			ui.addPopup(idTimer, 0, "", name, 9999, 9999, 0)
 			ui.addPopup(idChoser, 0, "", name, 9999, 9999, 0)
+		end
+	end
+	if time % obnovmessageinfo == 0 then
+		messageinfo(nil)
+		changeColorNick()
+	end
+end
+
+colornick = {0xffffff, 0xffff00}
+
+function changeColorNick()
+	for k,v in pairs(tfm.get.room.playerList) do
+		if players and isContainsMap(players, k) and players[k].isPlaying==true and players[k].mort == true then
+			tfm.exec.setNameColor(k, colornick[2])
+		else
+			tfm.exec.setNameColor(k, colornick[1])
 		end
 	end
 end
@@ -442,8 +578,15 @@ ui.msg = function(txt)
 	ui.addTextArea(idHaut, "<p align='center'>"..txt.."</p>", name, 15, 28, 670, nil, 0x8C3232, 0x131A2A, transparence, true)
 end
 
+
+
 ui.role = function(name, role, obj)
-	ui.addTextArea(idRole, "<font size='16' color='#131a2a'>Ты: </font><font size='16'>"..role.."</font>\n<p align='center'><font size='8'><b>"..(obj==name and ("Ты был: "..roles[players[name].jeu.role]) or " цель: "..obj), name, 15, 350, 220, 50, 0x8C3232, 0x131A2A, transparence, true)
+	ui.addTextArea(idRole, "<font size='10' color='#ffffff'>Ты: </font><font size='16' color='"..color_roles[players[name].jeu.role].."'>"..role.."</font>\n<p align='center'><font size='8'><b>"..(obj==name and ("Ты был: "..roles[players[name].jeu.role]) or " цель: "..obj), name, 10, 70, 220, nil, 0x000001, 0xFFFFFF, transparence, true)
+	if obj==name then
+		ui.addTextArea(idRole, "<font size='10' color='#ffffff'>Ты: </font><font size='16' color='"..color_roles[players[name].jeu.role].."'>"..role.."</font>\n<p align='center'><font size='8'><b>"..(obj==name and ("Ты был: "..roles[players[name].jeu.role]) or " цель: "..obj), name, 10, 70, 220, nil, 0x550000, 0xFFFFFF, transparence, true)
+	end
+	
+
 end
 
 ui.choser = function(txt, name, bool, display)
@@ -451,7 +594,7 @@ ui.choser = function(txt, name, bool, display)
 end
 
 ui.chat = function(name)
-	ui.addTextArea(idChat, "<J>!t сообщение</J><BL> для разговора с оборотнями </BL>\n"..jeu.chat, name, 15, 86, 200, 228, 0x8c3232, 0x131a2a, tonumber(transparence)/1.5, true)
+	ui.addTextArea(idChat, "<BL> Чат оборотней </BL> (<a href='event:chat_o'>написать</a>)\n"..jeu.chat, name, 15, 140, 200, 160, 0x000001, 0xFFFFFF, tonumber(transparence)/1.5, true)
 end
 
 tfm.lg = {
@@ -470,6 +613,8 @@ tfm.lg = {
 				local name2 = name==tbl[1] and tbl[2] or tbl[1]
 				tfm.lg.dead(name2)
 				txt = txt.."\n"..name2.." умирает от горя, потеряв любимого. "..name2.." был "..roles[players[name2].jeu.role].." !"
+				massinfo[#massinfo+1] = txt
+				
 			end
 		end
 		return txt, hunter
@@ -710,9 +855,15 @@ tfm.lg = {
 					players[v].vote = nil
 				end
 				local txt = ""
+				local fontsize = fontxSize
+				if countmapa(plNbr)>maxCountfontxSize then
+					fontsize = fontxSizeMin
+					print("fontsize")
+				end
 				for k, v in pairs(plNbr) do
 					if players[v].mort then
-						jeu.txtVote[v] = string.format("<a href='event:vote%s'>%s</a>(%d)→%s\n", v, v, jeu.vote[v] and jeu.vote[v] or 0, "никто")
+						local tf = string.format("<font size='"..fontsize.."px'>".."<a href='event:vote%s'>%s</a>(%d)→%s\n".."</font>", v, v, jeu.vote[v] and jeu.vote[v] or 0, "никто")
+						jeu.txtVote[v] = tf
 					end
 				end
 				for k,v in pairs(jeu.txtVote) do txt = txt..v end
@@ -732,15 +883,19 @@ tfm.lg = {
 					txt = txt.."без жертв!"
 					ressu = false
 					ui.msg(txt)
+					massinfo[#massinfo+1] = txt
 					tfm.lg.task(15, tfm.lg.win() and "win" or "vote", tour)
 				else
 					for k, v in pairs(jeu.mort) do
 						if (not players[v].isProtect) then
-							txt, hunter = tfm.lg.dead(v, txt.."без <ROSE>"..v.."</ROSE> ,он(а) был "..roles[players[v].jeu.role].."!!\n")--if v==hunter then hunter=true
+							txt, hunter = tfm.lg.dead(v, txt.."без <ROSE>"..v.."</ROSE> ,он(а) был ".."<font  color='"..color_roles[players[v].jeu.role].."'>"..roles[players[v].jeu.role].."</font>!!")--if v==hunter then hunter=true
+							
+							tfm.exec.movePlayer(v,tp_player[1][1],tp_player[1][2],false,0,0,false)
 						end
 					end
 					jeu.mort = {}
 					ui.msg(txt)
+					massinfo[#massinfo+1] = txt
 					if hunter then
 						tfm.lg.task(15, tfm.lg.win() and "win" or "hunter", "mort")
 					else--==nil
@@ -751,13 +906,16 @@ tfm.lg = {
 			if tour=="bucher" then
 				local txt, hunter = "Жители деревни сожгли "
 				if jeu.mort[1]==nil then
+					massinfo[#massinfo+1] = "Никто не идет на костер !"
 					txt = "Никто не идет на костер !"
 				else
 					for k, v in pairs(jeu.mort) do
-						txt, hunter = tfm.lg.dead(v, tostring(txt).."<ROSE>"..v.."</ROSE> ,он(а) был "..tostring(roles[players[v].jeu.role]).."!!\n")
+						txt, hunter = tfm.lg.dead(v, tostring(txt).."<ROSE>"..v.."</ROSE> ,он(а) был ".."<font  color='"..color_roles[players[v].jeu.role].."'>"..tostring(roles[players[v].jeu.role]).."</font>!!")
+						tfm.exec.movePlayer(v,tp_player[2][1],tp_player[2][2],false,0,0,false)
 					end
 					jeu.mort = {}
 					ui.msg(txt)
+					massinfo[#massinfo+1] = txt
 					if hunter then
 						tfm.lg.task(15, tfm.lg.win() and "win" or "hunter", "feu")
 					else
@@ -769,6 +927,7 @@ tfm.lg = {
 				local txt = "ERROR"
 				if tfm.lg.win()=="no" then
 					txt = "Никто не выжил !"
+					massinfo[#massinfo+1] = txt
 				else
 					local tbl = {}
 					txt = T.win:format(tfm.lg.win()).."\n Браво <ROSE>"
@@ -788,6 +947,11 @@ tfm.lg = {
 					end
 				end
 				ui.msg(txt)
+				zap = false
+            tfm.exec.removePhysicObject(0)
+            tfm.exec.removePhysicObject(1)
+				massinfo[#massinfo+1] = "<font color='"..colorInfor[5].."'>".."---------WIN----------".."</font>"
+				massinfo[#massinfo+1] = txt
 				main()
 			end
 			if tour=="hunter" then--охотник
@@ -806,8 +970,11 @@ tfm.lg = {
 			if tour=="deadHunt" then
 				if jeu.mort[1]==nil then
 					ui.msg(name.." ни в кого не стрелял")
+					massinfo[#massinfo+1] = name.." ни в кого не стрелял"
 				else
-					ui.msg(tfm.lg.dead(jeu.mort[1], name.." выстрелил "..jeu.mort[1].." ,он(а) был "..roles[players[jeu.mort[1]].jeu.role]))
+					local txth = tfm.lg.dead(jeu.mort[1], name.." выстрелил "..jeu.mort[1].." ,он(а) был "..roles[players[jeu.mort[1]].jeu.role])
+					ui.msg(txth)
+					massinfo[#massinfo+1] = txth
 				end
 				tfm.lg.task(15, tfm.lg.win() and "win" or (lastTour=="feu" and "night" or "vote"))
 			end
@@ -843,6 +1010,57 @@ tfm.lg = {
 		end
 	end
 }
+
+
+
+--показывает информацию
+function messageinfo(pl)
+	
+	--infoper()
+	
+	local stringinfo = ""
+	
+	for i=1, countmapa(massinfo) do
+		if i<5 then
+			stringinfo = stringinfo..massinfo[countmapa(massinfo)-i+1]
+			if i <= countmapa(massinfo)-1 then
+				stringinfo = stringinfo.."<br>"
+			end
+		end
+	end
+	
+	
+	local stringinfoplus = ""
+		
+	for i=1, countmapa(massinfo) do
+		if i<21 then
+			stringinfoplus = stringinfoplus..massinfo[countmapa(massinfo)-i+1]
+			if i <= countmapa(massinfo)-1 then
+				stringinfoplus = stringinfoplus.."<br>"
+			end
+		end
+	end
+	smesh = 50
+	if pl ~= nil then
+		ui.addTextArea(-57000, stringinfo, pl, 500-smesh, 720, 400, nil, 0x000001, 0xFFFFFF, 0.7, false)
+		ui.addTextArea(-57100, "<a href='event:plusinfo'>+", pl, 470-smesh, 720, 20, nil, 0x000001, 0xFFFFFF, 0.7, false)
+		
+		for p, val in pairs(massinfoplus) do
+			ui.addTextArea(-57000, stringinfoplus, p, 500-smesh, 480, 400, nil, 0x000001, 0xFFFFFF, 0.7, false)
+			ui.addTextArea(-57100, "<a href='event:plusinfom'>-", p, 470-smesh, 480, 20, nil, 0x000001, 0xFFFFFF, 0.7, false)
+		end
+		return
+	end
+	
+	ui.addTextArea(-57000, stringinfo, nil, 500-smesh, 720, 400, nil, 0x000001, 0xFFFFFF, 0.7, false)
+	ui.addTextArea(-57100, "<a href='event:plusinfo'>+", nil, 470-smesh, 720, 20, nil, 0x000001, 0xFFFFFF, 0.7, false)
+	
+	for p, val in pairs(massinfoplus) do
+		ui.addTextArea(-57000, stringinfoplus, p, 500-smesh, 480, 400, nil, 0x000001, 0xFFFFFF, 0.7, false)
+		ui.addTextArea(-57100, "<a href='event:plusinfom'>-", p, 470-smesh, 480, 20, nil, 0x000001, 0xFFFFFF, 0.7, false)
+	end
+	
+end
 
 badPrint = print
 print=function( ... )
