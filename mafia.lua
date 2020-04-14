@@ -8,6 +8,7 @@ next_day_delay = 30 --- in seconds
 new_years = false --- true for Christmas decoration
 bool_animeska_maps = false ---maps of Animeska6#0000
 bool_post_get = true --add left mouse
+bool_auto_start = true
 ------------------ ADVANCED PROPERTIES -----------------
 -- WARNING
 -- If automatic sort is on, mafia, police, villager list and the doctor field MUST BE EMPTY.
@@ -42,6 +43,7 @@ users = {}
 start = false
 viselebool = false
 kill = 0
+superadm = adm
 tfm.exec.disableAutoScore(true)
 tfm.exec.disableAutoShaman(true)
 tfm.exec.disableAutoNewGame(true)
@@ -82,6 +84,8 @@ ui.addTextArea(-1, "<p align='center'> <a href='event:start'>Запустить!
 ui.addTextArea(-2, "<p align='center'> <a href='event:game'>Участвовать", nil, 10, 350, 100, 20, 1, 0xffffff, 0.7,true)
 ui.addTextArea(-65, "<p align='center'>  Конкурс \"Мафия\"!", nil, 10, 27, 700, 20, 1, 0x0000ff, 0.7,true)
 ui.addTextArea(-66, "<a href='event:help'>help", nil, 725, 27, 50, 20, 1, 0x0000ff, 0.7,true)
+
+ui.addTextArea(-58100, "<a href='event:adminpanel'>Admin panel", adm, 320, 720, 100, nil, 0x000001, 0xFFFFFF, 0.7, false)
 
 tfm.exec.addPhysicObject(0, 390, 650, {type=10, width=20, height=120})
   tfm.exec.addPhysicObject(1, 390, 510, {type=0, width=20, height=150})
@@ -281,14 +285,26 @@ function eventNewPlayer(playerName)
             
         end
 
-        ui.addTextArea(-2, "<p align='center'> <a href='event:game'>Участвовать", playerName, 120, 350, 100, 20, 1, 0xffffff, 0.7,true)
+        ui.addTextArea(-2, "<p align='center'> <a href='event:game'>Участвовать", playerName, 10, 350, 100, 20, 1, 0xffffff, 0.7,true)
 		show_rule(playerName)
     end
 
     tfm.exec.setPlayerScore(playerName,0,false)
 
+		if playerName==superadm then
+			adm = playerName
+			ui.addTextArea(-58100, "<a href='event:adminpanel'>Admin panel", adm, 320, 720, 100, nil, 0x000001, 0xFFFFFF, 0.7, false)
+		end
+
+
     if start then
         ui.removeTextArea(-2, nil)
+	else
+		if playerName==superadm then
+			adm = playerName
+			ui.removeTextArea(-1, nil)
+			ui.addTextArea(-1, "<p align='center'> <a href='event:start'>Запустить!", adm, 120, 350, 100, 20, 1, 0x00ff00, 0.7,true)
+		end
     end
 
 end
@@ -328,6 +344,117 @@ iter = 0
 vote_side_polish = 0
 vote_side_mafia = 0
 
+function initGame()
+
+time = 0
+	time_auto = 0
+
+	massinfo = {}
+		random_event_chance = random_event_chance_start
+		changeboolg = true
+		die_virus = 0
+		die_doctor = 0
+        if countElements(users) < 4 and automatic_sort then
+            ui.addPopup(-64, 0, "<p align='center'><font color='#ff0000'>Ошибка!</font><br>Нужно минимум четыре игрока для старта</p>", adm, 300, 200, nil, true)
+           return 
+        end
+		
+		massinfo[#massinfo+1] = "<font color='#ffff00'>START GAME</font>"
+        
+        ui.removeTextArea(-8, nil)
+
+        for nick in pairs(tfm.get.room.playerList) do
+            tfm.exec.setPlayerScore(nick,0,false)
+        end
+
+        start = true
+        ui.removeTextArea(-1, nil)
+        ui.removeTextArea(-2, nil)
+        ui.removeTextArea(-8, nil)
+        ui.removeTextArea(-9, nil)
+
+        counter = 1
+        for i, _ in pairs(users) do
+            ui.removeTextArea(counter, nil)
+            counter = counter + 1
+        end
+        
+        if automatic_sort then
+            sh_users = {}
+            for i, val in pairs(users) do
+                table.insert(sh_users, math.random(1, countElements(sh_users) + 1), i)
+            end
+            doctor = sh_users[1]
+            table.remove(sh_users, 1)
+            target = 0
+            for _, i in pairs(sh_users) do
+                if target == 0 then
+                    villager_list[i] = {}
+                elseif target == 1 then
+                    police_list[i] = {}
+                elseif target == 2 then
+                    mafia_list[i] = {}
+                end
+                target = target + 1
+                if target > 2 then
+                    target = 0
+                end
+            end
+        end
+        
+        ---------------------------------First Day--------------------
+        changeMap(maps[1])
+        ui.addTextArea(27100, "<p align='right'><font color='#00ff00'>Жители: " ..       countElements(villager_list) .. "</font><br><font color='#0000ff'>Полиция: " .. countElements(police_list) .. "</font><br><font color='#ff0000'>Мафия: " .. countElements(mafia_list) .. "</font><br>Доктора: " .. doctor_count .. "</p>", nil, 670, 60, 100, nil, 0x000001, 0xFFFFFF, 0.7, true) 
+        ui.updateTextArea (-65, "<p align='center'>День знакомств..." , nil )
+        ---------------------------TEXT FOR MAFIA-------------------------------
+        dialog_text = "Мафия:<br>"
+        textwho = "<p align='center'>ваша роль<br><font size='30px' color='#ff0000'>Мафия</font><br>Ваша цель - убить всех жителей, полицейских, и доктора.<br></p>"
+        for p, x in pairs(mafia_list) do
+            dialog_text = dialog_text .. "<font color='#ff0000'>" .. p .. "</font><br>"
+        end
+        i = 0
+        for p, val in pairs(mafia_list) do
+        i = i+1
+          ui.addTextArea(-100+i, dialog_text .. "</p>", p, 10, 60, 100, nil, 0x000001, 0xFFFFFF, 1, true)
+          ui.addTextArea(-1100+i, textwho .. "</p>", p, 210, 60, 300, nil, 0x000001, 0xFFFFFF, 1, true)
+        end
+        ---------------------------TEXT FOR Polis-------------------------------
+        dialog_text = "Полиция:<br>"
+        textwho = "<p align='center'>ваша роль<br><font size='30px' color='#0000ff'>Полицейский</font><br>Ваша цель - задержать всех членов мафии.<br></p>"
+        for p, x in pairs(police_list) do
+                dialog_text = dialog_text .. "<font color='#0000ff'>" .. p .. "</font><br>"
+        end
+        i = 0
+        for p, val in pairs(police_list) do
+            i = i+1
+          ui.addTextArea(-200+i, dialog_text .. "</p>", p, 10, 60, 100, nil, 0x000001, 0xFFFFFF, 0.7, true)
+          ui.addTextArea(-1200+i, textwho .. "</p>", p, 210, 60, 300, nil, 0x000001, 0xFFFFFF, 1, true)
+        end
+        
+        ---------------------------TEXT FOR Vilige-------------------------------
+         dialog_text = "Вы житель"
+         textwho = "<p align='center'>ваша роль<br><font size='30px' color='#00ff00'>Мирный житель</font><br>Ваша цель - выжить в этом городе<br>"
+        i = 0
+        for p, val in pairs(villager_list) do
+        i = i+1
+          ui.addTextArea(-300+i, dialog_text .. "</p>", p, 10, 60, 100, nil, 0x000001, 0xFFFFFF, 0.7, true)
+          ui.addTextArea(-1300+i, textwho .. "</p>", p, 210, 60, 300, nil, 0x000001, 0xFFFFFF, 1, true)
+        end
+        ---------------------------TEXT FOR Doctor-------------------------------
+        dialog_text = "<p align='center'>ваша роль<br><font size='30px' color='#ffffff'>Доктор</font><br>Ваша цель - брать на лечение и лечить больных<br>"
+        ui.addTextArea(-1400, dialog_text .. "</p>", doctor, 210, 60, 300, nil, 0x000001, 0xFFFFFF, 0.7, true)
+        ui.addTextArea(-400, "Вы доктор</p>", doctor, 10, 60, 100, nil, 0x000001, 0xFFFFFF, 0.7, true)
+end
+
+
+function getSwitch(boolt)
+	if boolt then
+		return "вкл"
+	else
+		return "выкл"
+	end
+end
+
 function eventTextAreaCallback(id, p, cmd)
 
 	if cmd == "help" then
@@ -335,46 +462,59 @@ function eventTextAreaCallback(id, p, cmd)
 	end
 
 	if cmd == "adminpanel" then
-		ui.addTextArea(-58100, "<br><a href='event:adminmessage'>Написать сообщение в чат</a><br><a href='event:adminchange_per_kill_virus'>Поменять процент смерти от вируса</a><br><a href='event:adminchange_per_kill_doctor'>Поменять процент смерти от укола</a><br><a href='event:adminchange_per_event'>Поменять процент вероятности дневного события</a><br><a href='event:adminchange_style_maps'>Поменять стиль карт</a><br><br><a href='event:adminchange_close'>Close</a>", adm, 100, 150, 600, nil, 1, 1, 1, true)
+		ui.addTextArea(-58100, "<br><a href='event:adminmessage'>Написать сообщение в чат</a><br><a href='event:adminchange_per_kill_virus'>Поменять процент смерти от вируса</a><br><a href='event:adminchange_per_kill_doctor'>Поменять процент смерти от укола</a><br><a href='event:adminchange_per_event'>Поменять процент вероятности дневного события</a><br><a href='event:adminchange_style_maps'>Поменять стиль карт</a><br><a href='event:bool_auto_start'>Автостарт:"..getSwitch(bool_auto_start).."</a><br><br><a href='event:adminchange_close'>Close</a>", adm, 100, 150, 600, nil, 1, 1, 1, true)
 	end
 	
 	if cmd == "adminmessage" then
-		ui.removeTextArea(-58100, nil)
+		ui.addTextArea(-58100, "<a href='event:adminpanel'>Admin panel", adm, 320, 720, 100, nil, 0x000001, 0xFFFFFF, 0.7, false)
 		ui.addPopup(-58100, 2, "<p align='center'>Введите сообщение!", adm, 200, 200, 400, true)
 	end
 	if cmd == "adminchange_per_kill_virus" then
-		ui.removeTextArea(-58100, nil)
+		ui.addTextArea(-58100, "<a href='event:adminpanel'>Admin panel", adm, 320, 720, 100, nil, 0x000001, 0xFFFFFF, 0.7, false)
 		ui.addPopup(-58200, 2, "<p align='center'>Введите значение процента смерти от вируса:", adm, 200, 200, 400, true)
 	end
 	if cmd == "adminchange_per_kill_doctor" then
-		ui.removeTextArea(-58100, nil)
+		ui.addTextArea(-58100, "<a href='event:adminpanel'>Admin panel", adm, 320, 720, 100, nil, 0x000001, 0xFFFFFF, 0.7, false)
 		ui.addPopup(-58300, 2, "<p align='center'>Введите значение процента смерти от укола:", adm, 200, 200, 400, true)
 	end
 	if cmd == "adminchange_per_event" then
-		ui.removeTextArea(-58100, nil)
+		ui.addTextArea(-58100, "<a href='event:adminpanel'>Admin panel", adm, 320, 720, 100, nil, 0x000001, 0xFFFFFF, 0.7, false)
 		ui.addPopup(-58400, 2, "<p align='center'>Введите значение процента вероятности дневного события:", adm, 200, 200, 400, true)
 	end
 	if cmd == "adminchange_style_maps" then
-		ui.removeTextArea(-58100, nil)
+		ui.addTextArea(-58100, "<a href='event:adminpanel'>Admin panel", adm, 320, 720, 100, nil, 0x000001, 0xFFFFFF, 0.7, false)
 		ui.addTextArea(-58100, "<br><a href='event:style1'>Основной стиль Deff83</a><br><a href='event:style2'>Новогодний стиль</a><br><a href='event:style3'>Стиль розовый Animeska6#0000</a><>br<br><a href='event:adminchange_close'>Close</a>", adm, 100, 150, 600, nil, 1, 1, 1, true)
 	end
+	
+	if cmd == "bool_auto_start" then
+		bool_auto_start = not bool_auto_start
+		if bool_auto_start then
+			time = 0
+			time_auto = 0
+		end
+		ui.addTextArea(-58100, "<br><a href='event:adminmessage'>Написать сообщение в чат</a><br><a href='event:adminchange_per_kill_virus'>Поменять процент смерти от вируса</a><br><a href='event:adminchange_per_kill_doctor'>Поменять процент смерти от укола</a><br><a href='event:adminchange_per_event'>Поменять процент вероятности дневного события</a><br><a href='event:adminchange_style_maps'>Поменять стиль карт</a><br><a href='event:bool_auto_start'>Автостарт:"..getSwitch(bool_auto_start).."</a><br><br><a href='event:adminchange_close'>Close</a>", adm, 100, 150, 600, nil, 1, 1, 1, true)
+	end
 	if cmd == "adminchange_close" then
-		ui.removeTextArea(-58100, nil)
+		ui.addTextArea(-58100, "<a href='event:adminpanel'>Admin panel", adm, 320, 720, 100, nil, 0x000001, 0xFFFFFF, 0.7, false)
 	end
 	if cmd == "style1" then
-		ui.removeTextArea(-58100, nil)
+		ui.addTextArea(-58100, "<a href='event:adminpanel'>Admin panel", adm, 320, 720, 100, nil, 0x000001, 0xFFFFFF, 0.7, false)
 		maps = maps_deff
 		massinfo[#massinfo+1] = "<font color='#ff33ff'>[ADMIN]: включен основной стиль оформления</font>"
+		messageinfo(nil)
 	end
 	if cmd == "style2" then
-		ui.removeTextArea(-58100, nil)
+		ui.addTextArea(-58100, "<a href='event:adminpanel'>Admin panel", adm, 320, 720, 100, nil, 0x000001, 0xFFFFFF, 0.7, false)
 		maps = maps_new_year
 		massinfo[#massinfo+1] = "<font color='#ff33ff'>[ADMIN]: включен новогодний стиль оформления</font>"
+		messageinfo(nil)
 	end
 	if cmd == "style3" then
-		ui.removeTextArea(-58100, nil)
+		ui.addTextArea(-58100, "<a href='event:adminpanel'>Admin panel", adm, 320, 720, 100, nil, 0x000001, 0xFFFFFF, 0.7, false)
 		maps = maps_animeska
 		massinfo[#massinfo+1] = "<font color='#ff33ff'>[ADMIN]: включен розовый стиль оформления</font>"
+		messageinfo(nil)
+		
 	end
 	
 	if cmd == "golos_polish" then
@@ -474,101 +614,7 @@ function eventTextAreaCallback(id, p, cmd)
 
     end
     if cmd == "start" then
-		massinfo = {}
-		random_event_chance = random_event_chance_start
-		changeboolg = true
-		die_virus = 0
-		die_doctor = 0
-        if countElements(users) < 4 and automatic_sort then
-            ui.addPopup(-64, 0, "<p align='center'><font color='#ff0000'>Ошибка!</font><br>Нужно минимум четыре игрока для старта</p>", adm, 300, 200, nil, true)
-           return 
-        end
-		
-		massinfo[#massinfo+1] = "<font color='#ffff00'>START GAME</font>"
-        
-        ui.removeTextArea(-8, nil)
-
-        for nick in pairs(tfm.get.room.playerList) do
-            tfm.exec.setPlayerScore(nick,0,false)
-        end
-
-        start = true
-        ui.removeTextArea(-1, nil)
-        ui.removeTextArea(-2, nil)
-        ui.removeTextArea(-8, nil)
-        ui.removeTextArea(-9, nil)
-
-        counter = 1
-        for i, _ in pairs(users) do
-            ui.removeTextArea(counter, nil)
-            counter = counter + 1
-        end
-        
-        if automatic_sort then
-            sh_users = {}
-            for i, val in pairs(users) do
-                table.insert(sh_users, math.random(1, countElements(sh_users) + 1), i)
-            end
-            doctor = sh_users[1]
-            table.remove(sh_users, 1)
-            target = 0
-            for _, i in pairs(sh_users) do
-                if target == 0 then
-                    villager_list[i] = {}
-                elseif target == 1 then
-                    police_list[i] = {}
-                elseif target == 2 then
-                    mafia_list[i] = {}
-                end
-                target = target + 1
-                if target > 2 then
-                    target = 0
-                end
-            end
-        end
-        
-        ---------------------------------First Day--------------------
-        changeMap(maps[1])
-        ui.addTextArea(27100, "<p align='right'><font color='#00ff00'>Жители: " ..       countElements(villager_list) .. "</font><br><font color='#0000ff'>Полиция: " .. countElements(police_list) .. "</font><br><font color='#ff0000'>Мафия: " .. countElements(mafia_list) .. "</font><br>Доктора: " .. doctor_count .. "</p>", nil, 670, 60, 100, nil, 0x000001, 0xFFFFFF, 0.7, true) 
-        ui.updateTextArea (-65, "<p align='center'>День знакомств..." , nil )
-        ---------------------------TEXT FOR MAFIA-------------------------------
-        dialog_text = "Мафия:<br>"
-        textwho = "<p align='center'>ваша роль<br><font size='30px' color='#ff0000'>Мафия</font><br>Ваша цель - убить всех жителей, полицейских, и доктора.<br></p>"
-        for p, x in pairs(mafia_list) do
-            dialog_text = dialog_text .. "<font color='#ff0000'>" .. p .. "</font><br>"
-        end
-        i = 0
-        for p, val in pairs(mafia_list) do
-        i = i+1
-          ui.addTextArea(-100+i, dialog_text .. "</p>", p, 10, 60, 100, nil, 0x000001, 0xFFFFFF, 1, true)
-          ui.addTextArea(-1100+i, textwho .. "</p>", p, 210, 60, 300, nil, 0x000001, 0xFFFFFF, 1, true)
-        end
-        ---------------------------TEXT FOR Polis-------------------------------
-        dialog_text = "Полиция:<br>"
-        textwho = "<p align='center'>ваша роль<br><font size='30px' color='#0000ff'>Полицейский</font><br>Ваша цель - задержать всех членов мафии.<br></p>"
-        for p, x in pairs(police_list) do
-                dialog_text = dialog_text .. "<font color='#0000ff'>" .. p .. "</font><br>"
-        end
-        i = 0
-        for p, val in pairs(police_list) do
-            i = i+1
-          ui.addTextArea(-200+i, dialog_text .. "</p>", p, 10, 60, 100, nil, 0x000001, 0xFFFFFF, 0.7, true)
-          ui.addTextArea(-1200+i, textwho .. "</p>", p, 210, 60, 300, nil, 0x000001, 0xFFFFFF, 1, true)
-        end
-        
-        ---------------------------TEXT FOR Vilige-------------------------------
-         dialog_text = "Вы житель"
-         textwho = "<p align='center'>ваша роль<br><font size='30px' color='#00ff00'>Мирный житель</font><br>Ваша цель - выжить в этом городе<br>"
-        i = 0
-        for p, val in pairs(villager_list) do
-        i = i+1
-          ui.addTextArea(-300+i, dialog_text .. "</p>", p, 10, 60, 100, nil, 0x000001, 0xFFFFFF, 0.7, true)
-          ui.addTextArea(-1300+i, textwho .. "</p>", p, 210, 60, 300, nil, 0x000001, 0xFFFFFF, 1, true)
-        end
-        ---------------------------TEXT FOR Doctor-------------------------------
-        dialog_text = "<p align='center'>ваша роль<br><font size='30px' color='#ffffff'>Доктор</font><br>Ваша цель - брать на лечение и лечить больных<br>"
-        ui.addTextArea(-1400, dialog_text .. "</p>", doctor, 210, 60, 300, nil, 0x000001, 0xFFFFFF, 0.7, true)
-        ui.addTextArea(-400, "Вы доктор</p>", doctor, 10, 60, 100, nil, 0x000001, 0xFFFFFF, 0.7, true)
+		initGame()
     end
      if cmd == "viselitsa" then
      -----------------------------------------------------------
@@ -688,8 +734,29 @@ end
 obnovmessageinfo = 2*1
 allPlayer = -1
 
+
+time = 0
+
+time_auto = 0
+timer_start_auto = 30
+
 function eventLoop()
-    if not start then
+    if not start then--non start
+		if bool_auto_start then
+
+			if time_auto == 0 then
+				time_auto = os.time()+timer_start_auto*1000
+			end
+			TIME = math.ceil(os.difftime(time_auto,os.time())/1000)
+			ui.setMapName(string.format(mapName, TIME, countElements(users), countElements(tfm.get.room.playerList)))
+			if TIME<1 then
+				time_auto = 0
+				initGame()
+			end
+		end
+
+	
+	
         return
     end
 	if allPlayer == -1 then
