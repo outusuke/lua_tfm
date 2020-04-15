@@ -11,8 +11,8 @@ map = "@7704872"
 colorInfor = {"#aaaa00", "#00cc00", "#cc0000", "#777777", "#ffff00", "#ff33ff"} --info, add pl, no add pl, left new pl, WIN, admin
 
 
-roles = {"Ясновидящая", "Оборотень", "Селянин", "Ведьма", "Амур", "Охотник", "Cпаситель", "Вор", "Качек"}
-color_roles = {"#ff00ff", "#ffff00", "#ffcc00", "#ff0ff0", "#f5000f", "#ffffcc", "#ccff57", "#972721", "#456789"}
+roles = {"Ясновидящая", "Оборотень", "Селянин", "Ведьма", "Амур", "Охотник", "Cпаситель", "Вор", "Качек", "бог"}
+color_roles = {"#ff00ff", "#ffff00", "#ffcc00", "#ff0ff0", "#f5000f", "#ffffcc", "#ccff57", "#972721", "#456789", "#20B2AA"}
 
 color_side = {"#00ff00", "#ff0000"}
 
@@ -25,13 +25,15 @@ changeLesNoms = {
 	chasseur =   {"Охотник", nil},
 	salvateur =  {"Cпаситель", nil},
 	voleur =     {"Вор", nil},
-	costaud =    {"Качек", nil}
+	costaud =    {"Качек", nil},
+	god =        {"Бог", nil}
 }
 
 fontxSize = 10
 maxCountfontxSize=12
 fontxSizeMin=8
 
+point_god_start = 3--god points
 
 massinfo = {}
 massinfoplus = {}-----mouseinfo plus
@@ -46,7 +48,8 @@ tfm.exec.disableAfkDeath(true)
 tfm.exec.newGame(map)
 
 
-tp_player = {{250, 600}, {1200, 500}} --prison, boiler
+tp_player = {{250, 600}, {1200, 500}, {250, 250}} --prison, boiler, god
+--tp_player = {{250, 600}, {700, 500}, {250, 250}} --prison, boiler, god
 zap = false
 
 -----rule
@@ -61,6 +64,8 @@ show_rule(nil)
 	--massinfo[#massinfo+1] = "<font color='"..colorInfor[1].."'>".."Init game".."</font>"
 
 function main()
+--god
+	point_god = point_god_start + 1
 --start timer
 	time = 0
 	time_auto = 0
@@ -80,6 +85,9 @@ function main()
 	idLovers = 6
 	idChat = 7
 	idStartButton = 8
+	idWantGog = -75130
+	idGodWChoose = -75520
+	idGodWPol = -75580
 --tables:
 	task = {}
 	players = {}
@@ -87,14 +95,14 @@ function main()
 	want2Play = {}
 	jeu = {}
 	game = {}
-		--roles = {"Ясновидящая", "Оборотень", "Селянин", "Ведьма", "Амур", "Охотник", "Cпаситель", "Вор", "Качек"}
-		game[3] = {0, 1, 0, 0, 1, 0, 0, 0, 1}
-		game[4] = {1, 2, 1, 0, 0, 0, 0, 0, 0}
-		game[5] = {1, 2, 2, 0, 0, 0, 0, 0, 0}
-		game[6] = {1, 2, 2, 1, 0, 0, 0, 0, 0}
-		game[7] = {1, 2, 2, 1, 1, 0, 0, 0, 0}
-		game[8] = {1, 2, 2, 1, 1, 1, 0, 0, 0}
-		game[9] = {1, 2, 2, 1, 1, 1, 1, 0, 0}
+		--roles = {"Ясновидящая", "Оборотень", "Селянин", "Ведьма", "Амур", "Охотник", "Cпаситель", "Вор", "Качек", "Бог"}
+		game[3] = {0, 1, 0, 0, 1, 0, 0, 0, 0, 1}
+		game[4] = {0, 1, 0, 0, 1, 1, 0, 0, 0, 1}
+		game[5] = {1, 2, 2, 0, 0, 0, 0, 0, 0, 0}
+		game[6] = {1, 2, 2, 1, 0, 0, 0, 0, 0, 0}
+		game[7] = {1, 2, 2, 1, 1, 0, 0, 0, 0, 0}
+		game[8] = {1, 2, 2, 1, 1, 1, 0, 0, 0, 0}
+		game[9] = {1, 2, 2, 1, 1, 1, 1, 0, 0, 0}
 		
 	T = {
 		events = {
@@ -108,6 +116,7 @@ function main()
 			witch = "".."<font color='"..color_roles[4].."'>".." %s %s</font> просыпается, выбирается из мертвых или убивает кого-то и засыпает.",
 			vote = " Выберите, кого сжечь на костре!",
 			hunter = "".."<font color='"..color_roles[6].."'>".." %s %s</font> выбирай цель!",
+			god = "".."<font color='"..color_roles[10].."'>".." %s %s</font> выбирай действие!",
 		},
 		win = "%s выиграли!"
 	}
@@ -186,6 +195,7 @@ function eventNewPlayer(name)
 	if zap then
 		tfm.exec.addPhysicObject(0, 1228, 435, {type=8, width=380, height=28})--the cover of the boiler
 		tfm.exec.addPhysicObject(1, 385, 587, {type=10, width=20, height=150})--door of prison
+		tfm.exec.addPhysicObject(2, 385, 200, {type=10, width=20, height=150})--door of god
 	end
     tfm.exec.setNameColor(name, colornick[1])
 	if play and name == adm then--admin new player, game not start
@@ -250,11 +260,12 @@ function gameInit()
 		zap = true
 		tfm.exec.addPhysicObject(0, 1228, 435, {type=8, width=380, height=28})--the cover of the boiler
 		tfm.exec.addPhysicObject(1, 385, 587, {type=10, width=20, height=150})--door of prison
+		tfm.exec.addPhysicObject(2, 385, 200, {type=10, width=20, height=150})--door of god
 		massinfo[#massinfo+1] = "<font color='"..colorInfor[1].."'>".."Start game".."</font>"
 		ui.removeTextArea(idStartButton, nil)
 		task = {}
 		play = false
-		jeu = {roles={0,0,0,0,0,0,0,0,0}}
+		jeu = {roles={0,0,0,0,0,0,0,0,0,0}}
 		local r = {}
 		if game[#want2Play]~=nil then
 			print("start init map"..#want2Play)
@@ -263,7 +274,7 @@ function gameInit()
 			end
 		else
 			print("no start init map")
-			r = {1,3,2,1,1,1,1,1,1}				--{"Ясновидящая", "Оборотень", "Селянин", "Ведьма", "Амур", "Охотник", "Cпаситель", "Вор", "Качек"}
+			r = {1,3,2,1,1,1,1,1,1,0}				--{"Ясновидящая", "Оборотень", "Селянин", "Ведьма", "Амур", "Охотник", "Cпаситель", "Вор", "Качек"}
 			r[2] = #want2Play/4
 			r[3] = #want2Play-(r[2]+7)
 		end
@@ -481,6 +492,11 @@ function eventTextAreaCallback(id, name, call)
 		ui.choser(call:sub(5).." пей свое зелье и умри!", name)
 		massinfo[#massinfo+1] = "<font color='"..color_roles[4].."'>".."Ведьма</font> тратит смертоносное зелье"
 	end
+	if call:sub(1,8)=="god_kill" then
+		jeu.mort[1] = call:sub(9)
+		ui.choser("Ты убил "..call:sub(9).."!", name)
+		--massinfo[#massinfo+1] = "<font color='"..color_roles[10].."'>".."Бог</font> убил "..call:sub(9)
+	end
 	if call:sub(1,4)=="hunt" then
 		jeu.mort[1] = call:sub(5)
 		ui.choser("ты стреляешь в "..call:sub(5).." на смерть", name)
@@ -509,13 +525,134 @@ function eventTextAreaCallback(id, name, call)
 				end
 			end
 			players[name].txt = txt
-			ui.addTextArea(idChoser, txt, name, 620, 110, 180, nick, 0x000001, 0xFFFFFF, transparence, true)
+			ui.addTextArea(idChoser, txt, name, 620, 110, 180, nil, 0x000001, 0xFFFFFF, transparence, true)
 		elseif call == "noWitchDie" then
 		end
 		
 		
 	end
+	if call == "god_die" then
+		point_god = point_god - 1
+		local txt = "Выберите, кого убить:"
+		local pl = ""
+		for k, v in pairs(plNbr) do
+			if players[v].jeu.role==10 and players[v].mort then
+				pl = v
+			elseif players[v].mort then
+				txt = txt.."\n<a href='event:god_kill"..v.."'>"..v.."</a>"
+			end
+		end
+		ui.choser(txt, pl)
+		
+	end
+	if call=="god_vskres" then
+		point_god = point_god - 1
+		
+		
+	end
+	if call=="want_god" then
+
+		if players and isContainsMap(players, name) and players[name].isPlaying==true and players[name].mort == true then
+
+		else
+			ui.removeTextArea(idWantGog, nil)
+			tfm.exec.movePlayer(name,tp_player[3][1],tp_player[3][2],false,0,0,false)
+			p_stakan = name
+			showGodWanted()
+			bool_die_god = true
+		end
+		
+	end
+	if call:sub(1,9)=="got_w_pol" then
+		ui.removeTextArea(id, nil)
+		print(call:sub(10))
+		god_stakan = call:sub(10)
+		bool_die_god = false
+		showWanted(p_stakan)
+	end
+	if call:sub(1,5)=="w_pol" then
+		ui.removeTextArea(id, nil)
+		print(call:sub(6))
+		local j_god_stakan = call:sub(6)
+		if j_god_stakan==god_stakan then--угадал
+			print("TYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYT")
+				if jeu.roles[10]==1 then
+					local pl = ""
+					for k, v in pairs(plNbr) do
+						if players[v].jeu.role==10 and players[v].mort then
+							pl = v
+						end
+					end
+					if pl~="" then
+						for k, v in pairs(plNbr) do
+							if v==pl then
+								table.remove(plNbr, k)
+								break
+							end
+						end
+						txth = tfm.lg.dead(pl, "Умер <font color='"..color_roles[10].."'>бог</font>:"..pl)
+						if txth ~= "" then
+							massinfo[#massinfo+1] = txth
+						end
+						table.insert(plNbr, name)
+						jeu.roles[10] = jeu.roles[10] + 1
+						players[name].jeu = {}
+						players[name].jeu.role = 10
+						players[name].isPlaying = true
+						players[name].mort = true
+						tfm.exec.removePhysicObject(2)
+						local objectif = "Убей всех оборотней!"
+						ui.role(name, roles[10], objectif)
+						point_god = point_god_start
+						massinfo[#massinfo+1]="Сменился <font color='"..color_roles[10].."'>бог</font>!"
+					end
+					
+					
+				end
+			
+			
+		else
+			point_god = point_god_start
+		end
+		god_stakan = 0
+	end
+	
 end
+
+god_stakan = 0
+p_stakan = adm
+
+function showWanted(plf)
+	if jeu.roles[10]==1 then
+		local pl = ""
+		for k, v in pairs(plNbr) do
+			if players[v].jeu.role==10 and players[v].mort then
+				pl = v
+			end
+		end
+		if pl~="" then
+			ui.addTextArea(idGodWChoose, "<p align='center'>  Найдите шарик в одном из стаканов:<br>".."\n<a href='event:w_pol1'>1</a>".."\n<a href='event:w_pol2'>2</a>".."\n<a href='event:w_pol3'>3</a>", plf, 150, 100, 500, nil, 1, 0x0000ff, 0.7,true)
+		end
+		
+		
+	end
+end
+
+function showGodWanted()
+	if jeu.roles[10]==1 then
+		local pl = ""
+		for k, v in pairs(plNbr) do
+			if players[v].jeu.role==10 and players[v].mort then
+				pl = v
+			end
+		end
+		if pl~="" then
+			ui.addTextArea(idGodWPol, "<p align='center'>  Положите шарик в один из стакан:<br>".."\n<a href='event:got_w_pol1'>1</a>".."\n<a href='event:got_w_pol2'>2</a>".."\n<a href='event:got_w_pol3'>3</a>", pl, 150, 100, 500, nil, 1, 0x0000ff, 0.7,true)
+		end
+		
+	end
+end
+
 
 function eventPopupAnswer(id, name, ans)
 	if id == -58100 then--message admin
@@ -640,6 +777,8 @@ function setRolesNames()
 		T.events.hunter = string.format(T.events.hunter, tbl.chasseur~=nil and (tbl.chasseur~=nil and (tbl.chasseur[2]~=nil and tbl.chasseur[2] or "")) or "", tbl.chasseur[1]~=nil and tbl.chasseur[1] or "Охотник" or "Охотник")
 		T.events.saving = string.format(T.events.saving, tbl.salvateur~=nil and (tbl.salvateur~=nil and (tbl.salvateur[2]~=nil and tbl.salvateur[2] or "")) or "", tbl.salvateur[1]~=nil and tbl.salvateur[1] or "Cпаситель" or "Cпаситель")
 		T.events.thief = string.format(T.events.thief, tbl.voleur~=nil and (tbl.voleur~=nil and (tbl.voleur[2]~=nil and tbl.voleur[2] or "")) or "", tbl.voleur[1]~=nil and tbl.voleur[1] or "Вор" or "Вор")
+		T.events.god = string.format(T.events.god, tbl.god~=nil and (tbl.god~=nil and (tbl.god[2]~=nil and tbl.god[2] or "")) or "", tbl.god[1]~=nil and tbl.god[1] or "Бог" or "Бог")
+		
 		
 		roles[1] = tbl.voyante~=nil and (tbl.voyante[1]~=nil and tbl.voyante[1] or roles[1]) or roles[1]
 		roles[2] = tbl.loup_garou~=nil and (tbl.loup_garou[1]~=nil and tbl.loup_garou[1]:gsub("%$", "") or roles[2]) or roles[2]
@@ -650,6 +789,8 @@ function setRolesNames()
 		roles[7] = tbl.salvateur~=nil and (tbl.salvateur[1]~=nil and tbl.salvateur[1] or roles[7]) or roles[7]
 		roles[8] = tbl.voleur~=nil and (tbl.voleur[1]~=nil and tbl.voleur[1] or roles[8]) or roles[8]
 		roles[9] = tbl.costaud~=nil and (tbl.costaud[1]~=nil and tbl.costaud[1] or roles[9]) or roles[9]
+		roles[10] = tbl.costaud~=nil and (tbl.god[1]~=nil and tbl.god[1] or roles[10]) or roles[10]
+		
 	end
 end
 
@@ -685,6 +826,16 @@ ui.role = function(name, role, obj)
 
 end
 
+ui.changeGod = function(name)
+	ui.addTextArea(idWantGog, "<a href='event:want_god'>Стать богом", nil, 1220-smesh, 720, 110, nil, 0x000001, 0xFFFFFF, 0.7, false)
+	--ui.addTextArea(idChoser, "Points:"..point_god.."<br><br><a href='event:god_vskres'>воскресить</font><br><a href='event:god_die'>убить</font>", name, 560, 80, 225, nil, 0x000001, 0xFFFFFF, transparence, true)
+end
+
+
+ui.choserGod = function(name)
+	ui.addTextArea(idChoser, "Points:"..point_god.."<br><br><a href='event:god_vskres'>воскресить</font><br><a href='event:god_die'>убить</font>", name, 560, 80, 225, nil, 0x000001, 0xFFFFFF, transparence, true)
+end
+
 ui.choser = function(txt, name, bool, display)
 	ui.addTextArea(idChoser, (bool and txt:gsub("href", "color") or txt), name, 560, 80, 225, nil, 0x000001, 0xFFFFFF, transparence, true)
 end
@@ -712,7 +863,7 @@ function eventKeyboard(nick,klaw, down, x, y)
 end
 
 tfm.exec.bindKeyboard(adm,32,true) --up
-
+bool_die_god = false
 
 tfm.lg = {
 	dead = function(name, mort)
@@ -774,7 +925,8 @@ tfm.lg = {
 					jeu.amour[2] = players[name].amour[2]
 					jeu.roles[5] = 0
 					jeu.roles[3] = jeu.roles[3] + 1
-					ui.role(name, "Амур", "Убей всех оборотней!")
+					players[name].jeu.role = 3
+					ui.role(name, "Селянин", "Убей всех оборотней!")
 				end
 			end
 			if lastTour=="witch" then--ведьма
@@ -798,6 +950,14 @@ tfm.lg = {
 					jeu.mort = {mort}
 				end
 				jeu.vote = {}
+			end
+			if lastTour=="god" then--бог
+				ui.removeTextArea(idWantGog, nil)
+				ui.removeTextArea(idGodWChoose, nil)
+				ui.removeTextArea(idGodWPol, nil)
+			end
+			if lastTour=="god_dey" then--бог показать
+				tfm.exec.addPhysicObject(2, 385, 200, {type=10, width=20, height=150})--door of god
 			end
 			if lastTour=="vote" then--голосование
 				local last = 0
@@ -869,7 +1029,76 @@ tfm.lg = {
 					players[pl].isProtect = false
 				end
 				ui.msg(T.events[tour])
-				tfm.lg.task(2, "thief", tour)
+				tfm.lg.task(2, "god", tour)
+			end
+			if tour=="god" then--бог
+				if jeu.roles[10]==1 then
+					jeu.mort = {}
+					local pl = ""
+					for k, v in pairs(plNbr) do
+						if players[v].jeu.role==10 and players[v].mort then
+							pl = v
+						end
+					end
+					point_god = point_god - 1
+					if point_god >= 0 then
+						ui.choserGod(pl)
+						ui.msg(T.events[tour])
+						tfm.lg.task(15, "god_dey", tour, true, true, idChoser, nil)
+					else
+						ui.changeGod(pl)
+						ui.msg(T.events[tour])
+						tfm.lg.task(20, "god_dey", tour, true, true, idChoser, nil)
+					end
+					
+				end
+			end
+			if tour=="god_dey" then
+				local txth = ""
+				if jeu.mort[1]~=nil and jeu.mort[1]~="" then
+					txth = tfm.lg.dead(jeu.mort[1], "<font color='"..color_roles[10].."'>Бог</font> убил "..jeu.mort[1].." ,он(а) был ".."<font color='"..color_roles[players[jeu.mort[1]].jeu.role].."'>"..roles[players[jeu.mort[1]].jeu.role].."</font>")
+				elseif bool_die_god then
+					
+					bool_die_god = false
+					
+					if jeu.roles[10]==1 then
+						local pl = ""
+						for k, v in pairs(plNbr) do
+							if players[v].jeu.role==10 and players[v].mort then
+								pl = v
+							end
+						end
+						if pl~="" then
+							txth = tfm.lg.dead(pl, "Умер <font color='"..color_roles[10].."'>бог</font>:"..pl)
+							for k, v in pairs(plNbr) do
+								if v==pl then
+									table.remove(plNbr, k)
+									break
+								end
+							end
+							local name = p_stakan
+							table.insert(plNbr, name)
+							jeu.roles[10] = jeu.roles[10] + 1
+							players[name].jeu = {}
+							players[name].jeu.role = 10
+							players[name].isPlaying = true
+							players[name].mort = true
+							tfm.exec.removePhysicObject(2)
+							local objectif = "Убей всех оборотней!"
+							ui.role(name, roles[10], objectif)
+							point_god = point_god_start
+							txth = txth.."\nСменился <font color='"..color_roles[10].."'>бог</font>!"
+						end
+						
+						
+					end
+				else
+					txth = "<font color='"..color_roles[10].."'>Бог</font> не выбрал действие."
+				end
+				ui.msg(txth)
+				massinfo[#massinfo+1] = txth
+				tfm.lg.task(10, tfm.lg.win() and "win" or "thief", tour, true, true, idChoser, nil)
+				
 			end
 			if tour=="thief" then--вор
 				if jeu.roles[8]==1 then
@@ -1182,10 +1411,35 @@ tfm.lg = {
 smesh = 50
 
 
+
+function pokaz_sostav()
+	local stringinfoplus = ""
+	
+	for i=1, 5 do
+		if jeu.roles~=nil and jeu.roles~="" and jeu.roles[i]~=nil then
+		stringinfoplus = stringinfoplus.."<font color='"..color_roles[i].."'>"..roles[i]..": "..jeu.roles[i].."</font>\n"
+		else
+		stringinfoplus = stringinfoplus.."<font color='"..color_roles[i].."'>"..roles[i]..": ".."-".."</font>\n"
+		end
+	end
+	ui.addTextArea(-62100, stringinfoplus, nil, 970-smesh, 720, 110, nil, 0x000001, 0xFFFFFF, 0.7, false)
+	local stringinfoplus = ""
+	for i=6, #roles do
+		if jeu.roles~=nil and jeu.roles~="" and jeu.roles[i]~=nil then
+		stringinfoplus = stringinfoplus.."<font color='"..color_roles[i].."'>"..roles[i]..": "..jeu.roles[i].."</font>\n"
+		else
+		stringinfoplus = stringinfoplus.."<font color='"..color_roles[i].."'>"..roles[i]..": ".."-".."</font>\n"
+		end
+	end
+	ui.addTextArea(-62200, stringinfoplus, nil, 1100-smesh, 720, 110, nil, 0x000001, 0xFFFFFF, 0.7, false)
+	
+	
+end
+
 --показывает информацию
 function messageinfo(pl)
 	
-	
+	pokaz_sostav()
 	
 	local stringinfo = ""
 	
