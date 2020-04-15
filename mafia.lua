@@ -8,7 +8,8 @@ next_day_delay = 30 --- in seconds
 new_years = false --- true for Christmas decoration
 bool_animeska_maps = false ---maps of Animeska6#0000
 bool_post_get = true --add left mouse
-bool_auto_start = true
+bool_auto_start = true--bool autostart
+timer_start_auto = 30--time auto start in second
 ------------------ ADVANCED PROPERTIES -----------------
 -- WARNING
 -- If automatic sort is on, mafia, police, villager list and the doctor field MUST BE EMPTY.
@@ -738,7 +739,6 @@ allPlayer = -1
 time = 0
 
 time_auto = 0
-timer_start_auto = 30
 
 function eventLoop()
     if not start then--non start
