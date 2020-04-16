@@ -1,19 +1,16 @@
 --[         Оборотни         ]--
 --[  Модуль создан Athesdrake#0000  ]--
---[  переведен Deff83  ]--
+--[  переведен и дополнен Deff83  ]--
+--[  дизайн Deff83  ]--
 
+---------------------- PROPERTIES ----------------------
+--adm = "<admin nickname with hash>"
 adm = "Deff83#0000" --[[админ]] -- если в поле указан недействительный игрок, запускать игру могут все
-transparence = 0.75 --[[прозрачность текста]] -- от 0 (полностью невидимый) до 1 (полностью видимый)
-testing = false --[[режим тестового запуска]] -- нет минимума игроков, всех убъет в начале игры
-bool_auto_start = true
-
-map = "@7704872"
-colorInfor = {"#aaaa00", "#00cc00", "#cc0000", "#777777", "#ffff00", "#ff33ff"} --info, add pl, no add pl, left new pl, WIN, admin
-
+point_god_start = 10--god points
 
 roles = {"Ясновидящая", "Оборотень", "Селянин", "Ведьма", "Амур", "Охотник", "Cпаситель", "Вор", "Качек", "бог"}
 color_roles = {"#ff00ff", "#ffff00", "#ffcc00", "#ff0ff0", "#f5000f", "#ffffcc", "#ccff57", "#972721", "#456789", "#20B2AA"}
-
+colorInfor = {"#aaaa00", "#00cc00", "#cc0000", "#777777", "#ffff00", "#ff33ff"} --info, add pl, no add pl, left new pl, WIN, admin
 color_side = {"#00ff00", "#ff0000"}
 
 changeLesNoms = {
@@ -29,16 +26,25 @@ changeLesNoms = {
 	god =        {"Бог", nil}
 }
 
+------------------ ADVANCED PROPERTIES -----------------
+-- WARNING
+bool_auto_start = true
+map = "@7704872"
+smesh = 50
+
+transparence = 0.75 --[[прозрачность текста]] -- от 0 (полностью невидимый) до 1 (полностью видимый)
+testing = false --[[режим тестового запуска]] -- нет минимума игроков, всех убъет в начале игры
+
+--------------------- DO NOT TOUCH ---------------------
+--------------------- GAME  STATES ---------------------
+
 fontxSize = 10
 maxCountfontxSize=12
 fontxSizeMin=8
 
-point_god_start = 3--god points
-
 massinfo = {}
 massinfoplus = {}-----mouseinfo plus
 --".."<font color='"..color_roles[1].."'>".."
-
 --</font>
 
 tfm.exec.disableAutoScore(true)
@@ -47,9 +53,7 @@ tfm.exec.disableAutoNewGame(true)
 tfm.exec.disableAfkDeath(true)
 tfm.exec.newGame(map)
 
-
 tp_player = {{250, 600}, {1200, 500}, {250, 250}} --prison, boiler, god
---tp_player = {{250, 600}, {700, 500}, {250, 250}} --prison, boiler, god
 zap = false
 
 -----rule
@@ -76,7 +80,7 @@ function main()
 	play = true
 	speak = false
 	TIME = 0
-	mapName = "<VP>Оборотни<BL> | <N>Время: <V>%ds</V><BL> | <N>Мышь: <V>%d<N>/<V>%d<N> (<PT>%d<N>, <R>%d<N>)<BL> | <N>Создатель: <BV>Athesdrake#0000\n"
+	mapName = "<VP>Оборотни<BL> | <N>Время: <V>%ds</V><BL> | <N>Мышь: <V>%d<N>/<V>%d<N> (<PT>%d<N>, <R>%d<N>)<BL> | <N>Создатели: <BV>Athesdrake#0000 и Deff83#0000\n"
 --ids:
 	idHaut = 1
 	idRole = 2
@@ -1501,7 +1505,7 @@ tfm.lg = {
 	end
 }
 
-smesh = 50
+
 
 
 
@@ -1605,8 +1609,6 @@ print=function( ... )
 	end
 	badPrint(table.concat(tbl, "<R>, </R>"))
 end
-
-
 
 main()
 ui.addTextArea(-58100, "<a href='event:adminpanel'>Admin panel", adm, 320-smesh, 720, 100, nil, 0x000001, 0xFFFFFF, 0.7, false)
