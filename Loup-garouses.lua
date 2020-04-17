@@ -39,8 +39,8 @@ testing = false --[[режим тестового запуска]] -- нет м�
 --------------------- GAME  STATES ---------------------
 
 fontxSize = 10
-maxCountfontxSize=12
-fontxSizeMin=8
+maxCountfontxSize=18
+fontxSizeMin=9
 
 massinfo = {}
 massinfoplus = {}-----mouseinfo plus
@@ -94,6 +94,7 @@ function main()
 	idGodWChoose = -75520
 	idGodWPol = -75580
 --tables:
+	mass_playerList = {}
 	task = {}
 	players = {}
 	plNbr = {}
@@ -130,6 +131,7 @@ function main()
 	}
 --sytème:
 	for pl in pairs(tfm.get.room.playerList) do
+		mass_playerList[pl] = 1
 		--if pl == adm then
 			initPlayer(pl)
 		--end
@@ -202,6 +204,7 @@ function addPhysicObjectAll()
 end
 
 function eventNewPlayer(name)
+	mass_playerList[name] = 1
 	if name == adm then
 		ui.addTextArea(-58100, "<a href='event:adminpanel'>Admin panel", adm, 320-smesh, 720, 100, nil, 0x000001, 0xFFFFFF, 0.7, false)
 	end
@@ -221,47 +224,71 @@ function eventNewPlayer(name)
 	massinfo[#massinfo+1] = "<font color='"..colorInfor[4].."'>["..name.."]:".."Присоединился к игре!</font>"
 end
 
+massdel = {}
+
+function delPl()
+	for name, v in pairs(massdel) do
+		if players[name].isPlaying then
+			for k, v in pairs(plNbr) do
+				if v==name then
+					table.remove(plNbr, k)
+					break
+				end
+			end
+			players[name].isPlaying = false
+			local txt = tfm.lg.dead(name, "<ROSE>"..name.."</ROSE> вышел из комнаты. Это был один ".."<font color='"..color_roles[players[name].jeu.role].."'>"..roles[players[name].jeu.role].."</font> !")
+			--ui.msg(txt)
+			massinfo[#massinfo+1] = txt
+			if tfm.lg.win() then
+				for k, v in ipairs(task) do
+					task[k].finish = true
+				end
+				tfm.lg.task(3, "win")
+			end
+		end
+		if play then
+			if players[name] ~= nil then
+				players[name] = nil
+			end
+			local i = 0
+			for k, v in pairs(want2Play) do
+				if v == name then
+					i = k
+				end
+			end
+			if i ~= 0 then
+				table.remove(want2Play, i)
+			end
+			if name == adm then--left adm
+				startPanel()
+			end
+		end
+		tfm.lg.map()
+		massinfo[#massinfo+1] = "<font color='"..colorInfor[4].."'>["..name.."]:".."Покинул игру!</font>"
+	end
+	massdel = {}
+end
+
 function eventPlayerLeft(name)
-	if players[name].isPlaying then
-		for k, v in pairs(plNbr) do
-			if v==name then
-				table.remove(plNbr, k)
-				break
-			end
-		end
-		players[name].isPlaying = false
-		local txt = tfm.lg.dead(name, "<ROSE>"..name.."</ROSE> вышел из комнаты. Это был один ".."<font color='"..color_roles[players[name].jeu.role].."'>"..roles[players[name].jeu.role].."</font> !")
-		--ui.msg(txt)
-		massinfo[#massinfo+1] = txt
-		if tfm.lg.win() then
-			for k, v in ipairs(task) do
-				task[k].finish = true
-			end
-			tfm.lg.task(3, "win")
-		end
-	end
-	if play then
-		if players[name] ~= nil then
-			players[name] = nil
-		end
-		local i = 0
-		for k, v in pairs(want2Play) do
-			if v == name then
-				i = k
-			end
-		end
-		if i ~= 0 then
-			table.remove(want2Play, i)
-		end
-		if name == adm then--left adm
-			startPanel()
-		end
-	end
-	tfm.lg.map()
-	massinfo[#massinfo+1] = "<font color='"..colorInfor[4].."'>["..name.."]:".."Покинул игру!</font>"
+	massdel[name] = 1
+	mass_playerList[name] = nil
 end
 
 function eventNewGame() tfm.lg.map() end
+
+
+function randMass_want2Play(masiv)
+	local new_masiv = {}
+	local doble_masiv = masiv
+	for i=1, #doble_masiv do
+		local rand = math.random(1, #doble_masiv-i+1)
+		table.insert(new_masiv, doble_masiv[rand])
+		table.remove(doble_masiv, rand)
+	end
+	return new_masiv
+end
+
+
 
 function gameInit()
 	if (not pcall(setRolesNames)) then
@@ -291,15 +318,15 @@ function gameInit()
 		
 		math.randomseed(os.time())
         if not testing then
+			want2Play = randMass_want2Play(want2Play)
 			for i=1, #want2Play do
-				local pl = nil
-				repeat
-					pl = want2Play[math.random(#want2Play)]
-				until players[pl].isPlaying==false
+				local pl = want2Play[i]
 				local ran = 0
 				local objectif = "Убей всех оборотней!"
+				ran = math.random(#r)
 				repeat
-					ran = math.random(#r)
+					ran = ran + 1
+					if ran > #r then ran = 1 end
 				until r[ran]~=0
 				if ran==2 then
 					objectif = "Убей всех жителей деревни!"
@@ -561,7 +588,7 @@ function eventTextAreaCallback(id, name, call)
 		point_god = point_god - 1
 		
 		local txt = "Выберите, кого воскресить:"
-		for k, v in pairs(tfm.get.room.playerList) do
+		for k, v in pairs(mass_playerList) do
 			if locate(k, 1) then
 				txt = txt.."\n<a href='event:god_vos"..k.."'>"..k.."</a>"
 			end
@@ -572,7 +599,7 @@ function eventTextAreaCallback(id, name, call)
 		point_god = point_god - 1
 		
 		local txt = "Выберите, кого воскресить:"
-		for k, v in pairs(tfm.get.room.playerList) do
+		for k, v in pairs(mass_playerList) do
 			if locate(k, 2) then
 				txt = txt.."\n<a href='event:god_vos"..k.."'>"..k.."</a>"
 			end
@@ -768,6 +795,8 @@ end
 obnovmessageinfo = 2*1
 time = 0
 
+timerhelp = 0
+
 time_auto = 0
 timer_start_auto = 30
 
@@ -785,6 +814,9 @@ function eventLoop(t1, t2)
 			if tbl.txtArea then
 				ui.removeTextArea(tbl.id, tbl.name)
 			end
+			
+				ui.removeTextArea(idChoser, nil)--если таск есть то удалить выбор
+			
 			if (not tbl.finish) then
 				tfm.lg.tour(tbl.tour, tbl.last, tbl.name)
 			end
@@ -793,6 +825,21 @@ function eventLoop(t1, t2)
 			ui.addPopup(idChoser, 0, "", name, 9999, 9999, 0)
 		end
 	end
+	
+	
+	if not play then--игра началась, защита если нет тасков  на протяжении 15 сек
+		if countmapa(task)==0 then
+			timerhelp = timerhelp + 0.5
+			if timerhelp > 15 then
+				tfm.lg.task(3, "night")
+				timerhelp = 0
+			end
+		else
+			timerhelp = 0
+		end
+	end
+	
+	
 	if time % obnovmessageinfo == 0 then
 		messageinfo(nil)
 		changeColorNick()
@@ -809,6 +856,7 @@ function eventLoop(t1, t2)
 		end
 		
 	end
+	delPl()
 end
 
 colornick = {0xffffff, 0xffff00}
@@ -859,9 +907,11 @@ function findKey(value, tbl)
 	return false
 end
 
+mass_playerList = {}
+
 function nbrSouris()
 	local nbr = 0
-	for k,v in pairs(tfm.get.room.playerList) do
+	for k,v in pairs(mass_playerList) do
 		nbr = nbr +1
 	end
 	return nbr
@@ -913,8 +963,12 @@ end
 function eventKeyboard(nick,klaw, down, x, y)
 	if klaw== 32 then--down
 		print("down")
-		
-		ui.addPopup(idChoser, 1, "Хочешь ли ты вернуть к жизни ?", nick, 350, 175, 200, true)
+		local nbr = 0
+		for k,v in pairs(tfm.get.room.playerList) do
+			nbr = nbr +1
+			print(v)
+		end
+		print(nbr)
 	end
 end
 
@@ -934,9 +988,14 @@ tfm.lg = {
 			end
 			
 		end
+		
+		if players[name].mort then--если не был мертв то снизить количество роли
+			jeu.roles[role] = jeu.roles[role] - 1
+		end
+		
+		
 		players[name].mort = false
 		players[name].life=nil
-		jeu.roles[role] = jeu.roles[role] - 1
 		ui.role(name, "Мертв", name)
 		if jeu.amour~=nil and jeu.amour[1]~=nil then
 			local tbl = jeu.amour
@@ -1081,14 +1140,14 @@ tfm.lg = {
 				for k, v in pairs(plNbr) do
 					players[v].mort = true
 				end
-				tfm.lg.task(2, "night")
+				tfm.lg.task(4, "night")
 			end
 			if tour=="night" then--ночь
 				for _, pl in pairs(plNbr) do
 					players[pl].isProtect = false
 				end
 				ui.msg(T.events[tour])
-				tfm.lg.task(2, "god", tour)
+				tfm.lg.task(8, "god", tour)
 			end
 			if tour=="god" then--бог
 				if jeu.roles[10]==1 then
@@ -1103,7 +1162,7 @@ tfm.lg = {
 					if point_god >= 0 then
 						ui.choserGod(pl)
 						ui.msg(T.events[tour])
-						tfm.lg.task(15, "god_dey", tour, true, true, idChoser, nil)
+						tfm.lg.task(10, "god_dey", tour, true, true, idChoser, nil)
 					else
 						ui.changeGod(pl)
 						ui.msg(T.events[tour])
@@ -1191,7 +1250,7 @@ tfm.lg = {
 				end
 				ui.msg(txth)
 				massinfo[#massinfo+1] = txth
-				tfm.lg.task(10, tfm.lg.win() and "win" or "thief", tour, true, true, idChoser, nil)
+				tfm.lg.task(5, tfm.lg.win() and "win" or "thief", tour, true, true, idChoser, nil)
 				
 			end
 			if tour=="thief" then--вор
@@ -1228,7 +1287,7 @@ tfm.lg = {
 					players[pl].jeu.texte = txt
 					ui.choser(txt, pl)
 					ui.msg(T.events[tour])
-					tfm.lg.task(20, "lovers", tour, true, true, idChoser, pl)
+					tfm.lg.task(15, "lovers", tour, true, true, idChoser, pl)
 				else
 					tour = "daily"
 				end
@@ -1239,7 +1298,7 @@ tfm.lg = {
 					ui.addTextArea(idLovers, "<font size='12' color='#FF1493'>Твоя любовь: "..jeu.amour[i], jeu.amour[i==1 and 2 or 1], 10, 110, nil, 20, 0x000001, 0xFFFFFF, transparence, true)
 				end
 				ui.msg(T.events[tour])
-				tfm.lg.task(10, "daily", tour, true)
+				tfm.lg.task(5, "daily", tour, true)
 			end
 			if tour=="daily" then--день
 				if jeu.roles[1]==1 or jeu.roles[7]==1 then
@@ -1271,7 +1330,7 @@ tfm.lg = {
 						ui.choser(txt2, pl2)
 					end
 					ui.msg(msg)
-					tfm.lg.task(20, "werewolf", tour, true, true, idChoser)
+					tfm.lg.task(10, "werewolf", tour, true, true, idChoser)
 				else
 					tour = "werewolf"
 				end
@@ -1376,7 +1435,7 @@ tfm.lg = {
 					ressu = false
 					ui.msg(txt)
 					massinfo[#massinfo+1] = txt
-					tfm.lg.task(15, tfm.lg.win() and "win" or "vote", tour)
+					tfm.lg.task(10, tfm.lg.win() and "win" or "vote", tour)
 				else
 					for k, v in pairs(jeu.mort) do
 						if (not players[v].isProtect) then
@@ -1389,9 +1448,9 @@ tfm.lg = {
 					ui.msg(txt)
 					massinfo[#massinfo+1] = txt
 					if hunter then
-						tfm.lg.task(15, tfm.lg.win() and "win" or "hunter", "mort")
+						tfm.lg.task(10, tfm.lg.win() and "win" or "hunter", "mort")
 					else--==nil
-						tfm.lg.task(15, tfm.lg.win() and "win" or "vote", tour)
+						tfm.lg.task(10, tfm.lg.win() and "win" or "vote", tour)
 					end
 				end
 			end
@@ -1411,9 +1470,9 @@ tfm.lg = {
 					ui.msg(txt)
 					massinfo[#massinfo+1] = txt
 					if hunter then
-						tfm.lg.task(15, tfm.lg.win() and "win" or "hunter", "feu")
+						tfm.lg.task(10, tfm.lg.win() and "win" or "hunter", "feu")
 					else
-						tfm.lg.task(15, tfm.lg.win() and "win" or "night", tour)
+						tfm.lg.task(10, tfm.lg.win() and "win" or "night", tour)
 					end
 				end
 			end
@@ -1459,7 +1518,7 @@ tfm.lg = {
 				end
 				ui.choser(txt, pl)
 				ui.msg("<font color='"..color_roles[6].."'>".."Охотник</font>, в своих последних вздохах, стреляет в мышь по своему выбору!")
-				tfm.lg.task(15, "deadHunt", lastTour, true, true, idChoser, pl)
+				tfm.lg.task(10, "deadHunt", lastTour, true, true, idChoser, pl)
 			end
 			if tour=="deadHunt" then
 				if jeu.mort[1]==nil then
@@ -1470,7 +1529,7 @@ tfm.lg = {
 					ui.msg(txth)
 					massinfo[#massinfo+1] = txth
 				end
-				tfm.lg.task(15, tfm.lg.win() and "win" or (lastTour=="feu" and "night" or "vote"))
+				tfm.lg.task(5, tfm.lg.win() and "win" or (lastTour=="feu" and "night" or "vote"))
 			end
 		end
 	end,
