@@ -140,6 +140,14 @@ function isContains(table, element)
     return false
 end
 
+function countElements(table)
+    count = 0
+    for n, __ in pairs(table) do
+       count = count + 1
+    end
+    return count
+end
+
 function shallowcopy(orig)
     local copy = {
 		{pusto, pusto, pusto,  pusto, pusto, pusto,  pusto, pusto, pusto},
@@ -318,6 +326,7 @@ function restart()
 	chooser = {}
 	players = {}
 	for nick in pairs(tfm.get.room.playerList) do
+		if mass_playerList[nick]==nil then mass_playerList[nick] = 1 end
 		id_mouse = id_mouse + 1
 		players[nick] = id_mouse
 	end
@@ -632,7 +641,7 @@ function eventLoop()
 		
 		
 		if startbool == false then
-			ui.setMapName(string.format(mapName, math.floor((time_new - time)).."s", #winners))
+			ui.setMapName(string.format(mapName, math.floor((time_new - time)).."s", countElements(mass_playerList)))
 			if (time_new - time) == 0 then
 				time = 0
 				start()
@@ -642,7 +651,7 @@ function eventLoop()
 			getProgress(nil)
 		end
 			messageinfo(nil)
-			ui.setMapName(string.format(mapName, math.floor(time/60)..":"..(math.floor(time)%60), #winners))
+			ui.setMapName(string.format(mapName, math.floor(time/60)..":"..(math.floor(time)%60), countElements(mass_playerList)))
 			unbunsloop()
 		end
 	--end
@@ -806,13 +815,14 @@ function showNumsg(pl)
 end
 
 
-
+mass_playerList = {}
 
 function eventPlayerDied(nick)
     tfm.exec.respawnPlayer(nick)
 end
 
 function eventNewPlayer(playerName)
+	mass_playerList[playerName] = 1
     tfm.exec.respawnPlayer (playerName)
 	addDoska(playerName)
 	id_mouse = id_mouse + 1
@@ -824,6 +834,7 @@ end
 
 
 function eventPlayerLeft(pName)
+	mass_playerList[pName] = nil
 	players[pName] = nil
 	progress[pName] = nil
 end

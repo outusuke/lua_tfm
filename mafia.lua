@@ -74,8 +74,11 @@ time = 0
 day_cycle = 1
 day = 1
 
+mass_playerList = {}
+
 for nick in pairs(tfm.get.room.playerList) do
     tfm.exec.setPlayerScore(nick,0,false)
+	mass_playerList[nick] = 1
 end
 
 mapName = "<VP>Мафия<BL> | <N>Время: <V>%ds</V><BL> | <N>Мышь: <V>%d<N>/<V>%d<N> <BL> | <N>Создатели: <BV>Deff83#0000, Ilyamikheev#4068\n"
@@ -267,6 +270,7 @@ function eventPopupAnswer(id, p, cmd)
     --end
 end
 function eventNewPlayer(playerName)
+	mass_playerList[playerName] = 1
     tfm.exec.respawnPlayer (playerName)
     tfm.exec.setNameColor(playerName, 0xFFFFFF)
     ui.addTextArea(-65, "<p align='center'>  Конкурс \"Мафия\"!", playerName, 10, 27, 700, 20, 1, 0x0000ff, 0.7,true)
@@ -668,6 +672,7 @@ function eventTextAreaCallback(id, p, cmd)
 end
 
 function eventPlayerLeft(pName)
+	mass_playerList[pName] = nil
 	if bool_post_get then
 		massinfo[#massinfo+1] = "<font color='#777777'>["..pName.."]:".."Покинул комнату!</font>"
 	end
@@ -748,7 +753,7 @@ function eventLoop()
 				time_auto = os.time()+timer_start_auto*1000
 			end
 			TIME = math.ceil(os.difftime(time_auto,os.time())/1000)
-			ui.setMapName(string.format(mapName, TIME, countElements(users), countElements(tfm.get.room.playerList)))
+			ui.setMapName(string.format(mapName, TIME, countElements(users), countElements(mass_playerList)))
 			if TIME<1 then
 				time_auto = 0
 				initGame()
