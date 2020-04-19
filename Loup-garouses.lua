@@ -480,8 +480,10 @@ function eventTextAreaCallback(id, name, call)
 		end
 		jeu.txt = jeu.txt:gsub(name2.."%(".."%d".."%)", name2.."("..tostring(jeu.vote[name2])..")")
 		if players[name].vote~=nil then
-			jeu.vote[players[name].vote] = jeu.vote[players[name].vote] - 1
-			jeu.txt = jeu.txt:gsub(players[name].vote.."%(".."%d".."%)", players[name].vote.."("..jeu.vote[players[name].vote]..")")
+			if jeu.vote[players[name]]~=nil and jeu.vote[players[name].vote]~=nil then
+				jeu.vote[players[name].vote] = jeu.vote[players[name].vote] - 1
+				jeu.txt = jeu.txt:gsub(players[name].vote.."%(".."%d".."%)", players[name].vote.."("..jeu.vote[players[name].vote]..")")
+			end
 		end
 		players[name].vote = name2
 		for k, v in pairs(plNbr) do
