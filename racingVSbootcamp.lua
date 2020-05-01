@@ -629,7 +629,13 @@ end
 function ShowStartBoard(pl)
     ui.addTextArea(0, "<p align='center'>Admin: <font color='#00ff40'><b>" ..(Admin or "Ctmce").."</font><br><a href='event:Close'>Close</a>", pl, 263, 365, 265, 40, 0x324650, 0x000000, 0.8, true)
     ui.addTextArea(1, "", pl, 209, 33, 381, 326, 0x324650, 0x000000, 1, true)
-    ui.addTextArea(2, "<p align='center'><font size='12' color='#" ..team1Color  .."'>" .. (table.concat(teams.Team1,"\n") or ""), pl, 208, 66, 151, 254, 0x324650, 0x000000, 1, true)
+	
+	local strTeam1 = ""
+	for i,v in pairs(teams.Team1) do
+		strTeam1 = strTeam1.."<a href='event:del"..v.."'>-</a> "..v.."<a href='event:per"..v.."'>-</a>".."\n"
+	end
+	
+    ui.addTextArea(2, "<p align='center'><font size='12' color='#" ..team1Color  .."'>" .. strTeam1, pl, 208, 66, 151, 254, 0x324650, 0x000000, 1, true)
     ui.addTextArea(3, "<p align='center'><font size='12' color='#" ..team2Color .."'> " .. (table.concat(teams.Team2,"\n") or ""), pl, 438, 66, 151, 254, 0x324650, 0x000000, 1, true)
     ui.addTextArea(4, "<p align='center'>Mod:" ..(mod or "Racing"), pl, 354, 60, 89, 19, 0x324650, 0x000000, 1, true)
     ui.addTextArea(5, "<font size='12'><p align='center'><b>\\ Racing Tournament /", pl, 209, 33, 381, 21, 0x324650, 0x000000, 1, true)
