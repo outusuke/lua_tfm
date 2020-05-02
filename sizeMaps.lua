@@ -352,7 +352,8 @@ print(tfm.get.room.currentMap)
 		tfm.exec.setUIMapName(ui_map)
 		addInfoAdmin()
 		--tfm.exec.newGame(categor)
-	elseif tfm.get.room.currentMap == '0' then
+	elseif tonumber(string.sub(tfm.get.room.currentMap, 1,1)) ~= nil and tonumber(tfm.get.room.currentMap)<10000 then
+		
 		tfm.exec.newGame(categor)
 	else
 
