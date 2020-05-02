@@ -336,9 +336,25 @@ tfm.exec.disableAutoNewGame(false)
 	end
 end
 
+stbool = true
+
+
 function eventNewGame()
 
-	
+if stbool then
+	if tfm.get.room.xmlMapInfo then
+
+		if tfm.get.room.xmlMapInfo.permCode > 0 then
+			print(tfm.get.room.xmlMapInfo.permCode)
+
+			categor = "#"..tfm.get.room.xmlMapInfo.permCode
+			
+		end
+		stbool = false
+	end
+		
+
+end
 
 	local nudge = 0
 	if scale > 1 then
@@ -352,6 +368,9 @@ print(tfm.get.room.currentMap)
 		tfm.exec.setUIMapName(ui_map)
 		addInfoAdmin()
 		--tfm.exec.newGame(categor)
+		
+		
+		
 	elseif tonumber(string.sub(tfm.get.room.currentMap, 1,1)) ~= nil and tonumber(tfm.get.room.currentMap)<10000 then
 		
 		tfm.exec.newGame(categor)
@@ -569,4 +588,4 @@ function addInfoAdmin()
 	ui.addTextArea(10201, '!skip   !shaman   !all_shaman   !scale '..scale..'   !np '..categor..'', adm, 0, 40, 400, 20, 0x005500, 0x00FF00, 0.9, true)
 end
 
-tfm.exec.newGame(categor)
+tfm.exec.newGame()
