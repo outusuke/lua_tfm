@@ -496,6 +496,7 @@ function eventLoop()
 			ui.addPopup(-4400, 2, "<p align='center'>Введите сумму!", nill, -200, -200, 400, true)
 			if cruglocal == 0 then
 				local idlx = play_ochered[1]
+				if players[idlx]~= nill then
 					ui.addTextArea(idlx+20, "<p align='center'><font size='10px'>".."250".."$", nil, coordincard[idlx][1]+10, coordincard[idlx][2]+55,  70, 18, 0x000000,0x0000ff, 0.7,false)
 					players[idlx].price = players[idlx].price - 250
 					players[idlx].stavka = 250
@@ -508,7 +509,9 @@ function eventLoop()
 					players[idlx].price = players[idlx].price - 500
 					players[idlx].stavka = 500
 					ui.updateTextArea(-idlx, "<p align='center'><font size='10px'><a href='event:finish'>"..players[idlx].price .."$")
+					end
 					stavka = 500
+				
 				cruglocal = 1
 				obhod = 0
 			end
@@ -753,18 +756,26 @@ ui.removeTextArea(-10, nil)
 
 end
 function delplayer(idlx)
+if players[idlx]~=nill then
 	local playerdel = players[idlx].player
 	players[idlx] = nil
 	ui.addTextArea(-idlx, "<p align='center'><font size='10px'><a href='event:start'>сесть", nil, coordinigrok[idlx][1], coordinigrok[idlx][2],  60, 18, 0x000000,0x0000ff, 0.7,false)
 	tfm.exec.movePlayer(playerdel, 20,350,false,0,0,false)
 end
+end
 function pointstrit(idlx)
 cardwin = {}
 	local point = 0
 	local cardsev = {}
-	local cardone = players[idlx].card[1]
+	local cardone = 2
+	if players[idlx]~=nill then
+		cardone = players[idlx].card[1]
+	end
 	cardsev[6] = {math.floor(cardone/13)+1, cardone%13+1}
-	local cardtwo = players[idlx].card[2]
+	local cardtwo = 2
+	if players[idlx]~=nill then
+		cardtwo = players[idlx].card[2]
+	end
 	cardsev[7] = {math.floor(cardtwo/13)+1, cardtwo%13+1}
 	for j = 1, #cardontable do
 		cardsev[j] = {math.floor(cardontable[j] /13)+1, cardontable[j] %13+1}
