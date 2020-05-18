@@ -165,7 +165,7 @@ if id==-4400  then
 local idlx = play_ochered[tek_player]
     if tonumber(cmd, 10) then
     	if   tonumber(cmd, 10)>stavka then
-    
+    if players[idlx]~=nill then
     		if tonumber(cmd, 10) < players[idlx].price then
 					players[idlx].price = players[idlx].price - tonumber(cmd, 10) + players[idlx].stavka 
 					ui.updateTextArea(-idlx, "<p align='center'><font size='10px'><a href='event:finish'>"..players[idlx].price .."$")
@@ -180,7 +180,7 @@ local idlx = play_ochered[tek_player]
 					players[idlx].price = 0
 					ui.updateTextArea(-idlx, "<p align='center'><font size='10px'><a href='event:finish'>"..players[idlx].price .."$")
 					end
-					
+	end
 					obhod = 1
 					timer = 39
     	end
