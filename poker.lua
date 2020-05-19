@@ -1,3 +1,7 @@
+
+startsumm = 5000
+blindsumm = 500
+
 secured = false
 coloda = {}
 for j = 0, 51 do
@@ -25,6 +29,9 @@ coordincard = {
 	{200,265},
 	{310, 170}
 }
+--fall, out, call, all_in
+color_dey = {"#ff00ff", "#ffff00", "#ffcc00", "#ff0ff0", "#f5000f", "#ffffcc", "#ccff57", "#972721", "#456789", "#20B2AA"}
+
 masti_chervi = {"2","3","4","5","6","7","8","9","10","V","D","K","T"}
 masti_bubni = {"2","3","4","5","6","7","8","9","10","V","D","K","T"}
 masti_trefi = {"2","3","4","5","6","7","8","9","10","V","D","K","T"}
@@ -34,6 +41,8 @@ symbol_bubni = "♦"
 symbol_trefi = "♣"
 symbol_piki = "♠"
 masti_map = {{masti_chervi,0xff0000,symbol_chervi},{masti_bubni,0xff0000,symbol_bubni},{masti_trefi,0x000000,symbol_trefi},{masti_piki,0x000000,symbol_piki}}
+
+massinfo = {}
 
 cardontable = {}
 players = {}
@@ -55,14 +64,46 @@ tfm.exec.disableAfkDeath(true)
 --tfm.exec.setUIMapName ("fg")
 tfm.exec.newGame(mapa) 
 
+
+
+function show_rule(pl)
+	ui.addPopup(-10000, 1, "<p align='center'><font size='30px' color='#ffff00'>Конкурс \"Покер - Техасский Холдем\"</font><br><font size='14px'><font color='#00FFFF'>автор Deff83#0000</font><br><font size='11px'>В игре может участвовать от 2 до 8 человек. Все новые игроки распологают суммой в "..startsumm.."$. <br>Каждому игроку в Техасском Холдеме раздается по две карты. После раздачи начинается торговля по часовой стрелке, которая проходит в несколько раундов.<br>Два игрока по левую руку от дилера (Дилер здесь выбирается рандомно) делают обязательные ставки по "..blindsumm.."$, которые взимаются еще до начала торгов. Это делается для того, чтобы стимулировать игроков на активную игру. Эти ставки называются блайндами. <br>После того, как игроки поставили блайнды, начинается первый второй и третий этап торговли в ходе которых открываются карты на столе.<br>Правила игры в покер подразумевают наличие определенных действий, которые игрок совершает в процессе торговли:<br><p align='left'>    <font  color='#ffff00'>Поставить, бет (англ. bet)</font> – сделать ставку<br>    <font color='#ffff00'>Ответить, колл (англ. call)</font> – поставить столько же, сколько поставил соперник – уравнять<br>    <font  color='#ffff00'>Поднять, рейз (англ. raise)</font> – увеличить ставку – поставить больше, чем соперники<br>    <font  color='#ffff00'>Cбросить карты, фолд (англ. fold)</font> – отказаться от дальнейшего участия в игре и сбросить карты<br>    <font  color='#ffff00'>Пропустить, чек (англ. check)</font> – в ситуациях, когда ставка уже была сделана или ставки не были сделаны соперниками – не добавлять ничего в банк, оставить «как есть»<br><br><p align='center'><font size='14px'><font color='#00FFFF'>Читать правила дальше?</font></font></p>", pl, 100, 30, 600, true)
+end
+
+function show_dop(pl)
+	ui.addPopup(-20000, 1, "<p align='center'><font size='30px' color='#ffff00'>Конкурс \"Покер - Техасский Холдем\"</font><br><font size='14px'><font color='#00FFFF'>автор Deff83#0000</font><br><font size='11px'>Круг торговли заканчивается тогда, когда все игроки сделали равные ставки или сбросили карты.<br>После первого круга торговли, если в раздаче остается больше одного человека, то, по правилам игры в покер, на стол кладутся три общие открытые карты, которые называют флоп. Общие карты нужно использовать для составления комбинаций.<br>Если и после этого раунда в раздаче остается больше одного человека, то кладут еще одну общую карту, которую называют терном. Аналогично флопу, после сдачи терна проводится еще один круг торговли.<br>После терна, если это необходимо, кладут последнюю общую карту – ривер.<br>После ривера следует еще один раунд торговли, и если после него на банк претендует два или более игроков, то происходит вскрытие.<br>Комбинации по правилам покера составляются из пяти общих карт и двух закрытых. Когда была осуществлена и уравнена последняя ставка, все оставшиеся в игре люди по очереди начинают открывать для противников свои карты. Из них составляются и оцениваются итоговые выигрышные комбинации.<br>Обладателем банка игры будет тот, у кого на руках окажется самая высокая комбинация из карт. Правила игры в покер предусматривают 10 возможных комбинаций.<br><br><p align='center'><font size='14px'><font color='#00FFFF'>Читать правила дальше?</font> </font></font></p>", pl, 100, 30, 600, true)
+end
+
+function show_dopk(pl)
+	ui.addPopup(-30000, 0, "<p align='center'><font size='30px' color='#ffff00'>Конкурс \"Покер - Техасский Холдем\"</font><br><font size='14px'><font color='#00FFFF'>автор Deff83#0000</font><br><font size='14px'><br>Возможные комбинации от минимума очков до максимума:<br><p align='left'><font  color='#ffff00'>High Card</font> - старшая карта (нет комбинаций но у вас самая старшая карта) минимум очков<br><font  color='#ffff00'>Pair</font> - пара (2 одинаковых значения карт KK, 44, 55)<br><font  color='#ffff00'>Two Pair</font> - две пары (две по 2 одинаковых значения карт KK и 44, 55 и 77)<br><font  color='#ffff00'>Three of a Kind</font> - три совпадения (3 одинаковых значения карт KKK, 444, 555)<br><font  color='#ffff00'>Full-house</font> - фул хаус (3 одинаковых значения и пара KK555)<br><font  color='#ffff00'>Four of a Kind</font> - четыре совпадения (4 одинаковых значения карт KKKK, 4444)<br><font  color='#ffff00'>Flush</font> - флеш (5 одинаковых мастей ♣♣♣♣♣)<br><font  color='#ffff00'>Straight</font> - стрит (любая последовательность 56789, 789VD)<br><font  color='#ffff00'>Straight Flush</font> - стрит флеш (любая последовательность 56789, 8910VD но все масти одинаковые)<br><font  color='#ffff00'>Royal Flush</font> - стрит роял (последовательность 10VDKT все масти одинаковые) максимум очков</font></font></p>", pl, 100, 30, 600, true)
+end
+
+
+
+
+
+ui.addTextArea(-66000, "<a href='event:help'>help", nil, 725, 380, 50, 20, 1, 0x0000ff, 0.7,true)
+
 --ui.addTextArea(-9, "<p align='center'> <a href='event:go'>поехали", adm, 10, 350, 100, 20, 1, 0xffffff, 0.7,true)
 function buttomstart()
 	for j = 1, 8 do
 		ui.addTextArea(-j, "<p align='center'><font size='10px'><a href='event:start'>сесть", nil, coordinigrok[j][1], coordinigrok[j][2],  60, 18, 0x000000,0x0000ff, 0.7,false)
 	end
 end
+
+function countmapa(massiv)
+    i=0
+    for p, x in pairs(massiv) do
+        i=i+1
+    end
+    return i
+end
+
 buttomstart()
 function eventTextAreaCallback(id, p, cmd)
+	if cmd == "help" then
+		show_rule(p)
+	end
     if cmd == "start"  then
      for px, val in pairs(players) do
 				if val.player == p then
@@ -70,16 +111,17 @@ function eventTextAreaCallback(id, p, cmd)
 				end
 		end
 		ui.removeTextArea(id, p)
-		ui.addTextArea(id, "<p align='center'><font size='10px'><a href='event:finish'>".."5000".."$", nil, coordinigrok[-id][1], coordinigrok[-id][2]+27,  70, 18, 0x000000,0x0000ff, 0.7,false)
+		ui.addTextArea(id, "<p align='center'><font size='10px'><a href='event:finish'>"..startsumm.."$", nil, coordinigrok[-id][1], coordinigrok[-id][2]+27,  70, 18, 0x000000,0x0000ff, 0.7,false)
 		players[-id] = {}
 		players[-id].player = p
 		players[-id].card = {}
-		players[-id].price = 5000
+		players[-id].price = startsumm
 		players[-id].stavka = 0
 		tfm.exec.movePlayer(p,coordinigrok[-id][1]+30,coordinigrok[-id][2],false,0,0,false)
 		
 		end
 		    if cmd == "fall"  then
+				massinfo[#massinfo+1] ="<font color='"..color_dey[1].."'>fall</font>:"..p
 				ui.removeTextArea(-12, nill)
 				local idlx = play_ochered[tek_player]
 				fall(idlx)
@@ -102,6 +144,7 @@ function eventTextAreaCallback(id, p, cmd)
 					players[idlx].price = 0
 					gt = j
 					local timeri = timer
+					massinfo[#massinfo+1] ="<font color='"..color_dey[2].."'>out</font>:"..p
 					fall(idlx)
 					timer = timeri
 					
@@ -134,11 +177,18 @@ function eventTextAreaCallback(id, p, cmd)
 				raspredcard()
 		end
 		    if cmd == "check"  then
+				
 				ui.removeTextArea(-11, nill)
 		local idlx = play_ochered[tek_player]
 				
 				print(idlx)
 				if stavka < players[idlx].price then
+					
+					if stavka == players[idlx].stavka then
+						massinfo[#massinfo+1] ="<font color='"..color_dey[3].."'>check</font>:"..p
+					else
+						massinfo[#massinfo+1] ="<font color='"..color_dey[6].."'>call "..stavka.."</font>:"..p
+					end
 					players[idlx].price = players[idlx].price - stavka + players[idlx].stavka 
 					ui.updateTextArea(-idlx, "<p align='center'><font size='10px'><a href='event:finish'>"..players[idlx].price .."$")
 					players[idlx].stavka = stavka
@@ -149,6 +199,7 @@ function eventTextAreaCallback(id, p, cmd)
 					ui.addTextArea(idlx+20, "<p align='center'><font size='10px'>"..players[idlx].stavka .."$", nil, coordincard[idlx][1]+10, coordincard[idlx][2]+55,  70, 18, 0x000000,0x0000ff, 0.7,false)
 					
 					players[idlx].price = 0
+					massinfo[#massinfo+1] ="<font color='"..color_dey[5].."'>all in</font>:"..p
 					ui.updateTextArea(-idlx, "<p align='center'><font size='10px'><a href='event:finish'>"..players[idlx].price .."$")
 					
 				end
@@ -160,6 +211,17 @@ function eventTextAreaCallback(id, p, cmd)
 			end
 end
 function eventPopupAnswer(id, p, cmd)
+if id ==-10000 then
+	if cmd=="yes" then
+		show_dop(p)
+	end
+end
+if id ==-20000 then
+	if cmd=="yes" then
+		show_dopk(p)
+	end
+end
+
 ---------------podnyati------
 if id==-4400  then
 local idlx = play_ochered[tek_player]
@@ -172,13 +234,14 @@ local idlx = play_ochered[tek_player]
 					players[idlx].stavka = tonumber(cmd, 10)
 					stavka = tonumber(cmd, 10)
 					ui.addTextArea(idlx+20, "<p align='center'><font size='10px'>"..players[idlx].stavka .."$", nil, coordincard[idlx][1]+10, coordincard[idlx][2]+55,  70, 18, 0x000000,0x0000ff, 0.7,false)
-					
+					massinfo[#massinfo+1] ="<font color='"..color_dey[4].."'>call "..stavka.."</font>:"..p
 				else
 				players[idlx].stavka = players[idlx].price 
 					ui.addTextArea(idlx+20, "<p align='center'><font size='10px'>"..players[idlx].stavka .."$", nil, coordincard[idlx][1]+10, coordincard[idlx][2]+55,  70, 18, 0x000000,0x0000ff, 0.7,false)
 					stavka = players[idlx].stavka 
 					players[idlx].price = 0
 					ui.updateTextArea(-idlx, "<p align='center'><font size='10px'><a href='event:finish'>"..players[idlx].price .."$")
+					massinfo[#massinfo+1] ="<font color='"..color_dey[5].."'>all in</font>:"..p
 					end
 	end
 					obhod = 1
@@ -367,7 +430,8 @@ function raspredcard()
 	print(gamecol)
 if gamecol > 1 then
 ui.removeTextArea(-15, nil)
-ui.removeTextArea(-16, nil)
+ui.addTextArea(-16, "<p align='center'><font size='10px' color='#006600'>POKER. After by Deff83#0000", nil, 240, 245, 300, 40, 0xffffffff, 0.7,false)
+--ui.removeTextArea(-16, nil)
 	local ochered = {}
 	----sort 1-8
 	
@@ -411,10 +475,12 @@ ui.removeTextArea(-16, nil)
 	end
 	timer = 39
 	crug = 1
+	massinfo[#massinfo+1] ="<font color='"..color_dey[9].."'>Start</font>:"
 else
 	ui.addTextArea(-15, "<p align='center'><font size='60px' color='#006600'>POKER", nil, 100, 160,  600, 90, 0xffffffff, 0.7,false)
 	ui.addTextArea(-16, "<p align='center'><font size='10px' color='#006600'>After by Deff83#0000", nil, 380, 230,  150, 40, 0xffffffff, 0.7,false)
 end
+
 end
 typecrug = 0
 tek_player = 1
@@ -437,6 +503,10 @@ function eventLoop()
 			if cruglocal == 1 then
 				local idlx = play_ochered[tek_player]
 				fall(idlx)
+				
+				if players[play_ochered[tek_player]]~=nill then
+					massinfo[#massinfo+1] ="<font color='"..color_dey[1].."'>time out</font>:"..players[play_ochered[tek_player]].player
+				end
 				timer = 0
 			end
 		end
@@ -497,20 +567,21 @@ function eventLoop()
 			if cruglocal == 0 then
 				local idlx = play_ochered[1]
 				if players[idlx]~= nill then
-					ui.addTextArea(idlx+20, "<p align='center'><font size='10px'>".."250".."$", nil, coordincard[idlx][1]+10, coordincard[idlx][2]+55,  70, 18, 0x000000,0x0000ff, 0.7,false)
-					players[idlx].price = players[idlx].price - 250
-					players[idlx].stavka = 250
+					local blindsumm_pol = math.floor(blindsumm/2)
+					ui.addTextArea(idlx+20, "<p align='center'><font size='10px'>"..blindsumm_pol.."$", nil, coordincard[idlx][1]+10, coordincard[idlx][2]+55,  70, 18, 0x000000,0x0000ff, 0.7,false)
+					players[idlx].price = players[idlx].price - blindsumm_pol
+					players[idlx].stavka = blindsumm_pol
 					print(players[idlx].price)
 					ui.updateTextArea(-idlx, "<p align='center'><font size='10px'><a href='event:finish'>"..players[idlx].price .."$")
 					
 					
 				 idlx = play_ochered[2]
-					ui.addTextArea(idlx+20, "<p align='center'><font size='10px'>".."500".."$", nil, coordincard[idlx][1]+10, coordincard[idlx][2]+55,  70, 18, 0x000000,0x0000ff, 0.7,false)
-					players[idlx].price = players[idlx].price - 500
-					players[idlx].stavka = 500
+					ui.addTextArea(idlx+20, "<p align='center'><font size='10px'>"..blindsumm.."$", nil, coordincard[idlx][1]+10, coordincard[idlx][2]+55,  70, 18, 0x000000,0x0000ff, 0.7,false)
+					players[idlx].price = players[idlx].price - blindsumm
+					players[idlx].stavka = blindsumm
 					ui.updateTextArea(-idlx, "<p align='center'><font size='10px'><a href='event:finish'>"..players[idlx].price .."$")
 					end
-					stavka = 500
+					stavka = blindsumm
 				
 				cruglocal = 1
 				obhod = 0
@@ -584,6 +655,7 @@ function eventLoop()
 			raspredcard()
 		end
 	end
+	messageinfo(nil)
 end
 function isContain(mapalist, elementval)
 boolcont = false
@@ -602,6 +674,10 @@ function fall(id)
 	end
 	removecard(id, 1)
 	removecard(id, 2)
+	
+	removecard_zacr(id, 1, nil)
+	removecard_zacr(id, 2, nil)
+	
 	print(#play_ochered - #mousefall)
 	if #play_ochered - #mousefall < 2 then
 		for j = 1, #play_ochered do
@@ -619,22 +695,26 @@ function fall(id)
 	timer = 39
 end
 function removecard_zacr(moseid, numb, pl)
-	ui.removeTextArea(moseid*10000+numb, pl)
-	for j = 1, 13 do
-	ui.removeTextArea(moseid*10000+numb + 1000000*j, pl)
+	if moseid~=nill and numb~=nill then
+		ui.removeTextArea(moseid*10000+numb, pl)
+		for j = 1, 13 do
+		ui.removeTextArea(moseid*10000+numb + 1000000*j, pl)
+		end
 	end
 end
 function removecard(moseid, numb)
-	ui.removeTextArea(moseid*100+numb, nil)
-	for j = 1, 5 do
-		tfm.exec.removePhysicObject(moseid*100+numb*1000+j)
-	end
-	if secured then
-	for k = 1, 5 do
-	for j = 1, 5 do
-		tfm.exec.removePhysicObject(moseid*100+numb*1000+j+k*10000)
-	end
-	end
+	if moseid~=nill and numb~=nill then
+		ui.removeTextArea(moseid*100+numb, nil)
+		for j = 1, 5 do
+			tfm.exec.removePhysicObject(moseid*100+numb*1000+j)
+		end
+		if secured then
+		for k = 1, 5 do
+		for j = 1, 5 do
+			tfm.exec.removePhysicObject(moseid*100+numb*1000+j+k*10000)
+		end
+		end
+		end
 	end
 end
 function proverca()
@@ -717,10 +797,11 @@ crug = 2
 		
 		
 	
-	
+	local pricehy = -1
 	
 	local textwinrer = ""
 	for j = 1, #idlxwin do
+		pricehy = players[idlxwin[j]].price
 		players[idlxwin[j]].price = players[idlxwin[j]].price + math.floor( summ / #idlxwin)
 		ui.updateTextArea(-idlxwin[j], "<p align='center'><font size='10px'><a href='event:finish'>"..players[idlxwin[j]].price .."$")
 		textwinrer = textwinrer..players[idlxwin[j]].player.."<br>"
@@ -729,14 +810,25 @@ crug = 2
 	for j = 1, #play_ochered do
 		local idlx = play_ochered[j]
 		if players[idlx]~=nill then
-	if players[idlx].price < 500 then
+	if players[idlx].price < blindsumm then
 			iddelplayer[#iddelplayer+1] = idlx
 		end
 		end
 	end
+	print(pricehy)
+	if math.floor( summ / #idlxwin) < pricehy or pricehy==-1 then
+		ui.addTextArea(-13, "<p align='center'><font color='#ffffff' size='10px'> WIN</font><font color='#ffffff' size='10px'><br>"..textwinrer.."+"..math.floor( summ / #idlxwin), nil,10, 20, 100, nil, 1, 0xffffff, 0.7,true)
+	elseif math.floor( summ / #idlxwin) < 2*pricehy then
+		--extra
+		ui.addTextArea(-13, "<p align='center'><font color='#ffffff' size='10px'> EXTRA WIN</font><font color='#ffffff' size='10px'><br>"..textwinrer.."+"..math.floor( summ / #idlxwin), nil,10, 20, 100, nil, 0xFFA500, 0xffffff, 0.7,true)
+	elseif math.floor( summ / #idlxwin) < 4*pricehy then
+		--super
+		ui.addTextArea(-13, "<p align='center'><font color='#ffffff' size='10px'> SUPER WIN</font><font color='#ffffff' size='10px'><br>"..textwinrer.."+"..math.floor( summ / #idlxwin), nil,10, 20, 100, nil, 0xFF8C00, 0xffffff, 0.7,true)
+	else
+		--mega
+		ui.addTextArea(-13, "<p align='center'><font color='#ffffff' size='10px'> MEGA WIN</font><font color='#ffffff' size='10px'><br>"..textwinrer.."+"..math.floor( summ / #idlxwin), nil,10, 20, 100, nil, 0xFF4500, 0xffffff, 0.7,true)
+	end
 	
-	
-	ui.addTextArea(-13, "<p align='center'><font color='#ffffff' size='10px'> "..textwinrer.."+"..math.floor( summ / #idlxwin), nil,10, 20, 100, nil, 1, 0xffffff, 0.7,true)
 	for j = 1, #iddelplayer do
 		delplayer(iddelplayer[j])
 	end
@@ -1124,7 +1216,32 @@ function eventPlayerLeft(p)
 		-- end
 end
 
+
+--показывает информацию
+function messageinfo(pl)
+	
+
+	
+	local stringinfo = ""
+	
+	for i=1, countmapa(massinfo) do
+		if i<8 then
+			stringinfo = stringinfo..massinfo[countmapa(massinfo)-i+1]
+			if i <= countmapa(massinfo)-1 then
+				stringinfo = stringinfo.."<br>"
+			end
+		end
+	end
+	
+
+	ui.addTextArea(-57000, stringinfo, pl, 800-80, 20, 200, nil, 0x000001, 0xFFFFFF, 0.7, false)
+
+
+end
+
+
 function eventNewPlayer(playerName)
+	ui.addTextArea(-66000, "<a href='event:help'>help", nil, 725, 380, 50, 20, 1, 0x0000ff, 0.7,true)
 	tfm.exec.respawnPlayer (playerName)
 	for j = 1, 8 do
 		local boolzanit = true
