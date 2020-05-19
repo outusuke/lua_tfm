@@ -134,13 +134,13 @@ function eventTextAreaCallback(id, p, cmd)
 		local gt = -1
 		for j = 1, #play_ochered do
 			local idlx = play_ochered[j]
-			print("L          "..idlx)
-			print("L          "..play_ochered[tek_player])
+			--print("L          "..idlx)
+			--print("L          "..play_ochered[tek_player])
 			if players[idlx]~=nill then
-				print(players[idlx].player)
+				--print(players[idlx].player)
 				if players[idlx].player == p then
 					
-					print("88 "..p)
+					--print("88 "..p)
 					players[idlx].price = 0
 					gt = j
 					local timeri = timer
@@ -181,7 +181,7 @@ function eventTextAreaCallback(id, p, cmd)
 				ui.removeTextArea(-11, nill)
 		local idlx = play_ochered[tek_player]
 				
-				print(idlx)
+				--print(idlx)
 				if stavka < players[idlx].price then
 					
 					if stavka == players[idlx].stavka then
@@ -427,7 +427,7 @@ function raspredcard()
 	for id, val in pairs(players) do
 		gamecol = gamecol + 1
 	end
-	print(gamecol)
+	--print(gamecol)
 if gamecol > 1 then
 ui.removeTextArea(-15, nil)
 ui.addTextArea(-16, "<p align='center'><font size='10px' color='#006600'>POKER. After by Deff83#0000", nil, 240, 245, 300, 40, 0xffffffff, 0.7,false)
@@ -439,7 +439,7 @@ ui.addTextArea(-16, "<p align='center'><font size='10px' color='#006600'>POKER. 
 	
 	for id, val in pairs(players) do
 	if id == j then
-	print(id)
+	--print(id)
 	ochered[#ochered + 1] = id
 		local randomcard = math.random(1, #coloda)
 		local carde = coloda[randomcard]
@@ -515,7 +515,7 @@ function eventLoop()
 	
 		if crug == 1 then
 			if obhod == #play_ochered then
-				print("obhod")
+				--print("obhod")
 				for j = 1, #play_ochered do
 					local idlx = play_ochered[j]
 					if players[idlx]~= nill then
@@ -549,7 +549,7 @@ function eventLoop()
 					table.remove(coloda, randomcard)
 					cardontable[#cardontable + 1] = carde
 					print_cart(math.floor(carde/13)+1, carde%13+1, 9, 5)
-					print("проверка")
+					--print("проверка")
 					proverca()
 					return
 					---------------------------------
@@ -571,7 +571,7 @@ function eventLoop()
 					ui.addTextArea(idlx+20, "<p align='center'><font size='10px'>"..blindsumm_pol.."$", nil, coordincard[idlx][1]+10, coordincard[idlx][2]+55,  70, 18, 0x000000,0x0000ff, 0.7,false)
 					players[idlx].price = players[idlx].price - blindsumm_pol
 					players[idlx].stavka = blindsumm_pol
-					print(players[idlx].price)
+					--print(players[idlx].price)
 					ui.updateTextArea(-idlx, "<p align='center'><font size='10px'><a href='event:finish'>"..players[idlx].price .."$")
 					
 					
@@ -598,15 +598,15 @@ function eventLoop()
 			
 			obhod = obhod + 1
 			if tek_player > #play_ochered then
-			print(45)
+			--print(45)
 				tek_player = 1
 			end
 			if isContain(mousefall,play_ochered[tek_player]) then
 				timer = 39
 				return
 			end
-			print(play_ochered[tek_player])
-			print(players[play_ochered[tek_player]].player)
+			--print(play_ochered[tek_player])
+			--print(players[play_ochered[tek_player]].player)
 			utimer = true
 				ui.addTextArea(-play_ochered[tek_player], "<p align='center'><font size='10px'><a href='event:finish'>"..players[play_ochered[tek_player]].price.."$", nil, coordinigrok[play_ochered[tek_player]][1], coordinigrok[play_ochered[tek_player]][2]+27,  70, 18, 0xaaaa00,0x0000ff, 0.7,false)
 			if players[play_ochered[tek_player]].price > 0 then
@@ -670,7 +670,7 @@ function fall(id)
 	
 	if isContain(mousefall,id)==false then
 		mousefall[#mousefall+1] = id
-		print("mousefall")
+		--print("mousefall")
 	end
 	removecard(id, 1)
 	removecard(id, 2)
@@ -678,7 +678,7 @@ function fall(id)
 	removecard_zacr(id, 1, nil)
 	removecard_zacr(id, 2, nil)
 	
-	print(#play_ochered - #mousefall)
+	--print(#play_ochered - #mousefall)
 	if #play_ochered - #mousefall < 2 then
 		for j = 1, #play_ochered do
 				local idlx = play_ochered[j]
@@ -815,7 +815,7 @@ crug = 2
 		end
 		end
 	end
-	print(pricehy)
+	--print(pricehy)
 	if math.floor( summ / #idlxwin) < pricehy or pricehy==-1 then
 		ui.addTextArea(-13, "<p align='center'><font color='#ffffff' size='10px'> WIN</font><font color='#ffffff' size='10px'><br>"..textwinrer.."+"..math.floor( summ / #idlxwin), nil,10, 20, 100, nil, 1, 0xffffff, 0.7,true)
 	elseif math.floor( summ / #idlxwin) < 2*pricehy then
@@ -913,12 +913,12 @@ cardwin = {}
 				stringwin = "Flush"
 				point = pointz
 			end
-		print("Flash")
+		--print("Flash")
 		----------------------------СТРИТ ФЛЭШ---------------------------------
 		if cardfive[#cardfive] == 13 then
 			if cardfive[4] - cardfive[1] == 3 then
 			if cardfive[1] == 2 then
-				print("Strit-flash0")
+				--print("Strit-flash0")
 				pointz = 1E18 * cardfive[4]
 				if pointz > point then
 					cardwin = z[k_maxz][3]
@@ -931,11 +931,11 @@ cardwin = {}
 		
 		
 		if cardfive[#cardfive] - cardfive[#cardfive-4] == 4 then
-			print("Strit-flash1")
+			--print("Strit-flash1")
 			pointz = 1E18 * cardfive[#cardfive]
 			if cardfive[#cardfive] == 13 then
 				pointz = 1E20 * cardfive[#cardfive]
-				print("Flash-royali")
+				--print("Flash-royali")
 			end
 			if pointz > point then
 				cardwin = z[k_maxz][3]
@@ -945,7 +945,7 @@ cardwin = {}
 		end
 		if #cardfive-5 > 0 then
 		if cardfive[#cardfive-1] - cardfive[#cardfive-5] == 4 then
-			print("Strit-flash2")
+			--print("Strit-flash2")
 			pointz = 1E18 * cardfive[#cardfive-1]
 			if pointz > point then
 				cardwin = z[k_maxz][3]
@@ -956,7 +956,7 @@ cardwin = {}
 		end
 		if #cardfive-6 > 0 then
 		if cardfive[#cardfive-2] - cardfive[#cardfive-6] == 4 then
-			print("Strit-flash3")
+			--print("Strit-flash3")
 			pointz = 1E18 * cardfive[#cardfive-2]
 			if pointz > point then
 				cardwin = z[k_maxz][3]
@@ -991,18 +991,18 @@ cardwin = {}
 		end
 	end
 	for j = 1, #key do
-		print(key[j])
+		--print(key[j])
 	end
-	print(maxz)
+	--print(maxz)
 	---------------------СТРИТ------------------
 	if key[#key] == 13 then
 			if key[4] - key[1] == 3 then
 			if key[1] == 2 then
-				print("Strit0")
+				--print("Strit0")
 				pointz = 1E10 * key[4]
 				if pointz > point then
 					cardwin = {}
-					print(z[key[1]][2][1])
+					--print(z[key[1]][2][1])
 					cardwin[1] = z[key[1]][2][1]
 					cardwin[2] = z[key[2]][2][1]
 					cardwin[3] = z[key[3]][2][1]
@@ -1018,7 +1018,7 @@ cardwin = {}
 		
 		if key[#key-j] - key[#key-4-j] == 4 then
 			pointz = 1E10 * key[#key-j]
-			print("Strit")
+			--print("Strit")
 			if pointz > point then
 				cardwin = {}
 					cardwin[1] = z[key[#key-j]][2][1]
@@ -1034,7 +1034,7 @@ cardwin = {}
 	------------------КАРЭ-------------
 	if maxz == 4 then
 		pointz = 1E16 * k_maxz
-			print("Care")
+			--print("Care")
 			if pointz > point then
 				cardwin = z[k_maxz][2]
 				point = pointz
@@ -1058,7 +1058,7 @@ cardwin = {}
 		end
 		if fullhosetwo == 0 then
 			pointz = 1E8 * k_maxz
-			print("Trips")
+			--print("Trips")
 			if pointz > point then
 				cardwin[1] = z[k_maxz][2][1]
 				cardwin[2] = z[k_maxz][2][2]
@@ -1069,7 +1069,7 @@ cardwin = {}
 		else
 			-----------------Фул-хаус------------
 			pointz = 1E14 * k_maxz + 1E12 * fullhosetwo
-			print("Full-house")
+			--print("Full-house")
 			if pointz > point then
 				cardwin[1] = z[k_maxz][2][1]
 				cardwin[2] = z[k_maxz][2][2]
@@ -1095,7 +1095,7 @@ cardwin = {}
 		end
 		if fullhosetwo == 0 then
 			pointz = 1E4 * k_maxz
-			print("Para")
+			--print("Para")
 			if pointz > point then
 				stringwin = "Pair"
 				point = pointz
@@ -1106,7 +1106,7 @@ cardwin = {}
 		else
 			-----------------Две пары------------
 			pointz = 1E6 * k_maxz + 1E4 * fullhosetwo
-			print("Second-Paras")
+			--print("Second-Paras")
 			if pointz > point then
 				cardwin[1] = z[k_maxz][2][1]
 				cardwin[2] = z[k_maxz][2][2]
@@ -1117,7 +1117,7 @@ cardwin = {}
 	end
 	if maxz == 1 then
 		pointz = 1E2 * k_maxz
-			print("Starshay")
+			--print("Starshay")
 			if pointz > point then
 				stringwin = "High Card"
 				point = pointz
@@ -1127,7 +1127,7 @@ cardwin = {}
 	
 
 	end
-	print(point)
+	--print(point)
 	return point
 end
 function eventPlayerLeft(p)
@@ -1137,13 +1137,13 @@ function eventPlayerLeft(p)
 		local gt = -1
 		for j = 1, #play_ochered do
 			local idlx = play_ochered[j]
-			print("L          "..idlx)
-			print("L          "..play_ochered[tek_player])
+			--print("L          "..idlx)
+			--print("L          "..play_ochered[tek_player])
 			if players[idlx]~=nill then
-				print(players[idlx].player)
+				--print(players[idlx].player)
 				if players[idlx].player == p then
 					
-					print("88 "..p)
+					--print("88 "..p)
 					players[idlx].price = 0
 					gt = j
 					local timeri = timer
@@ -1195,8 +1195,8 @@ function eventPlayerLeft(p)
 		-- ----------------------------------------------------------------------------------------------
 		-- for j = 1, #play_ochered do
 			-- local idlx = play_ochered[j]
-			-- print("gggggggggggg")
-			-- print(players[idlx].player)
+			-- --print("gggggggggggg")
+			-- --print(players[idlx].player)
 			-- if players[idlx].player == pName then
 				-- players[idlx].price = 0
 				-- fall(idlx)
