@@ -1,84 +1,319 @@
 
---дамки ходят дальше 
+--дамки ходят дальше
+--текстареа максимум 2000 char
+local lang = "RU"
+
+local start_party_classic = 1
+local set_board = 2
+local party = {}--массив, board
+
+local players_images = {}
 
 
+local symbol_piece_mass = {'♚', '♛', '♜', '♝', '♞', '♟', '*', '&', '*'}
+local color_piece_mass = {'FFFFFF', 'FF00FF', 'FFFF00', 'FF0000', '00FFFF', '000000'}
 
-party = {}--массив, board
+local description = {}
+local name_g = {}
 
-players_images = {}
+name_g["RU"] = {
+	"Ша́хматы", 
+	"Ша́хматы Фишера", 
+	"Ша́хматы «Альмуджаннах»", 
+	"Ша́хматы с превращением", 
+	"Шахматы 'мост'",
+	"Мини-шахматы Гарднера",
+	"Ша́шки",
+	"Перестановка Гуарини 6 коней",
+	"Перестановка Гуарини",
+	"Перестановка коней 'мост'",
+	"Перестановка шашек 'мост'",
+	"Доска-«пистолет»",
+	"Зигзаг В. Шинкмана",
+	"Зигзаг В. Шинкмана 2",
+	"Перестановка угалки",
+	"Перестановка угалки 2",
+	"Перестановка угалки 3"
+}
 
+description["RU"] = {
+	[[<p align='center'><font size='20'><b><J>Ша́хматы</J></b></font><br><p align='left'><font size='14'>Ша́хматы (перс. شاه مات ‘шах мат’, буквальный перевод «шах умер») — настольная логическая игра со специальными фигурами на 64-клеточной доске для двух соперников, сочетающая в себе элементы искусства (в том числе в части шахматной композиции), науки и спорт. Шахматная партия ведётся между двумя соперниками на шахматной доске путём передвижения шахматных фигур. Оба партнёра должны играть по очереди, делая каждый раз один ход. Игрок, который имеет белые фигуры, начинает партию. Если король игрока находится под шахом и игрок не имеет ни одного хода, позволяющего устранить этот шах, этот игрок называется «получившим мат» и, соответственно, он терпит поражение. Цель игры и состоит в том, чтобы поставить мат королю противника.]],
+	[[<p align='center'><font size='20'><b><J>Ша́хматы Фишера</J></b></font><br><p align='left'><font size='14'>Одиннадцатый чемпион мира по шахматам Роберт Фишер предложил свой вариант игры, который в последствии получил его имя. Бобби хотел уйти от хорошо изученных дебютных дорожек во многих вариантах. Он оставил классическую шахматную доску, но расположил фигуры первой и восьмой горизонталей в случайном порядке, то есть без четко определенного места. Из-за этого у "шахмат Фишера" есть еще одно название – случайные шахматы Фишера. Здесь представлен один из вариантов расположения фигур.]],
+	[[<p align='center'><font size='20'><b><J>Ша́хматы «Альмуджаннах»</J></b></font><br><p align='left'><font size='14'>Одна из старых дебютных табий (начальных расположений фигур). Она может быть получена из современного начального расположения при помощи симметричных ходов белых и черных.]],
+	[[<p align='center'><font size='20'><b><J>Ша́хматы с превращением</J></b></font><br><p align='left'><font size='14'>Хорошей тренировкой для начинающих шахматистов послужит последний вариант шахмат, который мы рассмотрим — шахматы с превращением в другие фигуры при каждом ходе. В такой игре конь при своем ходе превращается в слона. Сходивший слон станет ладьей, а ладья — ферзем. Ферзь замыкает цепочку превращения и после своего хода становится конем. Такой вариант шахмат помогает улучшить навыки техники расчета вариантов и глубже понять ценность шахматных фигур не только в плане материала, но и в оценке позиции.]],
+	[[<p align='center'><font size='20'><b><J>Шахматы 'мост'</J></b></font><br><p align='left'><font size='14'>На этот раз фигуры расположены на разных островах.]],
+	[[<p align='center'><font size='20'><b><J>Мини-шахматы Гарднера</J></b></font><br><p align='left'><font size='14'>Мини-шахматы Гарднера — вариант игры в шахматы на уменьшенной доске 5×5, предложенный в 1962 году американским популяризатором науки Мартином Гарднером (придуман им в процессе программирования электронных машин для игры в шахматы). Здесь присутствуют все традиционные фигуры (по одной), у каждого игрока — по пять пешек и пять фигур. В 2013 году мини-шахматы Гарднера были слабо решены; доказано, что при оптимальной игре обеих сторон результат партии — ничья.]],
+	[[<p align='center'><font size='20'><b><J>Ша́шки</J></b></font><br><p align='left'><font size='14'>Ша́шки — логическая настольная игра для двух игроков, заключающаяся в передвижении определённым образом фишек-шашек по клеткам шашечной доски. Во время партии каждому игроку принадлежат шашки одного цвета: чёрного или белого (иногда других цветов, один из которых, считается тёмным, а другой — светлым). Цель игры — взять все шашки соперника или лишить их возможности хода (запереть). Существует несколько вариантов шашек, отличающихся правилами и размерами игрового поля. Здесь дамка при взятии ходит только через одно поле в любую сторону, а не на любое поле диагонали, как в русских или международных шашках.]],
+	[[<p align='center'><font size='20'><b><J>Перестановка Гуарини 6 коней</J></b></font><br><p align='left'><font size='14'>Хотя доска больше, и на каждой стороне по три, а не по два коня как в предыдуще задачи Гарини по перестановке коней, метод пуговиц и нитей также позволяет быстро найти необходимую перестановку. Решение состоит из 22 ходов (11 белых и 11 черных).]],
+	[[<p align='center'><font size='20'><b><J>Перестановка Гуарини</J></b></font><br><p align='left'><font size='14'>В противоположных углах шахматной доски 3×3 стоят два белых и два черных коня. За минимальное число ходов поменять местами белых коней с черными. Эта задача, придуманная итальянцем Гуарини еще в XVI в., хорошо известна математикам, часто предлагалась на различных олимпиадах и конкурсах. Наиболее изящно она решается при помощи так называемого метода пуговиц и нитей, придуманного известным изобретателем головоломок Г. Дьюдени. Нетрудно убедиться, что решение состоит из 16 перестановок коней (8 ходов белых и 8 ходов черных)]],
+	[[<p align='center'><font size='20'><b><J>Перестановка коней "мост"</J></b></font><br><p align='left'><font size='14'>Доска имеет довольно причудливую форму, но для метода пуговиц и нитей это не является препятствием. Распутывая клубок, получаем картину, в котором поле c3 является «транзитным» - связь между «ветками» a2 - d3 и b1 - b3 возможна только через него.]],
+	[[<p align='center'><font size='20'><b><J>Перестановка шашек "мост"</J></b></font><br><p align='left'><font size='14'>Необходимо переправить шашки одного цвета на другой берег. При этом шашки не должны ходить обратно.]],
+	[[<p align='center'><font size='20'><b><J>Доска-«пистолет»</J></b></font><br><p align='left'><font size='14'>В «позиции» фигуры ходят по обычным правилам, но доска имеет весьма оригинальную форму. Белым на доске-«пистолете» очень тесно, но необходимо поставить мат черному королю, решение в 21 ход! ]],
+	[[<p align='center'><font size='20'><b><J>Зигзаг В. Шинкмана</J></b></font><br><p align='left'><font size='14'>Белый король берет черного коня (при этом конь неподвижен, а король не становится под шах). Перестановка осуществляется за 26 ходов]],
+	[[<p align='center'><font size='20'><b><J>Зигзаг В. Шинкмана 2</J></b></font><br><p align='left'><font size='14'>король и ферзь меняются местами. Здесь для перестановки короля и ферзя (остальные фигуры должны вернуться на исходные места) приходится совершить 107 (!!) перемещений.]],
+	[[<p align='center'><font size='20'><b><J>Перестановка угалки</J></b></font><br><p align='left'><font size='14'>Необходимо быстрее соперника перевести все свои шашки на противоположную сторону.]],
+	[[<p align='center'><font size='20'><b><J>Перестановка угалки 2</J></b></font><br><p align='left'><font size='14'>Попробуй переставить все шашки одного цвета на другую сторону за минимальное количество ходов]],
+	[[<p align='center'><font size='20'><b><J>Перестановка угалки 3</J></b></font><br><p align='left'><font size='14'>Необходимо быстрее соперника перевести все свои шашки на противоположную сторону.]]
+	
+}
 
-symbol_piece_mass = {'♚', '♛', '♜', '♝', '♞', '♟', '*', '&'}
-color_piece_mass = {'FFFFFF', 'FF00FF', 'FFFF00', 'FF0000', '00FFFF', '000000'}
+local doppravil = {--1 сьедать чужую фигуру если false, изменять фигуру на другую если true
+	{false, false, true}, 
+	{false, false, true}, 
+	{false, false, true}, 
+	{false, true, true}, 
+	{false, false, true}, 
+	{false, false, true}, 
+	{false, false, true}, 
+	{true, false, false}, 
+	{true, false, false}, 
+	{true, false, false}, 
+	{true, false, false}, 
+	{false, false, false}, 
+	{false, false, false}, 
+	{true, false, false}, 
+	{true, false, true}, 
+	{true, false, false}, 
+	{true, false, true}
+}
 
-
--- Board
-local setBoard = function()
-	return
+local main_mass = {
 	{
-		-- {43, 45, 44, 42, 41},
-		-- {46, 46, 46, 46, 46},
-		
-		-- {0, 0, 0, 0, 0},
-		-- {0, 0, 0, 0, 0},		
-		-- -- --{0, 0, 0, 0, 0, 0, 0, 0, nil, 0},
-		-- -- --{0, 0, 0, 0, 0, 0, 0, 0, nil, 0},
-		
-		-- {16, 16, 16, 16, 16},
-		-- {13, 15, 14, 12, 11}
-	--------------------------------------------------------------
 		{63, 65, 64, 62, 61, 64, 65, 63},
 		{66, 66, 66, 66, 66, 66, 66, 66},
 		{0, 0, 0, 0, 0, 0, 0, 0},
-		
-		-- {0, 0, 0, 0, 0, 0, 0, 0},
-		-- {0, 0, 0, 0, 0, 0, 0, 0},		
-		{0, 0, 0, nil, nil, 0, 0, 0},
-		{0, 0, 0, nil, nil, 0, 0, 0},
-		
+		{0, 0, 0, 0, 0, 0, 0, 0},
+		{0, 0, 0, 0, 0, 0, 0, 0},
 		{0, 0, 0, 0, 0, 0, 0, 0},
 		{16, 16, 16, 16, 16, 16, 16, 16},
 		{13, 15, 14, 12, 11, 14, 15, 13}
-	--------------------------------------------------------------
+	}, 
+	{
+		{65, 63, 62, 61, 65, 63, 64, 64},
+		{66, 66, 66, 66, 66, 66, 66, 66},
+		{0, 0, 0, 0, 0, 0, 0, 0},
+		{0, 0, 0, 0, 0, 0, 0, 0},
+		{0, 0, 0, 0, 0, 0, 0, 0},
+		{0, 0, 0, 0, 0, 0, 0, 0},
+		{16, 16, 16, 16, 16, 16, 16, 16},
+		{15, 13, 12, 11, 15, 13, 14, 14},
+	}, 
+	{
+		{0, 63, 64, 62, 61, 64, 63, 0},
+		{66, 0, 0, 0, 0, 0, 0, 66},
+		{0, 66, 65, 66, 66, 65, 66, 0},
+		{0, 0, 66, 0, 0, 66, 0, 0},
+		{0, 0, 16, 0, 0, 16, 0, 0},
+		{0, 16, 15, 16, 16, 15, 16, 0},
+		{16, 0, 0, 0, 0, 0, 0, 16},
+		{0, 13, 14, 12, 11, 14, 13, 0}
+	}, 
+	{
+		{63, 65, 64, 62, 61, 64, 65, 63},
+		{66, 66, 66, 66, 66, 66, 66, 66},
+		{0, 0, 0, 0, 0, 0, 0, 0},
+		{0, 0, 0, 0, 0, 0, 0, 0},
+		{0, 0, 0, 0, 0, 0, 0, 0},
+		{0, 0, 0, 0, 0, 0, 0, 0},
+		{16, 16, 16, 16, 16, 16, 16, 16},
+		{13, 15, 14, 12, 11, 14, 15, 13}
+	}, 
+	{
+		{63, 65, 64, 62, 61, 64, 65, 63},
+		{66, 66, 66, 66, 66, 66, 66, 66},
+		{0, 0, 0, 0, 0, 0, 0, 0},
+		{nil, nil, nil, nil, nil, nil, nil, nil},
+		{0, 0, 0, 0, 0, 0, 0, 0},
+		{16, 16, 16, 16, 16, 16, 16, 16},
+		{13, 15, 14, 12, 11, 14, 15, 13}
+	}, 
+	{
+		{63, 65, 64, 62, 61},
+		{66, 66, 66, 66, 66},
+		{0, 0, 0, 0, 0},		
+		{16, 16, 16, 16, 16},
+		{13, 15, 14, 12, 11}
+	},
+	{
+		{0, 67, 0, 67, 0, 67, 0, 67},
+		{67, 0, 67, 0, 67, 0, 67, 0},
+		{0, 67, 0, 67, 0, 67, 0, 67},
+		{0, 0, 0, 0, 0, 0, 0, 0},
+		{0, 0, 0, 0, 0, 0, 0, 0},
+		{17, 0, 17, 0, 17, 0, 17, 0},
+		{0, 17, 0, 17, 0, 17, 0, 17},
+		{17, 0, 17, 0, 17, 0, 17, 0}
+	},
+	{
+		{45, 45, 45},
+		{0, 0, 0},
+		{0, 0, 0},		
+		{15, 15, 15}
+	},
+	{
+		{45, 0, 45},
+		{0, 0, 0},		
+		{15, 0, 15}
+	},
+	{
+		{45},
+		{0, 0, 0, 15},		
+		{45, 15, 0},		
+		{0, 0}
+	},
+	{
+		{29, 29, 29, 29, 0, 19, 19, 19, 19}
+	},
+	{
+		{61, 0, 64, 11, 14, 15, 0},
+		{nil, nil, nil, nil, nil, 13, 16, 16},
+		{nil, nil, nil, nil, nil, nil, 13, 15}
+	},
+	{
+		{nil, nil, nil, 16},
+		{nil, nil, 13, 16},
+		{nil, 16, 14, 11},
+		{65, 0, 14, 13}
 		
-		-- {0, 27, 0, 27, 0, 27, 0, 27},
-		-- {27, 0, 27, 0, 27, 0, 27, 0},
-		-- {0, 15, 0, 27, 0, 27, 0, 27},
-		-- {18, 0, 17, 0, 17, 0, 17, 0},
-		-- {0, 17, 0, 17, 0, 17, 0, 17},
-		-- {17, 0, 17, 0, 17, 0, 17, 0}
-	--------------------------------------------------------------
-		
-		-- {0, 0, 0, 0, 0, 0, 0, 0},
-		
-		-- {0, 0, 0, 0, 0, 0, 0, 0},
-		
-	--------------------------------------------------------------
-		-- {53, 55, 54, 52, 51, 54, 55, 53},
-		-- {56, 56, 56, 56, 0, 56, 56, 56},
-		-- {0, 0, 0, 0, 0, 0, 0, 0, 0, 33},
-		-- {0, 0, 0, 0, 56, 0, 0, 0, 0, 41},
-		-- {0, 0, 0, 0, 16, 0, 0, 0, 0, 24},
-		-- {0, 0, 0, 0, 0, 0, 0, 0, 0, 65},
-		-- {16, 16, 16, 16, 0, 16, 16, 16},
-		-- {13, 15, 14, 12, 11, 14, 15, 13}
-	--------------------------------------------------------------
-		
-		-- {0, 27, 0, 27, 0, 27, 0, 27},
-		-- {27, 0, 27, 0, 27, 0, 27, 0},
-		-- {0, 27, 0, 27, 0, 27, 0, 27},
-		-- {0, 0, 0, 0, 0, 0, 0, 0},
-		-- {0, 0, 0, 0, 0, 0, 0, 0},
-		-- {17, 0, 17, 0, 17, 0, 17, 0},
-		-- {0, 17, 0, 17, 0, 17, 0, 17},
-		-- {17, 0, 17, 0, 17, 0, 17, 0}
-	--------------------------------------------------------------
-		
-		
+	},
+	{
+		{nil, nil, nil, 11},
+		{nil, nil, nil, 13},
+		{nil, nil, 15, 14},
+		{12, 14, 13, 0}
+	},
+	{
+		{29, 29, 29, 0, 0, 0, 0, 0},
+		{29, 29, 29, 0, 0, 0, 0, 0},
+		{29, 29, 29, 0, 0, 0, 0, 0},
+		{0, 0, 0, 0, 0, 0, 0, 0},
+		{0, 0, 0, 0, 0, 0, 0, 0},
+		{0, 0, 0, 0, 0, 19, 19, 19},
+		{0, 0, 0, 0, 0, 19, 19, 19},
+		{0, 0, 0, 0, 0, 19, 19, 19}
+	},
+	{
+		{29, 29, 29, 29, 29, 29, 29, 29},
+		{29, 29, 29, 29, 29, 29, 29, 29},
+		{29, 29, 29, 29, 29, 29, 29, 29},
+		{29, 29, 29, 29, 29, 29, 29, 29},
+		{19, 19, 19, 19, 0, 19, 19, 19},
+		{19, 19, 19, 19, 19, 19, 19, 19},
+		{19, 19, 19, 19, 19, 19, 19, 19},
+		{19, 19, 19, 19, 19, 19, 19, 19}
+	},
+	{
+		{29, 29, 29, 29, 29, 29, 29, 29},
+		{29, 29, 29, 29, 29, 29, 29, 29},
+		{0, 0, 0, 0, 0, 0, 0, 0},
+		{0, 0, 0, 0, 0, 0, 0, 0},
+		{0, 0, 0, 0, 0, 0, 0, 0},
+		{0, 0, 0, 0, 0, 0, 0, 0},
+		{19, 19, 19, 19, 19, 19, 19, 19},
+		{19, 19, 19, 19, 19, 19, 19, 19}
 	}
+}
+
+local main_mass_solver = {
+	{
+		nil
+	}, 
+	{
+		nil
+	}, 
+	{
+		nil
+	},
+	{
+		nil
+	},
+	{
+		nil
+	},
+	{
+		nil
+	},
+	{
+		nil
+	},
+	{		
+		{15, 15, 15},
+		{0, 0, 0},
+		{0, 0, 0},
+		{45, 45, 45}
+	},
+	{	
+		{15, 0, 15},
+		{0, 0, 0},	
+		{45, 0, 45}
+	},
+	{
+		{15},
+		{0, 0, 0, 45},		
+		{15, 45, 0},		
+		{0, 0}
+	},
+	{
+		{ 19, 19, 19, 19, 0, 29, 29, 29, 29}
+	},
+	{
+		nil
+	},
+	{
+		{nil, nil, nil, nil},
+		{nil, nil, nil, nil},
+		{nil, nil, nil, nil},
+		{11, nil, nil, nil}
+		
+	},
+	{
+		{nil, nil, nil, 12},
+		{nil, nil, nil, 13},
+		{nil, nil, 15, 14},
+		{11, 14, 13, 0}
+	},
+	{
+		{19, 19, 19, 0, 0, 0, 0, 0},
+		{19, 19, 19, 0, 0, 0, 0, 0},
+		{19, 19, 19, 0, 0, 0, 0, 0},
+		{0, 0, 0, 0, 0, 0, 0, 0},
+		{0, 0, 0, 0, 0, 0, 0, 0},
+		{0, 0, 0, 0, 0, 29, 29, 29},
+		{0, 0, 0, 0, 0, 29, 29, 29},
+		{0, 0, 0, 0, 0, 29, 29, 29}
+	},
+	{
+		{19, 19, 19, 19, 19, 19, 19, 19},
+		{19, 19, 19, 19, 19, 19, 19, 19},
+		{19, 19, 19, 19, 19, 19, 19, 19},
+		{19, 19, 19, 19, 0, 19, 19, 19},
+		{29, 29, 29, 29, 29, 29, 29, 29},
+		{29, 29, 29, 29, 29, 29, 29, 29},
+		{29, 29, 29, 29, 29, 29, 29, 29},
+		{29, 29, 29, 29, 29, 29, 29, 29}
+	},
+	{
+		{19, 19, 19, 19, 19, 19, 19, 19},
+		{19, 19, 19, 19, 19, 19, 19, 19},
+		{0, 0, 0, 0, 0, 0, 0, 0},
+		{0, 0, 0, 0, 0, 0, 0, 0},
+		{0, 0, 0, 0, 0, 0, 0, 0},
+		{0, 0, 0, 0, 0, 0, 0, 0},
+		{29, 29, 29, 29, 29, 29, 29, 29},
+		{29, 29, 29, 29, 29, 29, 29, 29}
+	}
+}
+
+local name_chess = {}
+
+-- Board
+local setBoard = function(a)
+	return masscopy(main_mass[a])
 end
 
-local board = setBoard()
+function showDiscription(number_game, pl)
+	ui.addPopup(-100, 0, name_chess[number_game][3], pl, 100, 50, 600, true)
+end
 
 local piece_ts = {
 	king = 1,
@@ -88,10 +323,11 @@ local piece_ts = {
 	knight = 5,--конь
 	pawn = 6,--пешка
 	checker = 7,--шашка
-	checker_queen = 8--дамка
+	checker_queen = 8,--дамка
+	checker_per = 9--шашка для уголков
 }
 
-piece_ts_img = {
+local piece_ts_img = {
 	{--white
 		{"178fee23398.png", 0, 0, 1, 1}, 
 		{"178fee2a8cf.png", 0, 0, 1, 1}, 
@@ -101,7 +337,9 @@ piece_ts_img = {
 		{"178fee47dad.png", 0, 0, 1, 1},
 		
 		{"178fee4f2e4.png", 0, 0, 1, 1}, 
-		{"178fee50a55.png", 0, 0, 1, 1}
+		{"178fee50a55.png", 0, 0, 1, 1},
+		
+		{"178fee4f2e4.png", 0, 0, 1, 1}
 	},
 	{--pink
 		{"178fee24b09.png", 0, 0, 1, 1}, 
@@ -112,7 +350,9 @@ piece_ts_img = {
 		{"178fee49520.png", 0, 0, 1, 1},
 		
 		{"178fee596ff.png", 0, 0, 1, 1}, 
-		{"178fee5af22.png", 0, 0, 1, 1}
+		{"178fee5af22.png", 0, 0, 1, 1},
+		
+		{"178fee596ff.png", 0, 0, 1, 1}
 	}
 	,
 	{--yellow
@@ -124,7 +364,9 @@ piece_ts_img = {
 		{"178fee4ac93.png", 0, 0, 1, 1},
 		
 		{"178fee596ff.png", 0, 0, 1, 1}, 
-		{"178fee5af22.png", 0, 0, 1, 1}
+		{"178fee5af22.png", 0, 0, 1, 1},
+		
+		{"178fee596ff.png", 0, 0, 1, 1}
 	}
 	,
 	{--red
@@ -136,7 +378,9 @@ piece_ts_img = {
 		{"178fee4c404.png", 0, 0, 1, 1},
 		
 		{"178fee596ff.png", 0, 0, 1, 1}, 
-		{"178fee5af22.png", 0, 0, 1, 1}
+		{"178fee5af22.png", 0, 0, 1, 1},
+		
+		{"178fee596ff.png", 0, 0, 1, 1}
 	}
 	,
 	{--blue
@@ -148,7 +392,9 @@ piece_ts_img = {
 		{"178fee4db73.png", 0, 0, 1, 1},
 		
 		{"178fee596ff.png", 0, 0, 1, 1}, 
-		{"178fee5af22.png", 0, 0, 1, 1}
+		{"178fee5af22.png", 0, 0, 1, 1},
+		
+		{"178fee596ff.png", 0, 0, 1, 1}
 	}
 	,
 	{--black
@@ -160,7 +406,9 @@ piece_ts_img = {
 		{"178fee21c27.png", 0, 0, 1, 1},
 		
 		{"178fee596ff.png", 0, 0, 1, 1}, 
-		{"178fee5af22.png", 0, 0, 1, 1}
+		{"178fee5af22.png", 0, 0, 1, 1},
+		
+		{"178fee596ff.png", 0, 0, 1, 1}
 	}
 	
 }
@@ -171,7 +419,20 @@ function showBoard(p, number_board, bool_show_board)
 if party[number_board]==nil then
 	return
 end
-
+if players_images[p][1]~=nil then
+	for i, j in pairs(players_images[p][1]) do
+		if j~=nil then
+			tfm.exec.removeImage(j)
+		end
+	end
+end
+if players_images[p][2]~=nil then
+	for i, j in pairs(players_images[p][2]) do
+		if j~=nil then
+			tfm.exec.removeImage(j)
+		end
+	end
+end
 
 	for i,j in pairs(party[number_board][1]) do
 		
@@ -183,15 +444,15 @@ end
 	end
 end
 
-image_board = {
+local image_board = {
 	
-	{{"178fee5c66f.png", 0, 0, 1, 1}, {"178fee521c8.png", 0, 0, 1, 1}},
-	{{"178fee5f556.png", 0, 0, 1, 1}, {"178fee550b0.png", 0, 0, 1, 1}},
-	{{"178fee5dde2.png", 0, 0, 1, 1}, {"178fee5393a.png", 0, 0, 1, 1}}
+	{{"178fee5c66f.png", 0, 0, 1, 1}, {"178fee521c8.png", 0, 0, 1, 1}, {"178fee5f556.png", 0, 0, 1, 1}},
+	{{"178fee5f556.png", 0, 0, 1, 1}, {"178fee550b0.png", 0, 0, 1, 1}, {"178fee5dde2.png", 0, 0, 1, 1}},
+	{{"178fee5dde2.png", 0, 0, 1, 1}, {"178fee5393a.png", 0, 0, 1, 1}, {"178fee5c66f.png", 0, 0, 1, 1}}
 	
 }
 
-image_choose = {
+local image_choose = {
 	{{"178fee57f8f.png", 0, 0, 1, 1}, {"178fee5681e.png", 0, 0, 1, 1}}
 }
 
@@ -203,7 +464,34 @@ function string.split(s, delimiter)
     return result;
 end
 
+table.copy = function(list)
+	local out = {}
+	for k,v in next, list do
+		out[k] = (type(v) == "table" and table.copy(v) or v)
+	end
+	return out
+end
 
+masscopy = function(list)
+	local out = {}
+	for k,v in next, list do
+		out[k] = {}
+		for kx,vx in next, v do
+			out[k][kx] = vx
+		end
+	end
+	return out
+end
+
+content_in_mass = function(ch, mass)
+	local bool_y = false
+	for k,v in next, mass do
+		if v==ch then
+			bool_y=true
+		end
+	end
+	return bool_y
+end
 
 function showBoardSquare(row, column, pl, bool_show_board)
 	local setting_pl_party = players_images[pl][3][1]
@@ -214,11 +502,14 @@ function showBoardSquare(row, column, pl, bool_show_board)
 	
 	local square = party[setting_pl_party][1][row][column]
 	
-	local testsmesh = 0
+	local side = players_images[pl][5]
+	local sm = getsmesh(name_chess[party[setting_pl_party][5]][4], name_chess[party[setting_pl_party][5]][5], side)
+	local testsmesh_x = sm[1]
+	local testsmesh_y = sm[2]
 	
-	if pl == "Deff83#0000" then
-		testsmesh = 0
-	end
+	-- if pl == "Deff83#0000" then
+		-- testsmesh_x = 0
+	-- end
 	
 	------print(pl..">"..row..":"..column)
 	
@@ -229,12 +520,12 @@ function showBoardSquare(row, column, pl, bool_show_board)
 				if players_images[pl][1][row*100+column]~= nil then
 					tfm.exec.removeImage(players_images[pl][1][row*100+column])
 				end
-				players_images[pl][1][row*100+column] = tfm.exec.addImage(image_board[1][1][1], "?1", image_board[1][1][2]+column*44+200+testsmesh, image_board[1][1][3]+row*44-22, pl, image_board[1][1][4], image_board[1][1][5], 0, 1)
+				players_images[pl][1][row*100+column] = tfm.exec.addImage(image_board[set_board][1][1], "?1", image_board[set_board][1][2]+side*column*44+200+testsmesh_x, image_board[set_board][1][3]+side*row*44-22+testsmesh_y, pl, image_board[set_board][1][4], image_board[set_board][1][5], 0, 1)
 			else
 				if players_images[pl][1][row*100+column]~= nil then
 					tfm.exec.removeImage(players_images[pl][1][row*100+column])
 				end
-				players_images[pl][1][row*100+column] = tfm.exec.addImage(image_board[1][2][1], "?1", image_board[1][2][2]+column*44+200+testsmesh, image_board[1][2][3]+row*44-22, pl, image_board[1][2][4], image_board[1][2][5], 0, 1)
+				players_images[pl][1][row*100+column] = tfm.exec.addImage(image_board[set_board][2][1], "?1", image_board[set_board][2][2]+side*column*44+200+testsmesh_x, image_board[set_board][2][3]+side*row*44-22+testsmesh_y, pl, image_board[set_board][2][4], image_board[set_board][2][5], 0, 1)
 			end
 			
 			if party[setting_pl_party][2] ~= nil then
@@ -243,13 +534,13 @@ function showBoardSquare(row, column, pl, bool_show_board)
 					----print("tyt")
 					tfm.exec.removeImage(players_images[pl][1][row*100+column])
 					
-					players_images[pl][1][row*100+column] = tfm.exec.addImage(image_board[2][1][1], "?2", image_board[2][1][2]+party[setting_pl_party][2][1][2]*44+200+testsmesh, image_board[2][1][3]+party[setting_pl_party][2][1][1]*44-22, pl, image_board[2][1][4], image_board[2][1][5], 0, 1)
+					players_images[pl][1][row*100+column] = tfm.exec.addImage(image_board[set_board][3][1], "?2", image_board[set_board][3][2]+party[setting_pl_party][2][1][2]*44*side+200+testsmesh_x, image_board[set_board][3][3]+party[setting_pl_party][2][1][1]*44*side-22+testsmesh_y, pl, image_board[set_board][3][4], image_board[set_board][3][5], 0, 1)
 				end
 				if (party[setting_pl_party][2][2][1] == row) and (party[setting_pl_party][2][2][2] == column) then
 				----print("tyt2")
 					tfm.exec.removeImage(players_images[pl][1][row*100+column])
 					
-					players_images[pl][1][row*100+column] = tfm.exec.addImage(image_board[2][1][1], "?2", image_board[2][1][2]+party[setting_pl_party][2][2][2]*44+200+testsmesh, image_board[2][1][3]+party[setting_pl_party][2][2][1]*44-22, pl, image_board[2][1][4], image_board[2][1][5], 0, 1)
+					players_images[pl][1][row*100+column] = tfm.exec.addImage(image_board[set_board][3][1], "?2", image_board[set_board][3][2]+party[setting_pl_party][2][2][2]*44*side+200+testsmesh_x, image_board[set_board][3][3]+party[setting_pl_party][2][2][1]*44*side-22+testsmesh_y, pl, image_board[set_board][3][4], image_board[set_board][3][5], 0, 1)
 				end
 			end
 		end
@@ -267,8 +558,27 @@ function showBoardSquare(row, column, pl, bool_show_board)
 				------print(players_images[pl][2][row*100+column])
 				tfm.exec.removeImage(players_images[pl][2][row*100+column])
 			end
+			if players_images[pl][2][row*100+column+20000] ~= nil then
+				tfm.exec.removeImage(players_images[pl][2][row*100+column+20000])
+			end
+			
+			if main_mass_solver[party[setting_pl_party][5]]~=nil and main_mass_solver[party[setting_pl_party][5]][row]~=nil and main_mass_solver[party[setting_pl_party][5]][row][column]~=nil then
+				--print(party[setting_pl_party][5])
+				local square_d = main_mass_solver[party[setting_pl_party][5]][row][column]
+				local color_piece_t_d = math.floor(square_d/10)+0
+				local item_piece_t_d = square_d%10
+				if color_piece_t_d~=nil and item_piece_t_d~=nil and (square_d ~= 0) then
+					players_images[pl][2][row*100+column+20000] = tfm.exec.addImage(piece_ts_img[color_piece_t_d][item_piece_t_d][1], "?4", piece_ts_img[color_piece_t_d][item_piece_t_d][2]+column*44*side+200+testsmesh_x, piece_ts_img[color_piece_t_d][item_piece_t_d][3]+row*44*side-22+testsmesh_y, pl, piece_ts_img[color_piece_t_d][item_piece_t_d][4], piece_ts_img[color_piece_t_d][item_piece_t_d][5], 0, 0.2)
+					--print(color_piece_t_d)
+					--print(item_piece_t_d)
+				end
+			end
+			
+			
 			if (square ~= 0) and item_piece_t~=0 and color_piece_t~=0 and piece_ts_img[color_piece_t]~=nil and piece_ts_img[color_piece_t][item_piece_t]~=nil then
-				players_images[pl][2][row*100+column] = tfm.exec.addImage(piece_ts_img[color_piece_t][item_piece_t][1], "?5", piece_ts_img[color_piece_t][item_piece_t][2]+column*44+200+testsmesh, piece_ts_img[color_piece_t][item_piece_t][3]+row*44-22, pl, piece_ts_img[color_piece_t][item_piece_t][4], piece_ts_img[color_piece_t][item_piece_t][5], 0, 1)
+				
+				players_images[pl][2][row*100+column] = tfm.exec.addImage(piece_ts_img[color_piece_t][item_piece_t][1], "?5", piece_ts_img[color_piece_t][item_piece_t][2]+column*44*side+200+testsmesh_x, piece_ts_img[color_piece_t][item_piece_t][3]+row*44*side-22+testsmesh_y, pl, piece_ts_img[color_piece_t][item_piece_t][4], piece_ts_img[color_piece_t][item_piece_t][5], 0, 1)
+				
 			end
 		end
 		
@@ -282,14 +592,35 @@ end
 
 
 function init()
-	--board = setBoard()
-	--showBoard()
 	
+	for k, l in pairs(main_mass) do
+		name_chess[k] = {name_g[lang][k], doppravil[k], description[lang][k], 0, 0}
+	end
+	
+	for i, j in pairs(name_chess) do
+		local x_max = 0
+		local y_max = 0
+		
+		for k, l in pairs(main_mass[i]) do
+			y_max = y_max + 1
+			local x_max_y = 0
+			for k, l in pairs(main_mass[i][k]) do
+				x_max_y = x_max_y + 1
+			end
+			if x_max_y> x_max then
+				x_max = x_max_y
+			end
+		end
+		name_chess[i][4] = x_max
+		name_chess[i][5] = y_max
+	end
 	
 	
 end
-boolstartlua = true
-startcount = 0
+
+
+local boolstartlua = true
+local startcount = 0
 eventLoop = function()
 	if boolstartlua then
 	startcount = startcount + 1
@@ -304,6 +635,13 @@ eventLoop = function()
 	end
 end
 
+-- Player left
+eventPlayerLeft = function(n)
+end
+
+-- Respawn
+eventPlayerDied = tfm.exec.respawnPlayer
+
 -- New Game
 eventNewPlayer = function(n)
 	
@@ -317,6 +655,7 @@ eventNewPlayer = function(n)
 	players_images[n][2] = {}--картинки фигур
 	players_images[n][3] = {1}
 	players_images[n][4] = {}--массив нажатий
+	players_images[n][5] = 1--сторона доски
 	
 	-- if n == "Deff83#0000" then
 		-- ----print("wwwwwwwwwwwww:"..n)
@@ -327,13 +666,14 @@ eventNewPlayer = function(n)
 	
 	if party[setting_pl_party]==nil then
 		party[setting_pl_party] = {}
-		party[setting_pl_party][1] = setBoard()
-		party[setting_pl_party][2] = {{1, 2}, {6, 8}}
-		party[setting_pl_party][3] = {n}
+		party[setting_pl_party][1] = setBoard(start_party_classic)
+		party[setting_pl_party][2] = {{0, 0}, {0, 0}}
+		party[setting_pl_party][3] = {{n, {6, 5, 4, 3, 2, 1}}}
 		party[setting_pl_party][4] = {}
+		party[setting_pl_party][5] = start_party_classic
 		
 	else
-		party[setting_pl_party][3][#party[setting_pl_party][3]+1] = n
+		party[setting_pl_party][3][#party[setting_pl_party][3]+1] = {n, {6, 5, 4, 3, 2, 1}}
 	end
 	
 	
@@ -444,8 +784,8 @@ function trans(pl)
 	
 						
 				
-	if piece_t_choose == piece_ts.rook or piece_t_choose == piece_ts.queen or piece_t_choose == piece_ts.king then
-		local range = (piece_t_choose == piece_ts.king and 1 or 8)
+	if piece_t_choose == piece_ts.rook or piece_t_choose == piece_ts.queen or piece_t_choose == piece_ts.king or piece_t_choose == piece_ts.checker_per then
+		local range = ((piece_t_choose == piece_ts.king or piece_t_choose == piece_ts.checker_per) and 1 or 8)
 		
 		-- Horizontal and Vertical
 		local coord = {{-1, 0}, {0, -1}, {1, 0}, {0, 1}}
@@ -474,9 +814,9 @@ function trans(pl)
 		end
 	end
 	
-	if piece_t_choose == piece_ts.bishop or piece_t_choose == piece_ts.queen or piece_t_choose == piece_ts.king or piece_t_choose == piece_ts.pawn then
+	if piece_t_choose == piece_ts.bishop or piece_t_choose == piece_ts.queen or piece_t_choose == piece_ts.king or piece_t_choose == piece_ts.pawn or piece_t_choose == piece_ts.checker_per then
 		local isPawn = piece_t_choose == piece_ts.pawn
-		local range = ((piece_t_choose == piece_ts.king or isPawn) and 1 or 8)
+		local range = ((piece_t_choose == piece_ts.king or isPawn or piece_t_choose == piece_ts.checker_per) and 1 or 8)
 		
 		-- Diagonal
 		local coord = {{-1, -1}, {-1, 1}, {1, -1}, {1, 1}}
@@ -515,6 +855,26 @@ function trans(pl)
 			end
 		end
 	end
+	
+	if piece_t_choose == piece_ts.checker_per then
+		local coord = {{-1, -1}, {-1, 1}, {1, -1}, {1, 1}, {-1, 0}, {0, -1}, {1, 0}, {0, 1}}
+		for i = 1, 8 do
+			local newRow = row + 2*coord[i][1]
+			local newColumn = column + 2*coord[i][2]
+			if party[party_n][1][row + coord[i][1]]~=nil then
+				local figk = party[party_n][1][row + coord[i][1]][column + coord[i][2]]
+				if figk == nil or figk == 0 then
+				else
+					--if math.floor(figk/10)~= fig and (party[party_n][1][newRow]~=nil and party[party_n][1][newRow][newColumn] == 0) then
+						showMove(pl, newRow, newColumn, party_n, piece_t_choose_full, true)
+					--end
+				end
+			end
+		end
+		
+	end
+	
+	
 	if piece_t_choose == piece_ts.checker then
 			--print("p")
 		-- Diagonal
@@ -621,7 +981,44 @@ end
 --------------------------------------------------------------------------------------------------
 --------------------------------------------------------------------------------------------------
 --------------------------------------------------------------------------------------------------
-
+function getsmesh(x_count, y_count, side)
+	local sm = {0, 0}
+	if x_count==4 then
+		sm[1] = 90*side
+	end
+	if y_count==4 then
+		sm[2] = 90*side-40
+	end
+	if x_count==5 then
+		sm[1] = 60*side
+	end
+	if y_count==5 then
+		sm[2] = 60*side-40
+	end
+	if x_count==9 then
+		sm[1] = -20*side-20
+	end
+	if y_count==9 then
+		sm[2] = -20*side-40
+	end
+	if x_count==3 then
+		sm[1] = 105*side
+	end
+	if y_count==3 then
+		sm[2] = 105*side-40
+	end
+	if x_count==1 then
+		sm[1] = 150*side
+	end
+	if y_count==1 then
+		sm[2] = 150*side-40
+	end
+	if side == -1 then
+		sm[1] = sm[1]+396
+		sm[2] = sm[2]+396
+	end
+	return sm
+end
 
 function showMove(pl, row, column, party_n, stor, bool_show_p)
 
@@ -630,17 +1027,23 @@ if party[party_n][1][row]~=nil then
 
 	-- if  then
 		
-			-- players_images[pl][4][4][#players_images[pl][4][4]+1] = tfm.exec.addImage(image_choose[1][2][1], "!1", image_choose[1][2][2]+column*44+200, image_choose[1][2][3]+row*44-22, pl, image_choose[1][2][4], image_choose[1][2][5], 0, 1)
+			-- players_images[pl][4][4][#players_images[pl][4][4]+1] = tfm.exec.addImage(image_choose[1][2][1], "!1", image_choose[1][2][2]+column*44*side+200, image_choose[1][2][3]+row*44*side-22, pl, image_choose[1][2][4], image_choose[1][2][5], 0, 1)
 			-- players_images[pl][4][5][#players_images[pl][4][5]+1] = {row, column}
 			
 
 		-- return
 	-- end
-	
+	if name_chess[party[party_n][5]][2][1] then
+		bool_show_p = false
+	end
+	local side = players_images[pl][5]
+	local sm = getsmesh(name_chess[party[party_n][5]][4], name_chess[party[party_n][5]][5], side)
+	local smesh_x = sm[1]
+	local smesh_y = sm[2]
 	
 	if fig ~= nil and (not (math.floor(fig/10) == math.floor(stor/10))) and (fig == 0 or bool_show_p) then
 		
-			players_images[pl][4][4][#players_images[pl][4][4]+1] = tfm.exec.addImage(image_choose[1][2][1], "!1", image_choose[1][2][2]+column*44+200, image_choose[1][2][3]+row*44-22, pl, image_choose[1][2][4], image_choose[1][2][5], 0, 1)
+			players_images[pl][4][4][#players_images[pl][4][4]+1] = tfm.exec.addImage(image_choose[1][2][1], "!1", image_choose[1][2][2]+column*44*side+200+smesh_x, image_choose[1][2][3]+row*44*side-22+smesh_y, pl, image_choose[1][2][4], image_choose[1][2][5], 0, 1)
 			players_images[pl][4][5][#players_images[pl][4][5]+1] = {row, column}
 		
 	end
@@ -654,17 +1057,38 @@ function eventMouse(pl, xpl, ypl)
 	end
 	local party_local = party[players_images[pl][3][1]]
 	
-	local x_click = math.floor((xpl-200)/44)
-	local y_click = (math.floor((ypl+22)/44))
 	
+	local side = players_images[pl][5]
+	
+	local sm = getsmesh(name_chess[party_local[5]][4], name_chess[party_local[5]][5], side)
+	local smesh_x = sm[1]
+	local smesh_y = sm[2]
+		
+	local x_click = math.floor((xpl-200-smesh_x)/44*side)
+	local y_click = (math.floor((ypl+22-smesh_y)/44*side))
+	
+	if (side==-1) then
+		x_click = x_click + 1
+		y_click = y_click + 1
+	end
 	------print(x_click..":"..y_click)
 	
-	-- if party_local[1] then--если партия - класические шахматы
 	
 		if (players_images[pl][4][1] ==nil) then
 			if  party_local[1][y_click]~=nil and party_local[1][y_click][x_click] ~= 0 and party_local[1][y_click][x_click]~=nil then
+				
+				if  (((party_local[3]~=nil and  party_local[3][1]~=nil and party_local[3][1][1]==pl and content_in_mass(math.floor(party_local[1][y_click][x_click]/10), party_local[3][1][2])==true)) or ((party_local[3]~=nil and  party_local[3][2]~=nil and party_local[3][2][1]==pl and content_in_mass(math.floor(party_local[1][y_click][x_click]/10), party_local[3][2][2])==true)))==false then
+					print("tytr")
+					print(math.floor(party_local[1][y_click][x_click]/10))
+					print(party_local[3][1][2][1])
+					print(party_local[3][1][1])
+					print((party_local[3]~=nil and  party_local[3][1]~=nil and party_local[3][1][1]==pl and content_in_mass(math.floor(party_local[1][y_click][x_click]/10), party_local[3][1][2])==true))
+					return
+				end
+
+				
 				players_images[pl][4][1] = {y_click, x_click}
-				players_images[pl][4][3] = tfm.exec.addImage(image_choose[1][1][1], "!1", image_choose[1][1][2]+x_click*44+200, image_choose[1][1][3]+y_click*44-22, pl, image_choose[1][1][4], image_choose[1][1][5], 0, 1)
+				players_images[pl][4][3] = tfm.exec.addImage(image_choose[1][1][1], "!1", image_choose[1][1][2]+x_click*44*side+200+smesh_x, image_choose[1][1][3]+y_click*44*side-22+smesh_y, pl, image_choose[1][1][4], image_choose[1][1][5], 0, 1)
 				if players_images[pl][4][4]~=nil then
 					for i, j in pairs(players_images[pl][4][4]) do
 						tfm.exec.removeImage(j)
@@ -755,8 +1179,8 @@ function eventMouse(pl, xpl, ypl)
 	-- end
 end
 
-tmp_savefig = 0
-tmp_move_square = nil
+local tmp_savefig = 0
+local tmp_move_square = nil
 
 function spawn_piece(item, row, column, party_m)	
 	if party[party_m] == nil then
@@ -777,7 +1201,7 @@ function spawn_piece(item, row, column, party_m)
 	end
 end
 
-function changeMove(move, bool_writed)
+function changeMove(move, bool_writed, bool_up)
 	local first = move[1]
 	local second = move[2]
 	
@@ -883,7 +1307,30 @@ function changeMove(move, bool_writed)
 	end
 	
 	party[party_m][1][second[1]][second[2]] = item
-	
+
+	if name_chess[party[party_m][5]][2][2] then
+		if bool_up then
+			if item%10 >1 and item%10<6 then
+				--print(item)
+				if item%10 == 5 then
+					party[party_m][1][second[1]][second[2]] = math.floor(item/10)*10+2
+				else
+					party[party_m][1][second[1]][second[2]] = math.floor(item/10)*10+item%10 +1
+				end
+					--print(party[party_m][1][second[1]][second[2]])
+			end
+		else
+			if item%10 >1 and item%10<6 then
+				--print(item)
+				if item%10 == 2 then
+					party[party_m][1][second[1]][second[2]] = math.floor(item/10)*10+5
+				else
+					party[party_m][1][second[1]][second[2]] = math.floor(item/10)*10+item%10 - 1
+				end
+					--print(party[party_m][1][second[1]][second[2]])
+			end
+		end
+	end
 	
 	
 	
@@ -945,6 +1392,21 @@ function eventTextAreaCallback(id, pl, cmd)
 	
 		changeMove({{1,1}, {3,4}, 1}, true)
 	end
+	if cmd == "help" then
+	
+		showDiscription(party[setting_pl_party][5], pl)
+	end
+	if cmd == "new_game_s" then
+		show_new_game(pl)
+	end
+	if cmd == "open_game_s" then
+		show_open_room(pl)
+	end
+	if cmd == "cancel" then
+		ui.removeTextArea(id, pl)
+	end
+	
+	
 	
 	if cmd:sub(0, 9) == "transform" then
 		local piece_s = (cmd:sub(10, 10))+0
@@ -1011,6 +1473,8 @@ function eventTextAreaCallback(id, pl, cmd)
 	end
 	
 	if cmd:sub(0, 5) == "party" then
+	
+		ui.removeTextArea(-670, pl)
 		local party_s = cmd:sub(6, -1)
 		----print(party_s)
 		players_images[pl][3][1] = party_s+0
@@ -1033,26 +1497,55 @@ function eventTextAreaCallback(id, pl, cmd)
 		test()
 	end
 	
-	if cmd == "new_party" then
-		local num_new_party = #party + 1
-		players_images[pl][3] = {num_new_party}
+	if cmd:sub(0, 9) == "new_party" then
+		ui.removeTextArea(-680, pl)
+		local party_so = cmd:sub(10, -1)
+		if doppravil[party_so+0][3] then
+			show_choose_pl_list(pl, party_so)
+			return
+		end
+		start_g(party_so, pl, nil)
+		
+	end
+	
+	if cmd:sub(0, 6) == "choose" then
+		ui.removeTextArea(id, pl)
+		local apponent_so = cmd:sub(7, -1)
+		
+		if apponent_so~= nil then
+			local apponent_so_mass = string.split(apponent_so, "&")
+			show_dialog_apponent(apponent_so_mass[2], pl, apponent_so_mass[1])
+		end
+		
+		
+	end
+	if cmd:sub(0, 6) == "accept" then
+		ui.removeTextArea(id, pl)
+		local apponent_so = cmd:sub(7, -1)
+		print(apponent_so)
+		print(pl)
+		if apponent_so~= nil then
+			local apponent_so_mass = string.split(apponent_so, "&")
+			start_g(apponent_so_mass[2], pl, apponent_so_mass[1])
+		end
+		
+		
+	end
+	
+	
+	if cmd == "return_board" then		
+		players_images[pl][5] = players_images[pl][5] * (-1)
 		if (players_images[pl][4][1] ~=nil) then
 			tfm.exec.removeImage(players_images[pl][4][3])
+			
 			for i, j in pairs(players_images[pl][4][4]) do
 				tfm.exec.removeImage(j)
 			end
 		end
-		
 		players_images[pl][4] = {}
 
-		party[num_new_party] = {}
-		party[num_new_party][1] = setBoard()
-		party[num_new_party][2] = {{1, 2}, {6, 8}}
-		party[num_new_party][3] = {pl, "test#0000"}
-		party[num_new_party][4] = {}
-		showBoard(pl, players_images[pl][3][1], true)
-		ui.removeTextArea(-1002, pl)
 		ui.removeTextArea(-700000, pl)
+		showBoard(pl, players_images[pl][3][1], true)
 		test_hod()
 		test()
 	end
@@ -1068,10 +1561,10 @@ function eventTextAreaCallback(id, pl, cmd)
 			
 			if (last_move[1]%10 == piece_ts.checker or last_move[1]%10 == piece_ts.checker_queen) and last_move[4] ~= 0 then
 				--print("uiu")
-				changeMove({cletka1, cletka2, setting_pl_party}, false)				
+				changeMove({cletka1, cletka2, setting_pl_party}, false, true)				
 				spawn_piece(last_move[4], cletka1[1]+((cletka2[1]-cletka1[1])>0 and 1 or -1), cletka1[2]+((cletka2[2]-cletka1[2])>0 and 1 or -1), setting_pl_party)
 			else
-				changeMove({cletka1, cletka2, setting_pl_party}, false)
+				changeMove({cletka1, cletka2, setting_pl_party}, false, true)
 				spawn_piece(last_move[4], cletka1[1], cletka1[2], setting_pl_party)
 			end
 			
@@ -1084,7 +1577,7 @@ function eventTextAreaCallback(id, pl, cmd)
 					local dop_p_m_o_hod = dop_p_m_o[j]
 					-- print(dop_p_m_o_hod[1][1]..":"..dop_p_m_o_hod[1][2])
 					-- print(dop_p_m_o_hod[2][1]..":"..dop_p_m_o_hod[2][2])
-					changeMove({dop_p_m_o_hod[2], dop_p_m_o_hod[1], setting_pl_party}, false)
+					changeMove({dop_p_m_o_hod[2], dop_p_m_o_hod[1], setting_pl_party}, false, true)
 				end
 			end
 			if dop_resp_p_m~=nil then
@@ -1116,11 +1609,80 @@ function eventTextAreaCallback(id, pl, cmd)
 	end
 end
 
+function start_g(party_so, pl, add_pl)
+	local num_new_party = #party + 1
+	players_images[pl][3] = {num_new_party}
+	if (players_images[pl][4][1] ~=nil) then
+		tfm.exec.removeImage(players_images[pl][4][3])
+		for i, j in pairs(players_images[pl][4][4]) do
+			tfm.exec.removeImage(j)
+		end
+	end
+	
+	players_images[pl][4] = {}
+
+	party[num_new_party] = {}
+	party[num_new_party][1] = setBoard(party_so+0)
+	party[num_new_party][2] = {{0, 0}, {0, 0}}
+	
+	if add_pl~=nil then
+		party[num_new_party][3] = {{pl, {6}}, {add_pl, {1}}}
+		players_images[add_pl][3] = {num_new_party+0}
+		if (players_images[add_pl][4][1] ~=nil) then
+			tfm.exec.removeImage(players_images[add_pl][4][3])
+			
+			for i, j in pairs(players_images[add_pl][4][4]) do
+				tfm.exec.removeImage(j)
+			end
+		end
+
+		
+		players_images[add_pl][4] = {}
+		ui.removeTextArea(-700000, add_pl)
+	else
+		party[num_new_party][3] = {{pl, {6, 5, 4, 3, 2, 1}}}
+	end
+	
+	party[num_new_party][4] = {}
+	party[num_new_party][5] = party_so+0
+	showBoard(pl, players_images[pl][3][1], true)
+	if add_pl~=nil then
+		showBoard(add_pl, players_images[add_pl][3][1], true)
+	end
+	
+	ui.removeTextArea(-1002, pl)
+	ui.removeTextArea(-700000, pl)
+	test_hod()
+	test()
+end
+
+function show_dialog_apponent(party_so, pl, app)
+	local dialog_text = pl.." want to play with you - " .. name_chess[party_so+0][1] .. "<br><p align='center'><a href='event:accept"..pl.."&"..party_so.."'>accept</a><br><p align='center'><a href='event:cancel'>cancel</a>"
+	ui.addTextArea(-780, dialog_text, app, 200, 50, 400, nil, 1, 0x0000ff, 0.9,true)
+end
+
+function show_choose_pl_list(pl, party_so)
+	local ch_list = ""
+	for nick in pairs(tfm.get.room.playerList) do
+		if nick~=pl then
+			ch_list = ch_list.."<a href='event:choose"..nick.."&"..party_so.."'>"..nick.."</a><br>"
+		end
+	end
+	ch_list = ch_list .. "<br><p align='center'><a href='event:cancel'>cancel</a>"
+	ui.addTextArea(-750, ch_list, pl, 200, 50, 400, nil, 1, 0x0000ff, 0.9,true)
+end
+
 function test_hod()
 	for nick in pairs(tfm.get.room.playerList) do
+		--print(players_images[nick][3][1]..nick)
+		
 		local massplk = party[players_images[nick][3][1]][4]
 		local info_partys_pl = ""
-		for k = 1, #massplk do
+		local start_ma = #massplk - 30
+		if start_ma < 1 then
+			start_ma = 1
+		end
+		for k = start_ma, #massplk do
 			info_partys_pl = info_partys_pl.."<font color='#"..color_piece_mass[math.floor(massplk[k][1]/10)].."'>"..symbol_piece_mass[massplk[k][1]%10].."</font>"..massplk[k][2][1]..massplk[k][2][2]..""..massplk[k][3][1]..massplk[k][3][2]..""..((massplk[k][4]~=0 or massplk[k][7]~=nil) and "x" or "").." "..""
 		end
 		
@@ -1130,34 +1692,29 @@ end
 
 function test()
 
-ui.addTextArea(-66, "<a href='event:test1'>test1</a><br><a href='event:test2'>test2</a><br><a href='event:test3'>move</a><br>", nil, 725, 27, 50, nil, 1, 0x0000ff, 0.7,true)
+ui.addTextArea(-66, "<a href='event:help'>?</a>", nil, 775, 27, 20, nil, 1, 0x0000ff, 0.7,true)
 
 
-local info_partys = ""
 
-
-local ok = 0
-for i, j in pairs(party) do
-	ok = ok + 1
-	info_partys = info_partys.."<a href='event:party"..i.."'>"..i.."</a><br>"
-	
-	
-	
-
-end
 
 
 for nick in pairs(tfm.get.room.playerList) do
 	if players_images[nick]~=nil then
-		ui.addTextArea(-1000, ""..players_images[nick][3][1], nick, 60, 27, 50, nil, 1, 0x0000ff, 0.7,true)
+		ui.addTextArea(-1000, ""..players_images[nick][3][1], nick, 80, 27, 70, nil, 1, 0x0000ff, 0.7,true)
 		
 		local masspl = party[players_images[nick][3][1]][3]
 		local info_partys_pl = ""
 		for k = 1, #masspl do
-			info_partys_pl = info_partys_pl..""..masspl[k].."<br>"
+			if masspl[k][2]~=nil then
+				if (#masspl[k][2])+0>1 then
+					info_partys_pl = info_partys_pl..""..masspl[k][1].."<br>"
+				else
+					info_partys_pl = info_partys_pl..""..masspl[k][1].."<font color='#"..color_piece_mass[masspl[k][2][1]].."'>"..symbol_piece_mass[1].."</font>".."<br>"
+				end
+			end
 		end
 		
-		ui.addTextArea(-1001, ""..info_partys_pl, nick, 60, 100, 100, nil, 1, 0x0000ff, 0.7,true)
+		ui.addTextArea(-1001, ""..info_partys_pl, nick, 0, 100, 100, nil, 1, 0x0000ff, 0.7,true)
 		
 		
 		
@@ -1170,14 +1727,43 @@ end
 
 
 
-ui.addTextArea(-67, ""..info_partys, nil, 0, 27, 50, nil, 1, 0x0000ff, 0.7,true)
 
-ui.addTextArea(-68, "<a href='event:new_party'>new</a>", nil, 0, 70, 50, nil, 1, 0x0000ff, 0.7,true)
+
+ui.addTextArea(-67, "<a href='event:open_game_s'>open game</a>", nil, 0, 27, 70, nil, 1, 0x0000ff, 0.7,true)
+
+ui.addTextArea(-68, "<a href='event:new_game_s'>new game</a>", nil, 0, 350, 100, nil, 1, 0x0000ff, 0.7,true)
+
 ui.addTextArea(-69, "<a href='event:return_move'>return move</a>", nil, 700, 350, 100, nil, 1, 0x0000ff, 0.7,true)
+
+ui.addTextArea(-71, "<a href='event:return_board'>return board</a>", nil, 700, 300, 100, nil, 1, 0x0000ff, 0.7,true)
 
 end
 
+function show_new_game(pl)
+	local nd = "<p align='left'><font size='14'>"
+	for i, j in pairs(name_chess) do
+		nd = nd .. "<a href='event:new_party"..i.."'>"..i.." "..name_chess[i][1].."</a><br>"
+	end
+	nd = nd .. "<br><p align='center'><a href='event:cancel'>cancel</a>"
+	ui.addTextArea(-680, nd, pl, 200, 50, 400, nil, 1, 0x0000ff, 0.9,true)
+end
 
+function show_open_room(pl)
+	local info_partys = ""
+
+	for i, j in pairs(party) do
+		
+		local masspl = j[3]
+		local info_partys_pl = ""
+		for k = 1, #masspl do
+			info_partys_pl = info_partys_pl..""..masspl[k][1].." "
+		end
+		
+		info_partys = info_partys.."<a href='event:party"..i.."'>"..i.." "..name_chess[j[5]][1].."</a>".."   ("..info_partys_pl..")".."<br>"
+	end
+	
+	ui.addTextArea(-670, ""..info_partys.."<br><p align='center'><a href='event:cancel'>cancel</a>", pl, 200, 50, 400, nil, 1, 0x0000ff, 0.9,true)
+end
 
 -- Init
 for k, v in next, {"AutoShaman", "AfkDeath", "AutoNewGame", "AutoScore"} do
@@ -1187,7 +1773,9 @@ end
 for nick in pairs(tfm.get.room.playerList) do
     system.bindMouse(nick, true)
 end
-tfm.exec.newGame(7850663)
+
+init()
+tfm.exec.newGame(7852876)
 --table.foreach(tfm.get.room.playerList, eventNewPlayer)
 
 
