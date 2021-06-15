@@ -1,7 +1,14 @@
+--обозначение доски a1-a4
+--если короля съедают то вернуть ход назад и показать шах если 2 раза то выйгрыш
+--кнопка сдаться
+--время на ход
+--при решении задачи выйгрыш
 
---дамки ходят дальше
---текстареа максимум 2000 char
 local lang = "RU"
+
+local adm = "Deff83#0000"	--кто может нажимать вернуть ход
+
+local test_mod = false
 
 local start_party_classic = 1
 local set_board = 2
@@ -9,12 +16,13 @@ local party = {}--массив, board
 
 local players_images = {}
 
-
-local symbol_piece_mass = {'♚', '♛', '♜', '♝', '♞', '♟', '*', '&', '*'}
+local mass_ob = {"a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "v", "w", "x", "y", "z"}
+local symbol_piece_mass = {'♚', '♛', '♜', '♝', '♞', '♟', '■', '♛', '■'}
 local color_piece_mass = {'FFFFFF', 'FF00FF', 'FFFF00', 'FF0000', '00FFFF', '000000'}
 
 local description = {}
 local name_g = {}
+local name_button = {}
 
 name_g["RU"] = {
 	"Ша́хматы", 
@@ -57,24 +65,41 @@ description["RU"] = {
 	
 }
 
-local doppravil = {--1 сьедать чужую фигуру если false, изменять фигуру на другую если true
-	{false, false, true}, 
-	{false, false, true}, 
-	{false, false, true}, 
-	{false, true, true}, 
-	{false, false, true}, 
-	{false, false, true}, 
-	{false, false, true}, 
-	{true, false, false}, 
-	{true, false, false}, 
-	{true, false, false}, 
-	{true, false, false}, 
-	{false, false, false}, 
-	{false, false, false}, 
-	{true, false, false}, 
-	{true, false, true}, 
-	{true, false, false}, 
-	{true, false, true}
+name_button["RU"] = {
+	"отмена",
+	"Ваш ход!",
+	"GO",
+	"История игр",
+	"Новая патрия",
+	"Вернуть ход",
+	"Перевернуть доску",
+	"Принять",
+	"хочет с вами играть ",
+	"Выберите соперника",
+	"Шах",
+	"Мат",
+	"Нажми GO",
+	"Сдаться"
+}
+
+local doppravil = {--1 сьедать чужую фигуру если false, изменять фигуру на другую если true, соперник, очередность ходов, показывать кнопку GO, перепрыгивать своих, король сьеден мат
+	{false, false, true, true, false, true},
+	{false, false, true, true, false, true},
+	{false, false, true, true, false, true},
+	{false, true, true, true, false, true},
+	{false, false, true, true, false, true},
+	{false, false, true, true, false, true},
+	{false, false, true, true, true, false},
+	{true, false, false, false, false, false}, 
+	{true, false, false, false, false, false}, 
+	{true, false, false, false, false, false}, 
+	{true, false, false, false, false, false}, 
+	{false, false, false, false, false, false}, 
+	{false, false, false, false, false, false}, 
+	{true, false, false, false, false, false}, 
+	{true, false, true, true, true, false},
+	{true, false, false, false, false, false}, 
+	{true, false, true, true, true, false}
 }
 
 local main_mass = {
@@ -119,8 +144,8 @@ local main_mass = {
 		{13, 15, 14, 12, 11, 14, 15, 13}
 	}, 
 	{
-		{63, 65, 64, 62, 61, 64, 65, 63},
-		{66, 66, 66, 66, 66, 66, 66, 66},
+		{33, 35, 34, 32, 31, 34, 35, 33},
+		{36, 36, 36, 36, 36, 36, 36, 36},
 		{0, 0, 0, 0, 0, 0, 0, 0},
 		{nil, nil, nil, nil, nil, nil, nil, nil},
 		{0, 0, 0, 0, 0, 0, 0, 0},
@@ -128,8 +153,8 @@ local main_mass = {
 		{13, 15, 14, 12, 11, 14, 15, 13}
 	}, 
 	{
-		{63, 65, 64, 62, 61},
-		{66, 66, 66, 66, 66},
+		{43, 45, 44, 42, 41},
+		{46, 46, 46, 46, 46},
 		{0, 0, 0, 0, 0},		
 		{16, 16, 16, 16, 16},
 		{13, 15, 14, 12, 11}
@@ -305,6 +330,10 @@ local main_mass_solver = {
 }
 
 local name_chess = {}
+local tmp_savefig = 0
+local tmp_move_square = nil
+local boolstartlua = true
+local startcount = 0
 
 -- Board
 local setBoard = function(a)
@@ -415,7 +444,7 @@ local piece_ts_img = {
 
 
 function showBoard(p, number_board, bool_show_board)
-----print(p)
+------print(p)
 if party[number_board]==nil then
 	return
 end
@@ -438,7 +467,7 @@ end
 		
 		for i2,j2 in pairs(party[number_board][1][i]) do
 		
-		------print(i.."L"..j2)
+		--------print(i.."L"..j2)
 			showBoardSquare(i, i2, p, bool_show_board)
 		end
 	end
@@ -493,6 +522,19 @@ content_in_mass = function(ch, mass)
 	return bool_y
 end
 
+get_mass_colors = function(list)
+	local out = {}
+	for k,v in next, list do
+		for kx,vx in next, v do
+			if vx~=nil and content_in_mass(math.floor(vx/10), out)==false and math.floor(vx/10)~=0 then
+				out[#out+1] = math.floor(vx/10)
+			end
+		end
+	end
+
+	return out
+end
+
 function showBoardSquare(row, column, pl, bool_show_board)
 	local setting_pl_party = players_images[pl][3][1]
 	
@@ -511,7 +553,7 @@ function showBoardSquare(row, column, pl, bool_show_board)
 		-- testsmesh_x = 0
 	-- end
 	
-	------print(pl..">"..row..":"..column)
+	--------print(pl..">"..row..":"..column)
 	
 	
 	if (square~=nil) then
@@ -531,13 +573,13 @@ function showBoardSquare(row, column, pl, bool_show_board)
 			if party[setting_pl_party][2] ~= nil then
 				
 				if (party[setting_pl_party][2][1][1] == row) and (party[setting_pl_party][2][1][2] == column) then
-					----print("tyt")
+					------print("tyt")
 					tfm.exec.removeImage(players_images[pl][1][row*100+column])
 					
 					players_images[pl][1][row*100+column] = tfm.exec.addImage(image_board[set_board][3][1], "?2", image_board[set_board][3][2]+party[setting_pl_party][2][1][2]*44*side+200+testsmesh_x, image_board[set_board][3][3]+party[setting_pl_party][2][1][1]*44*side-22+testsmesh_y, pl, image_board[set_board][3][4], image_board[set_board][3][5], 0, 1)
 				end
 				if (party[setting_pl_party][2][2][1] == row) and (party[setting_pl_party][2][2][2] == column) then
-				----print("tyt2")
+				------print("tyt2")
 					tfm.exec.removeImage(players_images[pl][1][row*100+column])
 					
 					players_images[pl][1][row*100+column] = tfm.exec.addImage(image_board[set_board][3][1], "?2", image_board[set_board][3][2]+party[setting_pl_party][2][2][2]*44*side+200+testsmesh_x, image_board[set_board][3][3]+party[setting_pl_party][2][2][1]*44*side-22+testsmesh_y, pl, image_board[set_board][3][4], image_board[set_board][3][5], 0, 1)
@@ -550,12 +592,12 @@ function showBoardSquare(row, column, pl, bool_show_board)
 		local color_piece_t = math.floor(square/10)+0
 		local item_piece_t = square%10
 		
-		------print(square)
+		--------print(square)
 		if players_images[pl][2]~=nil then
 			if players_images[pl][2][row*100+column] ~= nil then
-			------print(players_images[pl][2][1*100+1])
-		--	----print(row..":"..column)
-				------print(players_images[pl][2][row*100+column])
+			--------print(players_images[pl][2][1*100+1])
+		--	------print(row..":"..column)
+				--------print(players_images[pl][2][row*100+column])
 				tfm.exec.removeImage(players_images[pl][2][row*100+column])
 			end
 			if players_images[pl][2][row*100+column+20000] ~= nil then
@@ -563,14 +605,14 @@ function showBoardSquare(row, column, pl, bool_show_board)
 			end
 			
 			if main_mass_solver[party[setting_pl_party][5]]~=nil and main_mass_solver[party[setting_pl_party][5]][row]~=nil and main_mass_solver[party[setting_pl_party][5]][row][column]~=nil then
-				--print(party[setting_pl_party][5])
+				----print(party[setting_pl_party][5])
 				local square_d = main_mass_solver[party[setting_pl_party][5]][row][column]
 				local color_piece_t_d = math.floor(square_d/10)+0
 				local item_piece_t_d = square_d%10
 				if color_piece_t_d~=nil and item_piece_t_d~=nil and (square_d ~= 0) then
 					players_images[pl][2][row*100+column+20000] = tfm.exec.addImage(piece_ts_img[color_piece_t_d][item_piece_t_d][1], "?4", piece_ts_img[color_piece_t_d][item_piece_t_d][2]+column*44*side+200+testsmesh_x, piece_ts_img[color_piece_t_d][item_piece_t_d][3]+row*44*side-22+testsmesh_y, pl, piece_ts_img[color_piece_t_d][item_piece_t_d][4], piece_ts_img[color_piece_t_d][item_piece_t_d][5], 0, 0.2)
-					--print(color_piece_t_d)
-					--print(item_piece_t_d)
+					----print(color_piece_t_d)
+					----print(item_piece_t_d)
 				end
 			end
 			
@@ -618,9 +660,8 @@ function init()
 	
 end
 
+kop = 0
 
-local boolstartlua = true
-local startcount = 0
 eventLoop = function()
 	if boolstartlua then
 	startcount = startcount + 1
@@ -633,6 +674,11 @@ eventLoop = function()
 	end
 	
 	end
+	
+	kop = kop + 1
+	if kop%4 == 0 then
+		ui.removeTextArea(-781, nil)
+	end
 end
 
 -- Player left
@@ -644,7 +690,7 @@ eventPlayerDied = tfm.exec.respawnPlayer
 
 -- New Game
 eventNewPlayer = function(n)
-	
+	tfm.exec.addImage("177a312dda6.jpg","?0",0,0, n)
 	tfm.exec.respawnPlayer(n)
 	
 	
@@ -658,7 +704,7 @@ eventNewPlayer = function(n)
 	players_images[n][5] = 1--сторона доски
 	
 	-- if n == "Deff83#0000" then
-		-- ----print("wwwwwwwwwwwww:"..n)
+		-- ------print("wwwwwwwwwwwww:"..n)
 		-- players_images[n][3] = {2}
 	-- end
 	
@@ -705,7 +751,7 @@ local checkCapture = function(n, row, column, newRow, newColumn)
 end
 
 function isWhitePiece(pio)
-	----print (pio)
+	------print (pio)
 	if math.floor(pio/10) == 5 then
 		return false
 	end
@@ -719,7 +765,7 @@ end
 
 function ispiece_tSquare(row, column, partyk)
 	if party[partyk][1][row] == nil then
-		----print(row.."/"..column)
+		------print(row.."/"..column)
 		return false
 	end
 
@@ -866,7 +912,7 @@ function trans(pl)
 				if figk == nil or figk == 0 then
 				else
 					--if math.floor(figk/10)~= fig and (party[party_n][1][newRow]~=nil and party[party_n][1][newRow][newColumn] == 0) then
-						showMove(pl, newRow, newColumn, party_n, piece_t_choose_full, true)
+						showMove(pl, newRow, newColumn, party_n, piece_t_choose_full, true, true, {row, column})
 					--end
 				end
 			end
@@ -876,7 +922,7 @@ function trans(pl)
 	
 	
 	if piece_t_choose == piece_ts.checker then
-			--print("p")
+			----print("p")
 		-- Diagonal
 		local coord = {{-1, -1}, {-1, 1}, {1, -1}, {1, 1}}
 		for i = 1, 4 do
@@ -890,7 +936,7 @@ function trans(pl)
 						if figk == nil or figk == 0 then
 						else
 							if math.floor(figk/10)~= fig and (party[party_n][1][newRow]~=nil and party[party_n][1][newRow][newColumn] == 0) then
-								showMove(pl, newRow, newColumn, party_n, piece_t_choose_full, true)
+								showMove(pl, newRow, newColumn, party_n, piece_t_choose_full, true, true, {row, column})
 							end
 						end
 					end
@@ -908,7 +954,7 @@ function trans(pl)
 	end
 	
 	if piece_t_choose == piece_ts.checker_queen then
-			--print("p")
+			----print("p")
 		-- Diagonal
 		local coord = {{-1, -1}, {-1, 1}, {1, -1}, {1, 1}}
 		for i = 1, 4 do
@@ -920,7 +966,7 @@ function trans(pl)
 				if ispiece_tSquare(newRow, newColumn, party_n) then
 					local figk = party[party_n][1][newRow][newColumn]
 					if math.floor(figk/10) ~= fig then
-						showMove(pl, newRow+coord[i][1], newColumn+coord[i][2], party_n, piece_t_choose_full, false)
+						showMove(pl, newRow+coord[i][1], newColumn+coord[i][2], party_n, piece_t_choose_full, false, true, {row, column})
 					end
 					break
 				end
@@ -937,8 +983,8 @@ function trans(pl)
 			if column == 5 then
 				if true and not ispiece_tSquare(row, column + d, party_n) and not ispiece_tSquare(row, column + (d * 2), party_n) then--если рокировка не было
 					if d > 0 or not ispiece_tSquare(row, column - 3, party_n) then
-						----print("@@")
-						----print(column + (d > 0 and 2 or -2))
+						------print("@@")
+						------print(column + (d > 0 and 2 or -2))
 					
 						if ((party[party_n][1][row+1] == nil or party[party_n][1][row+1][column] == nil) and whitePiece) or ((party[party_n][1][row-1] == nil or party[party_n][1][row-1][column] == nil) and not whitePiece) then
 							if (party[party_n][1][row]~= nil and party[party_n][1][row][1]~=nil and party[party_n][1][row][1]%10 == piece_ts.rook and d < 0) or (party[party_n][1][row]~= nil and party[party_n][1][row][8]~=nil and party[party_n][1][row][8]%10 == piece_ts.rook and d > 0) then
@@ -954,7 +1000,7 @@ function trans(pl)
 	end
 				
 				
-			----print(dir)
+			------print(dir)
 	if true then
 		return
 	end	
@@ -1001,6 +1047,12 @@ function getsmesh(x_count, y_count, side)
 	if y_count==9 then
 		sm[2] = -20*side-40
 	end
+	if x_count==8 then
+		sm[1] = 0
+	end
+	if y_count==8 then
+		sm[2] = 0
+	end
 	if x_count==3 then
 		sm[1] = 105*side
 	end
@@ -1017,14 +1069,51 @@ function getsmesh(x_count, y_count, side)
 		sm[1] = sm[1]+396
 		sm[2] = sm[2]+396
 	end
+	sm[1] = sm[1]-20
+	sm[2] = sm[2]+0
 	return sm
 end
 
-function showMove(pl, row, column, party_n, stor, bool_show_p)
+function showMove(pl, row, column, party_n, stor, bool_show_p, bool_second_move, last_m)
 
 if party[party_n][1][row]~=nil then
 	local fig = party[party_n][1][row][column]
+	local last_move = party[party_n][4][#party[party_n][4]]
+	
+	if last_move~=nil and math.floor(last_move[1]/10)~=math.floor(stor/10) then
 
+	else
+		
+		if doppravil[party[party_n][5]][4] then
+			if last_move~=nil and bool_second_move then
+				local cletka1 = last_move[3]
+				local cletka2 = last_move[2]
+				local dop_resp_p_m = last_move[4]
+				----print(math.floor(last_move[1]/10))
+				----print(math.floor(stor/10))
+				----print(cletka1[1])
+				----print(cletka1[2])
+				----print(dop_resp_p_m)
+				if (last_m~=nil and cletka1[1] == last_m[1] and cletka1[2] == last_m[2]) then
+					--print("ht")
+					-----------------TTTTTTTTTTTTTTTTTTT
+					
+					if ((dop_resp_p_m~=nil and dop_resp_p_m~=0) and (stor%10==piece_ts.checker or stor%10==piece_ts.checker_queen)) or (stor%10==piece_ts.checker_per and (math.abs(cletka1[1]-cletka2[1])>1 or math.abs(cletka1[2]-cletka2[2])>1)) then
+						
+					else
+						return
+					end
+					
+				else
+					return
+				end
+			else
+				if last_move~=nil then
+					return
+				end
+			end
+		end
+	end
 	-- if  then
 		
 			-- players_images[pl][4][4][#players_images[pl][4][4]+1] = tfm.exec.addImage(image_choose[1][2][1], "!1", image_choose[1][2][2]+column*44*side+200, image_choose[1][2][3]+row*44*side-22, pl, image_choose[1][2][4], image_choose[1][2][5], 0, 1)
@@ -1051,7 +1140,7 @@ end
 end
 
 function eventMouse(pl, xpl, ypl)
-	------print(xpl..":"..ypl)
+	--------print(xpl..":"..ypl)
 	if players_images[pl] == nil or players_images[pl][3]==nil or players_images[pl][3][1]==nil then
 		return
 	end
@@ -1071,21 +1160,24 @@ function eventMouse(pl, xpl, ypl)
 		x_click = x_click + 1
 		y_click = y_click + 1
 	end
-	------print(x_click..":"..y_click)
+	--------print(x_click..":"..y_click)
 	
 	
 		if (players_images[pl][4][1] ==nil) then
 			if  party_local[1][y_click]~=nil and party_local[1][y_click][x_click] ~= 0 and party_local[1][y_click][x_click]~=nil then
 				
 				if  (((party_local[3]~=nil and  party_local[3][1]~=nil and party_local[3][1][1]==pl and content_in_mass(math.floor(party_local[1][y_click][x_click]/10), party_local[3][1][2])==true)) or ((party_local[3]~=nil and  party_local[3][2]~=nil and party_local[3][2][1]==pl and content_in_mass(math.floor(party_local[1][y_click][x_click]/10), party_local[3][2][2])==true)))==false then
-					print("tytr")
-					print(math.floor(party_local[1][y_click][x_click]/10))
-					print(party_local[3][1][2][1])
-					print(party_local[3][1][1])
-					print((party_local[3]~=nil and  party_local[3][1]~=nil and party_local[3][1][1]==pl and content_in_mass(math.floor(party_local[1][y_click][x_click]/10), party_local[3][1][2])==true))
+					--print("tytr")
+					--print(math.floor(party_local[1][y_click][x_click]/10))
+					--print(party_local[3][1][2][1])
+					--print(party_local[3][1][1])
+					--print((party_local[3]~=nil and  party_local[3][1]~=nil and party_local[3][1][1]==pl and content_in_mass(math.floor(party_local[1][y_click][x_click]/10), party_local[3][1][2])==true))
 					return
 				end
-
+				if party_local[6]~=nil and (party_local[6][2][party_local[6][1]]~=math.floor(party_local[1][y_click][x_click]/10)) and doppravil[party_local[5]][4] then
+					return
+				end
+				
 				
 				players_images[pl][4][1] = {y_click, x_click}
 				players_images[pl][4][3] = tfm.exec.addImage(image_choose[1][1][1], "!1", image_choose[1][1][2]+x_click*44*side+200+smesh_x, image_choose[1][1][3]+y_click*44*side-22+smesh_y, pl, image_choose[1][1][4], image_choose[1][1][5], 0, 1)
@@ -1124,7 +1216,7 @@ function eventMouse(pl, xpl, ypl)
 					if (party_local[1][players_images[pl][4][1][1]][players_images[pl][4][1][2]]%10 == piece_ts.pawn) then
 						
 							if ((isWhitePiece(party_local[1][players_images[pl][4][1][1]][players_images[pl][4][1][2]]) and (party_local[1][y_click-1]==nil or party_local[1][y_click-1][x_click]==nil)) or (not isWhitePiece(party_local[1][players_images[pl][4][1][1]][players_images[pl][4][1][2]]) and (party_local[1][y_click+1]==nil or party_local[1][y_click+1][x_click]==nil))) then
-								--print("tuty")
+								----print("tuty")
 								local text = "<textformat leading='40'><p align='center'><font size='25'>PAWN PROMOTION<font size='15'>\n<B>"
 									
 								for k, v in next, {{'<ROSE>Queen', 2}, {'<J>Rook', 3}, {'<PT>Bishop', 4}, {'<BV>Knight', 5}} do
@@ -1147,12 +1239,12 @@ function eventMouse(pl, xpl, ypl)
 					end
 					--Castling
 					if (party_local[1][players_images[pl][4][1][1]][players_images[pl][4][1][2]]~=nil and party_local[1][players_images[pl][4][1][1]][players_images[pl][4][1][2]]%10 == piece_ts.king) and math.abs(players_images[pl][4][1][2] - x_click) == 2 then
-						----print("+++++++++++++++++++++++++")
+						------print("+++++++++++++++++++++++++")
 						if players_images[pl][4][1][2] - x_click < 0 then
 							changeMove({{y_click, 8}, {y_click, 6}, players_images[pl][3][1]}, false)
 							changeMove({players_images[pl][4][1], {y_click, x_click}, players_images[pl][3][1], nil, {{{y_click, 8}, {y_click, 6}}}}, true)
 						else
-							----print(y_click)
+							------print(y_click)
 							changeMove({{y_click, 1}, {y_click, 4}, players_images[pl][3][1]}, false)
 							changeMove({players_images[pl][4][1], {y_click, x_click}, players_images[pl][3][1], nil, {{{y_click, 1}, {y_click, 4}}}}, true)
 						end
@@ -1163,7 +1255,7 @@ function eventMouse(pl, xpl, ypl)
 			end
 			
 			tfm.exec.removeImage(players_images[pl][4][3])
-			------print(players_images[pl][3][1])
+			--------print(players_images[pl][3][1])
 			
 			
 			players_images[pl][4][1] = nil
@@ -1178,9 +1270,6 @@ function eventMouse(pl, xpl, ypl)
 		
 	-- end
 end
-
-local tmp_savefig = 0
-local tmp_move_square = nil
 
 function spawn_piece(item, row, column, party_m)	
 	if party[party_m] == nil then
@@ -1201,6 +1290,35 @@ function spawn_piece(item, row, column, party_m)
 	end
 end
 
+function win(party_j, num_color, pl_k)
+	--*/*/
+	if pl_k == nil then
+		local masspl = party[party_j][3]
+				
+		for k = 1, #masspl do
+			local mass_d = masspl[k][2]
+			for kj = 1, #mass_d do
+				if mass_d[kj]==num_color then
+					show_win(masspl[k][1], party_j)
+				end
+			end
+		end
+	else
+		
+		local masspl = party[party_j][3]
+		local pl_u = ""
+		for k = 1, #masspl do
+			local mass_d = masspl[k][1]
+			if mass_d~=pl_k then
+				pl_u = mass_d
+			end
+		end
+		
+		show_win(pl_u, party_j)
+	end
+	
+end
+
 function changeMove(move, bool_writed, bool_up)
 	local first = move[1]
 	local second = move[2]
@@ -1218,32 +1336,32 @@ function changeMove(move, bool_writed, bool_up)
 	end
 
 	if (party[party_m]==nil) then
-		----print("wrong party:"..party_m)
+		------print("wrong party:"..party_m)
 		return
 	end
 	
 	--------------------WRONG Square------------
 	if party[party_m][1][second[1]] == nil then
-		----print("wrong raw:"..second[1])
+		------print("wrong raw:"..second[1])
 		return
 	end
 	if (party[party_m][1][second[1]][second[2]]==nil) then
-		----print("wrong column:"..second[2]..", "..second[1])
+		------print("wrong column:"..second[2]..", "..second[1])
 		return
 	end
 		if party[party_m][1][first[1]] == nil then
-		----print("wrong raw:"..first[1])
+		------print("wrong raw:"..first[1])
 		return
 	end
 	if (party[party_m][1][first[1]][first[2]]==nil) then
-		----print("wrong column:"..first[2]..", "..first[1])
+		------print("wrong column:"..first[2]..", "..first[1])
 		return
 	end
 	------------------------------------------------------
 	
 	
 	if (party[party_m][1][first[1]][first[2]]==0) then
-		----print("wrong 0")
+		------print("wrong 0")
 		return
 	end
 	
@@ -1311,23 +1429,23 @@ function changeMove(move, bool_writed, bool_up)
 	if name_chess[party[party_m][5]][2][2] then
 		if bool_up then
 			if item%10 >1 and item%10<6 then
-				--print(item)
+				----print(item)
 				if item%10 == 5 then
 					party[party_m][1][second[1]][second[2]] = math.floor(item/10)*10+2
 				else
 					party[party_m][1][second[1]][second[2]] = math.floor(item/10)*10+item%10 +1
 				end
-					--print(party[party_m][1][second[1]][second[2]])
+					----print(party[party_m][1][second[1]][second[2]])
 			end
 		else
 			if item%10 >1 and item%10<6 then
-				--print(item)
+				----print(item)
 				if item%10 == 2 then
 					party[party_m][1][second[1]][second[2]] = math.floor(item/10)*10+5
 				else
 					party[party_m][1][second[1]][second[2]] = math.floor(item/10)*10+item%10 - 1
 				end
-					--print(party[party_m][1][second[1]][second[2]])
+					----print(party[party_m][1][second[1]][second[2]])
 			end
 		end
 	end
@@ -1350,6 +1468,19 @@ function changeMove(move, bool_writed, bool_up)
 		party[party_m][1][second[1]][second[2]] = item + 1 
 	end
 	
+	
+	
+	
+	if party[party_m][6]~=nil and bool_writed and doppravil[party[party_m][5]][5]==false then
+		party[party_m][6][1] = party[party_m][6][1] + 1
+		if party[party_m][6][2][party[party_m][6][1]]==nil then
+			party[party_m][6][1] = 1
+		end
+	end
+	
+	if doppravil[party[party_m][5]][6]==true and localsave~=nil and localsave[4]~=nil and ((localsave[4]%10)==1) then
+		win(party_m, math.floor((party[party_m][1][second[1]][second[2]])/10))
+	end
 	
 	
 	for nick in pairs(tfm.get.room.playerList) do
@@ -1378,14 +1509,14 @@ function eventTextAreaCallback(id, pl, cmd)
 		local cletka2 = {math.random(1, 8), math.random(1, 10)}
 		changeMove({cletka1, cletka2, 2}, true)
 		
-		------print(cletka1[1]..":"..cletka1[2].."->"..cletka2[1]..":"..cletka2[2].."("..party[setting_pl_party][1][cletka1[1]][cletka1[2]]..")")
+		--------print(cletka1[1]..":"..cletka1[2].."->"..cletka2[1]..":"..cletka2[2].."("..party[setting_pl_party][1][cletka1[1]][cletka1[2]]..")")
 	end
 	if cmd == "test1" then
 		local cletka1 = {math.random(1, 8), math.random(1, 10)}
 		local cletka2 = {math.random(1, 8), math.random(1, 10)}
 		changeMove({cletka1, cletka2, 1}, true)
 		
-		------print(cletka1[1]..":"..cletka1[2].."->"..cletka2[1]..":"..cletka2[2].."("..party[2][1][cletka1[1]][cletka1[2]]..")")
+		--------print(cletka1[1]..":"..cletka1[2].."->"..cletka2[1]..":"..cletka2[2].."("..party[2][1][cletka1[1]][cletka1[2]]..")")
 		
 	end
 	if cmd == "test3" then
@@ -1412,21 +1543,21 @@ function eventTextAreaCallback(id, pl, cmd)
 		local piece_s = (cmd:sub(10, 10))+0
 		ui.removeTextArea(-700000, pl)
 		
-		--print(piece_s)
+		----print(piece_s)
 		
 		if piece_s == piece_ts.queen or piece_s == piece_ts.rook or piece_s == piece_ts.bishop or piece_s == piece_ts.knight then
 			local xy_s = cmd:sub(11, -1)
 			local xy_mass = string.split(xy_s, "k")
-			--print("----------------")
-			--print(xy_mass[1])
-			--print(xy_mass[2])
-			--print(players_images[pl][4][1][1])
-			--print(players_images[pl][4][1][2])
-			--print(players_images[pl][3][1])
-			--print("----------------")
+			----print("----------------")
+			----print(xy_mass[1])
+			----print(xy_mass[2])
+			----print(players_images[pl][4][1][1])
+			----print(players_images[pl][4][1][2])
+			----print(players_images[pl][3][1])
+			----print("----------------")
 
 			local party_local = party[players_images[pl][3][1]]
-			--print(party_local[1][players_images[pl][4][1][1]][players_images[pl][4][1][2]])
+			----print(party_local[1][players_images[pl][4][1][1]][players_images[pl][4][1][2]])
 			
 			if players_images[pl][4][1]==nil then
 				return
@@ -1434,13 +1565,13 @@ function eventTextAreaCallback(id, pl, cmd)
 			
 			local fig_ht = party_local[1][players_images[pl][4][1][1]][players_images[pl][4][1][2]]
 			local new_piece = math.floor(fig_ht/10)*10+piece_s
-			--print(new_piece)
+			----print(new_piece)
 			changeMove({players_images[pl][4][1], {xy_mass[1]+0, xy_mass[2]+0}, players_images[pl][3][1], {fig_ht, new_piece}}, true)
 			
 			
 			
 			tfm.exec.removeImage(players_images[pl][4][3])
-			------print(players_images[pl][3][1])
+			--------print(players_images[pl][3][1])
 			
 			
 			players_images[pl][4][1] = nil
@@ -1473,10 +1604,10 @@ function eventTextAreaCallback(id, pl, cmd)
 	end
 	
 	if cmd:sub(0, 5) == "party" then
-	
+		ui.removeTextArea(-1004, pl)
 		ui.removeTextArea(-670, pl)
 		local party_s = cmd:sub(6, -1)
-		----print(party_s)
+		------print(party_s)
 		players_images[pl][3][1] = party_s+0
 		
 		if (players_images[pl][4][1] ~=nil) then
@@ -1522,8 +1653,8 @@ function eventTextAreaCallback(id, pl, cmd)
 	if cmd:sub(0, 6) == "accept" then
 		ui.removeTextArea(id, pl)
 		local apponent_so = cmd:sub(7, -1)
-		print(apponent_so)
-		print(pl)
+		--print(apponent_so)
+		--print(pl)
 		if apponent_so~= nil then
 			local apponent_so_mass = string.split(apponent_so, "&")
 			start_g(apponent_so_mass[2], pl, apponent_so_mass[1])
@@ -1532,6 +1663,33 @@ function eventTextAreaCallback(id, pl, cmd)
 		
 	end
 	
+	if cmd == "go_sh" then
+		local masspl = party[players_images[pl][3][1]][3]
+		for k = 1, #masspl do
+			show_sh_funt(3, masspl[k][1], players_images[pl][3][1])
+		end
+	end
+	
+	
+	if cmd == "flag_sh" then
+		
+		win(players_images[pl][3][1], num_color, pl)
+	end
+	
+	if cmd == "shah_sh" then
+		local masspl = party[players_images[pl][3][1]][3]
+		for k = 1, #masspl do
+			show_sh_funt(1, masspl[k][1], players_images[pl][3][1])
+		end
+	end
+	
+	if cmd == "mat_sh" then
+		local masspl = party[players_images[pl][3][1]][3]
+		for k = 1, #masspl do
+			show_sh_funt(2, masspl[k][1], players_images[pl][3][1])
+		end
+	end
+		
 	
 	if cmd == "return_board" then		
 		players_images[pl][5] = players_images[pl][5] * (-1)
@@ -1550,6 +1708,30 @@ function eventTextAreaCallback(id, pl, cmd)
 		test()
 	end
 	
+	if cmd == "go" then
+		local last_move = party[setting_pl_party][4][#party[setting_pl_party][4]]
+		if last_move~=nil and party[setting_pl_party][6][2][party[setting_pl_party][6][1]] ~= math.floor(last_move[1]/10) then
+			return
+		end
+		ui.removeTextArea(id, pl)
+		
+		if (players_images[pl][4][1] ~=nil) then
+			tfm.exec.removeImage(players_images[pl][4][3])
+			
+			for i, j in pairs(players_images[pl][4][4]) do
+				tfm.exec.removeImage(j)
+			end
+		end
+		
+		if party[setting_pl_party][6]~=nil then
+			party[setting_pl_party][6][1] = party[setting_pl_party][6][1] + 1
+			if party[setting_pl_party][6][2][party[setting_pl_party][6][1]]==nil then
+				party[setting_pl_party][6][1] = 1
+			end
+		end
+		test_hod()
+	end
+	
 	if cmd == "return_move" then
 		local last_move = party[setting_pl_party][4][#party[setting_pl_party][4]]
 		if last_move~=nil then
@@ -1560,7 +1742,7 @@ function eventTextAreaCallback(id, pl, cmd)
 			local dop_resp_p_m = last_move[7]
 			
 			if (last_move[1]%10 == piece_ts.checker or last_move[1]%10 == piece_ts.checker_queen) and last_move[4] ~= 0 then
-				--print("uiu")
+				----print("uiu")
 				changeMove({cletka1, cletka2, setting_pl_party}, false, true)				
 				spawn_piece(last_move[4], cletka1[1]+((cletka2[1]-cletka1[1])>0 and 1 or -1), cletka1[2]+((cletka2[2]-cletka1[2])>0 and 1 or -1), setting_pl_party)
 			else
@@ -1575,13 +1757,27 @@ function eventTextAreaCallback(id, pl, cmd)
 				--spawn_piece(change_p_m_o[1], cletka2[1], cletka2[2], setting_pl_party)
 				for j=1, #dop_p_m_o do
 					local dop_p_m_o_hod = dop_p_m_o[j]
-					-- print(dop_p_m_o_hod[1][1]..":"..dop_p_m_o_hod[1][2])
-					-- print(dop_p_m_o_hod[2][1]..":"..dop_p_m_o_hod[2][2])
+					-- --print(dop_p_m_o_hod[1][1]..":"..dop_p_m_o_hod[1][2])
+					-- --print(dop_p_m_o_hod[2][1]..":"..dop_p_m_o_hod[2][2])
 					changeMove({dop_p_m_o_hod[2], dop_p_m_o_hod[1], setting_pl_party}, false, true)
 				end
 			end
 			if dop_resp_p_m~=nil then
 				spawn_piece(dop_resp_p_m[1], dop_resp_p_m[2], dop_resp_p_m[3], setting_pl_party)
+			end
+			
+			--print(math.floor(last_move[1]/10))
+			--print(party[setting_pl_party][6][1])
+			if party[setting_pl_party][6]~=nil then
+				local gty = party[setting_pl_party][6][1]
+				
+				for i=1, #party[setting_pl_party][6][2] do
+					if party[setting_pl_party][6][2][i] == math.floor(last_move[1]/10) then
+						gty = i
+					end
+				end
+				
+				party[setting_pl_party][6][1] = gty
 			end
 			
 			party[setting_pl_party][4][#party[setting_pl_party][4]] = nil
@@ -1601,6 +1797,8 @@ function eventTextAreaCallback(id, pl, cmd)
 			end
 			players_images[pl][4][4] = {}
 			players_images[pl][4][5] = {}
+			
+			
 			
 			tmp_savefig = 0
 			tmp_move_square = nil
@@ -1625,8 +1823,16 @@ function start_g(party_so, pl, add_pl)
 	party[num_new_party][1] = setBoard(party_so+0)
 	party[num_new_party][2] = {{0, 0}, {0, 0}}
 	
+	local masser =  get_mass_colors(party[num_new_party][1])
+	
 	if add_pl~=nil then
+		
 		party[num_new_party][3] = {{pl, {6}}, {add_pl, {1}}}
+		
+		if masser[2]~=nil then
+			party[num_new_party][3] = {{pl, {masser[2]}}, {add_pl, {masser[1]}}}
+		end
+		
 		players_images[add_pl][3] = {num_new_party+0}
 		if (players_images[add_pl][4][1] ~=nil) then
 			tfm.exec.removeImage(players_images[add_pl][4][3])
@@ -1636,7 +1842,7 @@ function start_g(party_so, pl, add_pl)
 			end
 		end
 
-		
+		players_images[add_pl][5] = (-1)
 		players_images[add_pl][4] = {}
 		ui.removeTextArea(-700000, add_pl)
 	else
@@ -1645,6 +1851,12 @@ function start_g(party_so, pl, add_pl)
 	
 	party[num_new_party][4] = {}
 	party[num_new_party][5] = party_so+0
+	
+	party[num_new_party][6] = {1, masser}	--кто ходит
+	if masser[2]~=nil then
+		party[num_new_party][6] = {2, masser}	--кто ходит
+	end
+	--print(party[num_new_party][6])
 	showBoard(pl, players_images[pl][3][1], true)
 	if add_pl~=nil then
 		showBoard(add_pl, players_images[add_pl][3][1], true)
@@ -1655,44 +1867,91 @@ function start_g(party_so, pl, add_pl)
 	test_hod()
 	test()
 end
+  
+ function show_sh_funt(num_sh, p_o, p_n)
+
+	if players_images[p_o]~=nil and players_images[p_o][3]~=nil and players_images[p_o][3][1]==p_n then
+		local mat_text = name_button[lang][11-1+num_sh].."<br><br><p align='center'><a href='event:cancel'>"..name_button[lang][1].."</a>"
+		ui.addTextArea(-781, mat_text, p_o, 100, 150, 100, nil, 1, 0x0000ff, 0.9,true)
+	end
+
+ end
+  
+function show_win(p, p_n)
+	local p_mass = party[p_n][3]
+	for k=1, #p_mass do
+		local p_o = p_mass[k][1]
+		if players_images[p_o]~=nil and players_images[p_o][3]~=nil and players_images[p_o][3][1]==p_n then
+			local win_text = p.."- win!!!<br><br><p align='center'><a href='event:cancel'>"..name_button[lang][1].."</a>"
+			ui.addTextArea(-780, win_text, p_o, 200, 150, 400, nil, 1, 0x0000ff, 0.9,true)
+		end
+	end
+end
 
 function show_dialog_apponent(party_so, pl, app)
-	local dialog_text = pl.." want to play with you - " .. name_chess[party_so+0][1] .. "<br><p align='center'><a href='event:accept"..pl.."&"..party_so.."'>accept</a><br><p align='center'><a href='event:cancel'>cancel</a>"
-	ui.addTextArea(-780, dialog_text, app, 200, 50, 400, nil, 1, 0x0000ff, 0.9,true)
+	local dialog_text = pl.." "..name_button[lang][9].." - " .. name_chess[party_so+0][1] .. "<br><br><p align='center'><a href='event:accept"..pl.."&"..party_so.."'>"..name_button[lang][8].."</a>    <p align='center'><a href='event:cancel'>"..name_button[lang][1].."</a>"
+	ui.addTextArea(-780, dialog_text, app, 200, 150, 400, nil, 1, 0x0000ff, 0.9,true)
 end
 
 function show_choose_pl_list(pl, party_so)
-	local ch_list = ""
+	local ch_list = "<p align='center'>"..name_button[lang][10].."<br><p align='left'>"
 	for nick in pairs(tfm.get.room.playerList) do
-		if nick~=pl then
+		if nick~=pl or test_mod then
 			ch_list = ch_list.."<a href='event:choose"..nick.."&"..party_so.."'>"..nick.."</a><br>"
 		end
 	end
-	ch_list = ch_list .. "<br><p align='center'><a href='event:cancel'>cancel</a>"
+	ch_list = ch_list .. "<br><p align='center'><a href='event:cancel'>"..name_button[lang][1].."</a>"
 	ui.addTextArea(-750, ch_list, pl, 200, 50, 400, nil, 1, 0x0000ff, 0.9,true)
+end
+
+function get_coord(cletka1, cletka2, party_u)
+	local ht = ""
+	local my = name_chess[party_u][5]
+	ht = ht ..mass_ob[cletka1[2]]..(my-cletka1[1]+1).."-"..mass_ob[cletka2[2]]..(my-cletka2[1]+1)
+	return ht
 end
 
 function test_hod()
 	for nick in pairs(tfm.get.room.playerList) do
-		--print(players_images[nick][3][1]..nick)
+		----print(players_images[nick][3][1]..nick)
 		
 		local massplk = party[players_images[nick][3][1]][4]
+		local jk = party[players_images[nick][3][1]][5]
 		local info_partys_pl = ""
 		local start_ma = #massplk - 30
 		if start_ma < 1 then
 			start_ma = 1
 		end
 		for k = start_ma, #massplk do
-			info_partys_pl = info_partys_pl.."<font color='#"..color_piece_mass[math.floor(massplk[k][1]/10)].."'>"..symbol_piece_mass[massplk[k][1]%10].."</font>"..massplk[k][2][1]..massplk[k][2][2]..""..massplk[k][3][1]..massplk[k][3][2]..""..((massplk[k][4]~=0 or massplk[k][7]~=nil) and "x" or "").." "..""
+			info_partys_pl = info_partys_pl.."<font color='#"..color_piece_mass[math.floor(massplk[k][1]/10)].."'>"..symbol_piece_mass[massplk[k][1]%10].."</font>"..get_coord( massplk[k][2], massplk[k][3], jk)..""..((massplk[k][4]~=0 or massplk[k][7]~=nil) and "x" or "").." "..""
 		end
 		
-		ui.addTextArea(-1002, ""..info_partys_pl, nick, 620, 100, 180, nil, 1, 0x0000ff, 0.7,true)
+		ui.addTextArea(-1002, ""..info_partys_pl, nick, 600, 100, 180, nil, 0x333377, 0x999999, 0.9,true)
+		local myhod = party[players_images[nick][3][1]][6]
+		if myhod~=nil and myhod[2][myhod[1]]~=nil then
+			local masspl = party[players_images[nick][3][1]][3]
+			
+			for k = 1, #masspl do
+				if (masspl[k][1]==nick and masspl[k][2][1]==myhod[2][myhod[1]] and doppravil[jk][3]) or test_mod  then
+					ui.addTextArea(-1003, name_button[lang][2], nick, 600, 70, 90, nil, 0x770000, 0x999999, 0.9,true)
+					if doppravil[jk][5] then
+						ui.addTextArea(-1004, "<p align='center'><a href='event:go'>"..name_button[lang][3].."</a>", nick, 700, 70, 30, nil, 0x770000, 0x999999, 0.9,true)
+					end
+				else
+					if masspl[k][1]==nick then
+						ui.removeTextArea(-1003, nick)
+						ui.removeTextArea(-1004, nick)
+					end
+				end
+			end
+			
+		end
 	end
 end
 
 function test()
 
-ui.addTextArea(-66, "<a href='event:help'>?</a>", nil, 775, 27, 20, nil, 1, 0x0000ff, 0.7,true)
+ui.addTextArea(-66, "<a href='event:help'> ?</a>", nil, 5, 25, 18, nil, 1, 0x999999, 0.7,true)
 
 
 
@@ -1700,7 +1959,7 @@ ui.addTextArea(-66, "<a href='event:help'>?</a>", nil, 775, 27, 20, nil, 1, 0x00
 
 for nick in pairs(tfm.get.room.playerList) do
 	if players_images[nick]~=nil then
-		ui.addTextArea(-1000, ""..players_images[nick][3][1], nick, 80, 27, 70, nil, 1, 0x0000ff, 0.7,true)
+		ui.addTextArea(-1000, ""..players_images[nick][3][1], nick, 205, 380, nil, nil, 1, 0x999999, 0.7,true)
 		
 		local masspl = party[players_images[nick][3][1]][3]
 		local info_partys_pl = ""
@@ -1714,7 +1973,7 @@ for nick in pairs(tfm.get.room.playerList) do
 			end
 		end
 		
-		ui.addTextArea(-1001, ""..info_partys_pl, nick, 0, 100, 100, nil, 1, 0x0000ff, 0.7,true)
+		ui.addTextArea(-1001, ""..info_partys_pl, nick, 600, 30, 180, nil, 1, 0x999999, 0.7,true)
 		
 		
 		
@@ -1729,30 +1988,38 @@ end
 
 
 
-ui.addTextArea(-67, "<a href='event:open_game_s'>open game</a>", nil, 0, 27, 70, nil, 1, 0x0000ff, 0.7,true)
 
-ui.addTextArea(-68, "<a href='event:new_game_s'>new game</a>", nil, 0, 350, 100, nil, 1, 0x0000ff, 0.7,true)
+ui.addTextArea(-67, "<a href='event:open_game_s'>"..name_button[lang][4].."</a>", nil, 120, 380, 75, nil, 1, 0x999999, 0.7,true)
 
-ui.addTextArea(-69, "<a href='event:return_move'>return move</a>", nil, 700, 350, 100, nil, 1, 0x0000ff, 0.7,true)
+ui.addTextArea(-68, "<a href='event:new_game_s'>"..name_button[lang][5].."</a>", nil, 10, 380, 100, nil, 1, 0x999999, 0.7,true)
 
-ui.addTextArea(-71, "<a href='event:return_board'>return board</a>", nil, 700, 300, 100, nil, 1, 0x0000ff, 0.7,true)
+ui.addTextArea(-69, "<a href='event:return_move'>"..name_button[lang][6].."</a>", adm, 600, 325, 130, nil, 1, 0x999999, 0.7,true)
+
+ui.addTextArea(-71, "<a href='event:return_board'>"..name_button[lang][7].."</a>", nil, 600, 355, 130, nil, 1, 0x999999, 0.7,true)
+
+ui.addTextArea(-73, "<a href='event:shah_sh'>"..name_button[lang][11].."</a>", nil, 600, 295, 30, nil, 1, 0x999999, 0.7,true)
+ui.addTextArea(-72, "<a href='event:mat_sh'>"..name_button[lang][12].."</a>", nil, 640, 295, 30, nil, 1, 0x999999, 0.7,true)
+
+ui.addTextArea(-74, "<a href='event:go_sh'>"..name_button[lang][13].."</a>", nil, 680, 295, 70, nil, 1, 0x999999, 0.7,true)
+
+ui.addTextArea(-75, "<a href='event:flag_sh'>"..name_button[lang][14].."</a>", nil, 600, 265, 130, nil, 1, 0x999999, 0.7,true)
 
 end
 
 function show_new_game(pl)
-	local nd = "<p align='left'><font size='14'>"
+	local nd = "<p align='left'><font size='13'>"
 	for i, j in pairs(name_chess) do
 		nd = nd .. "<a href='event:new_party"..i.."'>"..i.." "..name_chess[i][1].."</a><br>"
 	end
-	nd = nd .. "<br><p align='center'><a href='event:cancel'>cancel</a>"
-	ui.addTextArea(-680, nd, pl, 200, 50, 400, nil, 1, 0x0000ff, 0.9,true)
+	nd = nd .. "<br><p align='center'><a href='event:cancel'>"..name_button[lang][1].."</a>"
+	ui.addTextArea(-680, nd, pl, 5, 50, 250, nil, 1, 0x999999, 0.9,true)
 end
 
 function show_open_room(pl)
 	local info_partys = ""
-
+	local col = 0
 	for i, j in pairs(party) do
-		
+		col = col + 1
 		local masspl = j[3]
 		local info_partys_pl = ""
 		for k = 1, #masspl do
@@ -1761,8 +2028,11 @@ function show_open_room(pl)
 		
 		info_partys = info_partys.."<a href='event:party"..i.."'>"..i.." "..name_chess[j[5]][1].."</a>".."   ("..info_partys_pl..")".."<br>"
 	end
-	
-	ui.addTextArea(-670, ""..info_partys.."<br><p align='center'><a href='event:cancel'>cancel</a>", pl, 200, 50, 400, nil, 1, 0x0000ff, 0.9,true)
+	if col>21 then
+		ui.addTextArea(-670, ""..info_partys.."<br><p align='center'><a href='event:cancel'>"..name_button[lang][1].."</a>", pl, 10, 60, 400, 300, 1, 0x999999, 0.9,true)
+	else
+		ui.addTextArea(-670, ""..info_partys.."<br><p align='center'><a href='event:cancel'>"..name_button[lang][1].."</a>", pl, 10, 60, 400, nil, 1, 0x999999, 0.9,true)
+	end
 end
 
 -- Init
