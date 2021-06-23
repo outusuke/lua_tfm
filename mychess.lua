@@ -1,17 +1,14 @@
---обозначение доски a1-a4
---если короля съедают то вернуть ход назад и показать шах если 2 раза то выйгрыш
---кнопка сдаться
---время на ход
---при решении задачи выйгрыш
-
+---------------------- PROPERTIES ----------------------
 local lang = "RU"
 
-local adm = "Deff83#0000"	--кто может нажимать вернуть ход
+local adms = {"Deff83#0000"}	--кто может нажимать вернуть ход
+local set_board = 2				--2 blue, 1 green, 3 red
+local map_st = 7863012			--7852876
 
+------------------ ADVANCED PROPERTIES -----------------
 local test_mod = false
 
 local start_party_classic = 1
-local set_board = 2
 local party = {}--массив, board
 
 local players_images = {}
@@ -37,11 +34,31 @@ name_g["RU"] = {
 	"Перестановка коней 'мост'",
 	"Перестановка шашек 'мост'",
 	"Доска-«пистолет»",
-	"Зигзаг В. Шинкмана",
-	"Зигзаг В. Шинкмана 2",
-	"Перестановка угалки",
-	"Перестановка угалки 2",
-	"Перестановка угалки 3"
+	"Зигзаг В. Шенкмана",
+	"Зигзаг В. Шенкмана 2",
+	"Перестановка уголки",
+	"Перестановка уголки 2",
+	"Перестановка уголки 3"
+}
+
+name_g["EN"] = {
+			"Chess", 
+			"Fischer Chess", 
+			"Chess «Almujannah»", 
+			"Chess with transformation", 
+			"Bridge-Chess",
+			"Gardner Mini-Chess",
+			"Checkers",
+ 		"Rearrangement of Guarini 6 horses",
+			"Rearrangement of Guarini",
+			"Rearrangement of horses'bridge'",
+ 		"Rearranging the 'bridge'checkers",
+ 		"Board-«gun»",
+			"V.Shankman's Zigzag",
+			"V.Shankman's Zigzag 2",
+ 		"Rearranging corners",
+ 		"Rearranging corners 2",
+ 		"Rearranging corners 3"
 }
 
 description["RU"] = {
@@ -57,20 +74,39 @@ description["RU"] = {
 	[[<p align='center'><font size='20'><b><J>Перестановка коней "мост"</J></b></font><br><p align='left'><font size='14'>Доска имеет довольно причудливую форму, но для метода пуговиц и нитей это не является препятствием. Распутывая клубок, получаем картину, в котором поле c3 является «транзитным» - связь между «ветками» a2 - d3 и b1 - b3 возможна только через него.]],
 	[[<p align='center'><font size='20'><b><J>Перестановка шашек "мост"</J></b></font><br><p align='left'><font size='14'>Необходимо переправить шашки одного цвета на другой берег. При этом шашки не должны ходить обратно.]],
 	[[<p align='center'><font size='20'><b><J>Доска-«пистолет»</J></b></font><br><p align='left'><font size='14'>В «позиции» фигуры ходят по обычным правилам, но доска имеет весьма оригинальную форму. Белым на доске-«пистолете» очень тесно, но необходимо поставить мат черному королю, решение в 21 ход! ]],
-	[[<p align='center'><font size='20'><b><J>Зигзаг В. Шинкмана</J></b></font><br><p align='left'><font size='14'>Белый король берет черного коня (при этом конь неподвижен, а король не становится под шах). Перестановка осуществляется за 26 ходов]],
-	[[<p align='center'><font size='20'><b><J>Зигзаг В. Шинкмана 2</J></b></font><br><p align='left'><font size='14'>король и ферзь меняются местами. Здесь для перестановки короля и ферзя (остальные фигуры должны вернуться на исходные места) приходится совершить 107 (!!) перемещений.]],
-	[[<p align='center'><font size='20'><b><J>Перестановка угалки</J></b></font><br><p align='left'><font size='14'>Необходимо быстрее соперника перевести все свои шашки на противоположную сторону.]],
-	[[<p align='center'><font size='20'><b><J>Перестановка угалки 2</J></b></font><br><p align='left'><font size='14'>Попробуй переставить все шашки одного цвета на другую сторону за минимальное количество ходов]],
-	[[<p align='center'><font size='20'><b><J>Перестановка угалки 3</J></b></font><br><p align='left'><font size='14'>Необходимо быстрее соперника перевести все свои шашки на противоположную сторону.]]
-	
+	[[<p align='center'><font size='20'><b><J>Зигзаг В. Шенкмана</J></b></font><br><p align='left'><font size='14'>Белый король берет черного коня (при этом конь неподвижен, а король не становится под шах). Перестановка осуществляется за 26 ходов]],
+	[[<p align='center'><font size='20'><b><J>Зигзаг В. Шенкмана 2</J></b></font><br><p align='left'><font size='14'>король и ферзь меняются местами. Здесь для перестановки короля и ферзя (остальные фигуры должны вернуться на исходные места) приходится совершить 107 (!!) перемещений.]],
+	[[<p align='center'><font size='20'><b><J>Перестановка уголки</J></b></font><br><p align='left'><font size='14'>Необходимо быстрее соперника перевести все свои шашки на противоположную сторону.]],
+	[[<p align='center'><font size='20'><b><J>Перестановка уголки 2</J></b></font><br><palign='left'><font size='14'>Попробуй переставить все шашки одного цвета на другую сторону за минимальное количество ходов]],
+	[[<p align='center'><font size='20'><b><J>Перестановка уголки 3</J></b></font><br><p align='left'><font size='14'>Необходимо быстрее соперника перевести все свои шашки на противоположную сторону.]]
+	}
+
+description["EN"] = {
+	[[<p align='center'><font size='20'><b><J>Chess</J></b></font><br><p align='left'><font size='14'>Chess (Persian.  شاه مات - Checkmate (literally translated "the Check is dead") is a board puzzle game with special pieces on a 64 — cell board for two opponents, combining elements of art (including chess composition), science and sports. A chess game is played between two opponents on a chessboard by moving the chess pieces. Both partners must play in turn, making one move each time. The player who has the white pieces starts the game. If a player's king is under check and the player does not have a single move to eliminate this check, this player is called "checkmate" and, accordingly, he is defeated. The goal of the game is to checkmate the opponent's king.]],
+	[[<p align='center'><font size='20'><b><J>Fischer Chess</J></b></font><br><p align='left'><font size='14'>The eleventh world chess champion Robert Fischer proposed his own version of the game, which later received his name. Bobby wanted to move away from the well-studied debut tracks in many ways. He left the classic chessboard, but placed the pieces of the first and eighth horizontal lines in a random order, that is, without a clearly defined place. Because of this, "Fischer Chess" has another name – Fischer Random Chess. Here is one of the options for the arrangement of the shapes.]],
+	[[<p align='center'><font size='20'><b><J>Chess «Almujannah»</J></b></font><br><p align='left'><font size='14'>One of the old opening tabs (the initial positions of the pieces). It can be obtained from the modern starting position by using the symmetrical moves of white and black.]],
+	[[<p align='center'><font size='20'><b><J>Chess with transformation</J></b></font><br><p align='left'><font size='14'>Good training for novice chess players will be the last version of chess, which we will consider-chess with the transformation into other pieces at each turn. In this game, the knight turns into an elephant when it moves. The bishop that descends will become the rook, and the rook will become the queen. The queen closes the chain of transformation and becomes a knight after her turn. This variant of chess helps to improve the skills of the technique of calculating options and to better understand the value of chess pieces not only in terms of material, but also in assessing the position.]],
+	[[<p align='center'><font size='20'><b><J>Bridge-Chess</J></b></font><br><p align='left'><font size='14'>This time the figures are located on different islands.]],
+	[[<p align='center'><font size='20'><b><J>Gardner Mini-Chess</J></b></font><br><p align='left'><font size='14'>Gardner's Mini-chess is a variant of the game of chess on a reduced 5×5 board, proposed in 1962 by the American popularizer of science Martin Gardner (invented by him in the process of programming electronic machines for playing chess). All the traditional pieces are present here (one at a time), each player has five pawns and five pieces. In 2013, Gardner's mini-chess was poorly solved; it was proved that with optimal play of both sides, the result of the game is a draw.]],
+	[[<p align='center'><font size='20'><b><J>Checkers</J></b></font><br><p align='left'><font size='14'>Checkers-a logical board game for two players, consisting in the movement of a certain way of the chips-checkers on the cells of the checkers board. During the game, each player owns checkers of the same color: black or white (sometimes other colors, one of which is considered dark, and the other-light). The goal of the game is to take all the opponent's checkers or to deprive them of the opportunity to move (lock). There are several variants of checkers that differ in the rules and size of the playing field. Here, the king moves only through one field in any direction, and not on any diagonal field, as in Russian or international draughts.]],
+	[[<p align='center'><font size='20'><b><J>Rearrangement of Guarini 6 horses</J></b></font><br><p align='left'><font size='14'>Although the board is larger, and there are three knights on each side, rather than two as in the previous Garini knight permutation problem, the buttons and threads method also allows you to quickly find the necessary permutation. The solution consists of 22 moves (11 white and 11 black).]],
+	[[<p align='center'><font size='20'><b><J>Rearrangement of Guarini</J></b></font><br><p align='left'><font size='14'>In the opposite corners of the 3×3 chessboard, there are two white and two black knights. For the minimum number of moves, swap the white horses with the black ones. This problem, invented by the Italian Guarini in the XVI century, is well known to mathematicians, and was often proposed at various Olympiads and competitions. Most elegantly, it is solved using the so-called method of buttons and threads, invented by the famous inventor of puzzles G. Dudeny. It is easy to see that the solution consists of 16 permutations of the knights (8 moves of white and 8 moves of black).]],
+	[[<p align='center'><font size='20'><b><J>Rearranging the 'bridge' horses</J></b></font><br><p align='left'><font size='14'>The board has a rather fancy shape, but for the method of buttons and threads, this is not an obstacle. Unraveling the tangle, we get a picture in which the field c3 is "transit" - the connection between the "branches" a2-d3 and b1-b3 is possible only through it.]],
+	[[<p align='center'><font size='20'><b><J>Rearranging the 'bridge' checkers</J></b></font><br><p align='left'><font size='14'>It is necessary to transfer the checkers of the same color to the other side. In this case, the checkers should not go back.]],
+	[[<p align='center'><font size='20'><b><J>Board-«gun»</J></b></font><br><p align='left'><font size='14'>In the" position", the pieces move according to the usual rules, but the board has a very original shape. White on the board - " gun " is very tight, but you need to checkmate the black king, the solution is in 21 moves! ]],
+	[[<p align='center'><font size='20'><b><J>V.Shankman's Zigzag</J></b></font><br><p align='left'><font size='14'>The white king takes the black horse (while the horse is stationary, and the king does not get under the check). The permutation is carried out in 26 moves]],
+	[[<p align='center'><font size='20'><b><J>V.Shankman's Zigzag 2</J></b></font><br><p align='left'><font size='14'>The king and queen change places. Here, to rearrange the king and queen (the other pieces must return to their original places), you have to make 107 (!!) moves.]],
+	[[<p align='center'><font size='20'><b><J>Rearranging corners</J></b></font><br><p align='left'><font size='14'>It is necessary to move all your checkers to the opposite side faster than the opponent.]],
+	[[<p align='center'><font size='20'><b><J>Rearranging corners 2</J></b></font><br><p align='left'><font size='14'>Try to move all the checkers of the same color to the other side in the minimum number of moves]],
+	[[<p align='center'><font size='20'><b><J>Rearranging corners 3</J></b></font><br><p align='left'><font size='14'>It is necessary to move all your checkers to the opposite side faster than the opponent.]]
 }
 
 name_button["RU"] = {
-	"отмена",
+	"Отмена",
 	"Ваш ход!",
 	"GO",
 	"История игр",
-	"Новая патрия",
+	"Новая партия",
 	"Вернуть ход",
 	"Перевернуть доску",
 	"Принять",
@@ -80,6 +116,23 @@ name_button["RU"] = {
 	"Мат",
 	"Нажми GO",
 	"Сдаться"
+}
+
+name_button["EN"] = {
+	"Cancel",
+	"Your turn!",
+	"GO",
+	"History of game",
+	"New game",
+	"Return",
+	"Flip the board",
+	"Accept",
+	"wants to play with you ",
+	"Choose opponent",
+	"Сheck",
+	"Mate",
+	"Press GO",
+	"Give up"
 }
 
 local doppravil = {--1 сьедать чужую фигуру если false, изменять фигуру на другую если true, соперник, очередность ходов, показывать кнопку GO, перепрыгивать своих, король сьеден мат
@@ -443,6 +496,19 @@ local piece_ts_img = {
 }
 
 
+local image_board = {
+	
+	{{"178fee5c66f.png", 0, 0, 1, 1}, {"178fee521c8.png", 0, 0, 1, 1}, {"178fee5f556.png", 0, 0, 1, 1}},
+	{{"178fee5f556.png", 0, 0, 1, 1}, {"178fee550b0.png", 0, 0, 1, 1}, {"178fee5dde2.png", 0, 0, 1, 1}},
+	{{"178fee5dde2.png", 0, 0, 1, 1}, {"178fee5393a.png", 0, 0, 1, 1}, {"178fee5c66f.png", 0, 0, 1, 1}}
+	
+}
+
+local image_choose = {
+	{{"178fee57f8f.png", 0, 0, 1, 1}, {"178fee5681e.png", 0, 0, 1, 1}}
+}
+
+--------------------- DO NOT TOUCH ---------------------
 function showBoard(p, number_board, bool_show_board)
 ------print(p)
 if party[number_board]==nil then
@@ -472,18 +538,6 @@ end
 		end
 	end
 end
-
-local image_board = {
-	
-	{{"178fee5c66f.png", 0, 0, 1, 1}, {"178fee521c8.png", 0, 0, 1, 1}, {"178fee5f556.png", 0, 0, 1, 1}},
-	{{"178fee5f556.png", 0, 0, 1, 1}, {"178fee550b0.png", 0, 0, 1, 1}, {"178fee5dde2.png", 0, 0, 1, 1}},
-	{{"178fee5dde2.png", 0, 0, 1, 1}, {"178fee5393a.png", 0, 0, 1, 1}, {"178fee5c66f.png", 0, 0, 1, 1}}
-	
-}
-
-local image_choose = {
-	{{"178fee57f8f.png", 0, 0, 1, 1}, {"178fee5681e.png", 0, 0, 1, 1}}
-}
 
 function string.split(s, delimiter)
     result = {};
@@ -1959,7 +2013,7 @@ ui.addTextArea(-66, "<a href='event:help'> ?</a>", nil, 5, 25, 18, nil, 1, 0x999
 
 for nick in pairs(tfm.get.room.playerList) do
 	if players_images[nick]~=nil then
-		ui.addTextArea(-1000, ""..players_images[nick][3][1], nick, 205, 380, nil, nil, 1, 0x999999, 0.7,true)
+		ui.addTextArea(-1000, ""..players_images[nick][3][1], nick, 230, 380, nil, nil, 1, 0x999999, 0.7,true)
 		
 		local masspl = party[players_images[nick][3][1]][3]
 		local info_partys_pl = ""
@@ -1989,18 +2043,20 @@ end
 
 
 
-ui.addTextArea(-67, "<a href='event:open_game_s'>"..name_button[lang][4].."</a>", nil, 120, 380, 75, nil, 1, 0x999999, 0.7,true)
+ui.addTextArea(-67, "<a href='event:open_game_s'>"..name_button[lang][4].."</a>", nil, 120, 380, 100, nil, 1, 0x999999, 0.7,true)
 
 ui.addTextArea(-68, "<a href='event:new_game_s'>"..name_button[lang][5].."</a>", nil, 10, 380, 100, nil, 1, 0x999999, 0.7,true)
 
-ui.addTextArea(-69, "<a href='event:return_move'>"..name_button[lang][6].."</a>", adm, 600, 325, 130, nil, 1, 0x999999, 0.7,true)
+for i, adm in pairs(adms) do
+	ui.addTextArea(-69, "<a href='event:return_move'>"..name_button[lang][6].."</a>", adm, 600, 325, 130, nil, 1, 0x999999, 0.7,true)
+end
 
 ui.addTextArea(-71, "<a href='event:return_board'>"..name_button[lang][7].."</a>", nil, 600, 355, 130, nil, 1, 0x999999, 0.7,true)
 
-ui.addTextArea(-73, "<a href='event:shah_sh'>"..name_button[lang][11].."</a>", nil, 600, 295, 30, nil, 1, 0x999999, 0.7,true)
-ui.addTextArea(-72, "<a href='event:mat_sh'>"..name_button[lang][12].."</a>", nil, 640, 295, 30, nil, 1, 0x999999, 0.7,true)
+ui.addTextArea(-73, "<a href='event:shah_sh'>"..name_button[lang][11].."</a>", nil, 600, 295, 50, nil, 1, 0x999999, 0.7,true)
+ui.addTextArea(-72, "<a href='event:mat_sh'>"..name_button[lang][12].."</a>", nil, 660, 295, 50, nil, 1, 0x999999, 0.7,true)
 
-ui.addTextArea(-74, "<a href='event:go_sh'>"..name_button[lang][13].."</a>", nil, 680, 295, 70, nil, 1, 0x999999, 0.7,true)
+ui.addTextArea(-74, "<a href='event:go_sh'>"..name_button[lang][13].."</a>", nil, 720, 295, 70, nil, 1, 0x999999, 0.7,true)
 
 ui.addTextArea(-75, "<a href='event:flag_sh'>"..name_button[lang][14].."</a>", nil, 600, 265, 130, nil, 1, 0x999999, 0.7,true)
 
@@ -2045,7 +2101,7 @@ for nick in pairs(tfm.get.room.playerList) do
 end
 
 init()
-tfm.exec.newGame(7852876)
---table.foreach(tfm.get.room.playerList, eventNewPlayer)
+tfm.exec.newGame(map_st)
+
 
 
