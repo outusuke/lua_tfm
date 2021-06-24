@@ -1,8 +1,8 @@
 ---------------------- PROPERTIES ----------------------
-local lang = "RU"
+local lang = "RU"	-- "RU", "EN"
 
 local adms = {"Deff83#0000"}	--кто может нажимать вернуть ход
-local set_board = 2				--2 blue, 1 green, 3 red
+local set_board = 2				--2 blue, 1 green, 3 red color board
 local map_st = 7863012			--7852876
 
 ------------------ ADVANCED PROPERTIES -----------------
