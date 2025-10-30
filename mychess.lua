@@ -1482,6 +1482,10 @@ function changeMove(move, bool_writed, bool_up)
 		local opponentColor = currentColor == 1 and 6 or 1
 		
 		if isCheckmate(party[party_m][1], opponentColor) then
+			-- Mark move as checkmate
+			if localsave then
+				localsave[8] = true
+			end
 			for nick in pairs(tfm.get.room.playerList) do
 				if players_images[nick] and players_images[nick][3][1] == party_m then
 					tfm.exec.chatMessage("<R>Checkmate! Game over.", nick)
@@ -1489,6 +1493,10 @@ function changeMove(move, bool_writed, bool_up)
 			end
 			win(party_m, currentColor)
 		elseif isKingInCheck(party[party_m][1], opponentColor) then
+			-- Mark move as check
+			if localsave then
+				localsave[9] = true
+			end
 			for nick in pairs(tfm.get.room.playerList) do
 				if players_images[nick] and players_images[nick][3][1] == party_m then
 					tfm.exec.chatMessage("<J>Check!", nick)
@@ -1520,8 +1528,16 @@ end
 function eventTextAreaCallback(id, pl, cmd)
 	local setting_pl_party = players_images[pl][3][1]
 	
-	if cmd == "help" then
-		showDiscription(party[setting_pl_party][5], pl)
+	if cmd == "show_full_history" then
+		show_full_move_history(pl)
+	end
+	
+	if cmd == "export_pgn" then
+		export_pgn_to_chat(pl)
+	end
+	
+	if cmd == "close_history" then
+		ui.removeTextArea(-900, pl)
 	end
 	if cmd == "new_game_s" then
 		show_new_game(pl)
@@ -1838,10 +1854,84 @@ function show_choose_pl_list(pl, party_so)
 end
 
 function get_coord(cletka1, cletka2, party_u)
-	local ht = ""
 	local my = name_chess[party_u][5]
-	ht = ht ..mass_ob[cletka1[2]]..(my-cletka1[1]+1).."-"..mass_ob[cletka2[2]]..(my-cletka2[1]+1)
-	return ht
+	-- Convert to algebraic notation (e.g., e2-e4)
+	local from = mass_ob[cletka1[2]]..(my-cletka1[1]+1)
+	local to = mass_ob[cletka2[2]]..(my-cletka2[1]+1)
+	return from.."-"..to
+end
+
+function get_proper_pgn(move, party_u)
+	-- Generate proper PGN notation
+	local piece = move[1]
+	local pieceType = piece % 10
+	local from = move[2]
+	local to = move[3]
+	local captured = move[4]
+	
+	local my = name_chess[party_u][5]
+	local toSquare = mass_ob[to[2]]..(my-to[1]+1)
+	local fromSquare = mass_ob[from[2]]..(my-from[1]+1)
+	
+	local notation = ""
+	
+	-- Castling
+	if pieceType == piece_ts.king and math.abs(from[2] - to[2]) == 2 then
+		if to[2] > from[2] then
+			return "O-O" -- King-side castling
+		else
+			return "O-O-O" -- Queen-side castling
+		end
+	end
+	
+	-- Piece prefix (not for pawns)
+	if pieceType == piece_ts.king then
+		notation = "K"
+	elseif pieceType == piece_ts.queen then
+		notation = "Q"
+	elseif pieceType == piece_ts.rook then
+		notation = "R"
+	elseif pieceType == piece_ts.bishop then
+		notation = "B"
+	elseif pieceType == piece_ts.knight then
+		notation = "N"
+	end
+	
+	-- For pawn captures, include the file
+	if pieceType == piece_ts.pawn and (captured ~= 0 or move[7]) then
+		notation = mass_ob[from[2]]
+	end
+	
+	-- Capture notation
+	if captured ~= 0 or move[7] then
+		notation = notation .. "x"
+	end
+	
+	-- Destination square
+	notation = notation .. toSquare
+	
+	-- Pawn promotion
+	if move[5] and move[5][2] then
+		local promotedPiece = move[5][2] % 10
+		if promotedPiece == piece_ts.queen then
+			notation = notation .. "=Q"
+		elseif promotedPiece == piece_ts.rook then
+			notation = notation .. "=R"
+		elseif promotedPiece == piece_ts.bishop then
+			notation = notation .. "=B"
+		elseif promotedPiece == piece_ts.knight then
+			notation = notation .. "=N"
+		end
+	end
+	
+	-- Check and checkmate
+	if move[8] then
+		notation = notation .. "#"
+	elseif move[9] then
+		notation = notation .. "+"
+	end
+	
+	return notation
 end
 
 function test_hod()
@@ -1862,17 +1952,14 @@ function test_hod()
 		
 		for k = start_ma, #massplk do
 			local move = massplk[k]
-			local piece_symbol = symbol_piece_mass[move[1]%10]
-			local piece_color = color_piece_mass[math.floor(move[1]/10)]
-			local coord_str = get_coord(move[2], move[3], jk)
-			local capture_str = (move[4]~=0 or move[7]~=nil) and "x" or ""
+			local pgn = get_proper_pgn(move, jk)
 			
 			-- Add move number for white moves
 			if isWhiteMove then
 				info_partys_pl = info_partys_pl .. moveNumber .. ". "
 			end
 			
-			info_partys_pl = info_partys_pl .. "<font color='#"..piece_color.."'>"..piece_symbol.."</font>"..coord_str..capture_str.." "
+			info_partys_pl = info_partys_pl .. pgn .. " "
 			
 			-- Toggle between white and black moves
 			if isWhiteMove then
@@ -1888,8 +1975,9 @@ function test_hod()
 		local has_more = start_ma > 1
 		local nav_text = ""
 		if has_more then
-			nav_text = "<a href='event:show_full_history'>View Full History</a>\n"
+			nav_text = "<a href='event:show_full_history'>View Full History</a> | "
 		end
+		nav_text = nav_text .. "<a href='event:export_pgn'>Export PGN</a>\n"
 		
 		ui.addTextArea(-1002, nav_text..info_partys_pl, nick, 600, 100, 180, nil, 0x333377, 0x999999, 0.9, true)
 		
@@ -1978,6 +2066,127 @@ function show_open_room(pl)
 	else
 		ui.addTextArea(-670, ""..info_partys.."<br><p align='center'><a href='event:cancel'>"..name_button[1].."</a>", pl, 10, 60, 400, nil, 1, 0x999999, 0.9,true)
 	end
+end
+
+function show_full_move_history(pl)
+	if players_images[pl] == nil or players_images[pl][3] == nil then
+		return
+	end
+	
+	local party_id = players_images[pl][3][1]
+	local massplk = party[party_id][4]
+	local jk = party[party_id][5]
+	
+	if #massplk == 0 then
+		tfm.exec.chatMessage("<R>No moves recorded yet.", pl)
+		return
+	end
+	
+	-- Check if textArea already exists and remove it first
+	ui.removeTextArea(-900, pl)
+	
+	local history_text = "<p align='center'><font size='16'><b>Complete Move History</b></font></p>\n<p align='left'><font size='11'>"
+	
+	local moveNumber = 1
+	local isWhiteMove = true
+	local charCount = 200 -- Approximate initial chars
+	
+	-- Limit to prevent overflow (leave room for formatting)
+	local maxMoves = math.min(#massplk, 60) -- Max 60 moves (30 pairs)
+	
+	for k = 1, maxMoves do
+		local move = massplk[k]
+		local pgn = get_proper_pgn(move, jk)
+		
+		-- Add move number for white moves
+		local moveText = ""
+		if isWhiteMove then
+			moveText = moveNumber .. ". " .. pgn .. " "
+		else
+			moveText = pgn .. " "
+		end
+		
+		-- Check if adding this move would exceed limit
+		charCount = charCount + #moveText
+		if charCount > 1800 then
+			history_text = history_text .. "\n<VP>...truncated (too many moves)</VP>"
+			break
+		end
+		
+		history_text = history_text .. moveText
+		
+		-- Add line break every 2 moves (after black's move)
+		if not isWhiteMove then
+			history_text = history_text .. "\n"
+			moveNumber = moveNumber + 1
+		end
+		
+		isWhiteMove = not isWhiteMove
+	end
+	
+	history_text = history_text .. "</font>\n<p align='center'><a href='event:close_history'>Close</a></p>"
+	
+	ui.addTextArea(-900, history_text, pl, 150, 50, 500, 300, 0x324650, 0x999999, 0.95, true)
+end
+
+function export_pgn_to_chat(pl)
+	if players_images[pl] == nil or players_images[pl][3] == nil then
+		return
+	end
+	
+	local party_id = players_images[pl][3][1]
+	local massplk = party[party_id][4]
+	local jk = party[party_id][5]
+	
+	if #massplk == 0 then
+		tfm.exec.chatMessage("<R>No moves to export.", pl)
+		return
+	end
+	
+	tfm.exec.chatMessage("<VP>========== PGN Export ==========", pl)
+	
+	local moveNumber = 1
+	local isWhiteMove = true
+	local lineText = ""
+	local moveCount = 0
+	
+	for k = 1, #massplk do
+		local move = massplk[k]
+		local pgn = get_proper_pgn(move, jk)
+		
+		-- Add move number for white moves
+		if isWhiteMove then
+			lineText = lineText .. moveNumber .. ". " .. pgn .. " "
+		else
+			lineText = lineText .. pgn .. " "
+		end
+		
+		moveCount = moveCount + 1
+		
+		-- Send line every 10 moves or at the end
+		if moveCount >= 10 or k == #massplk then
+			if not isWhiteMove then
+				lineText = lineText .. "\n"
+			end
+			tfm.exec.chatMessage(lineText, pl)
+			lineText = ""
+			moveCount = 0
+		end
+		
+		-- Toggle between white and black moves
+		if not isWhiteMove then
+			moveNumber = moveNumber + 1
+		end
+		
+		isWhiteMove = not isWhiteMove
+	end
+	
+	-- Send any remaining text
+	if lineText ~= "" then
+		tfm.exec.chatMessage(lineText, pl)
+	end
+	
+	tfm.exec.chatMessage("<VP>================================", pl)
 end
 
 -- Initialize module
